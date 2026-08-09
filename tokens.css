@@ -1,0 +1,327 @@
+/* DesarPro Design Tokens — Enterprise-grade theme system.
+   Both dark (default) and light modes. Brand stays consistent. */
+
+:root, [data-theme="dark"] {
+  /* Surfaces */
+  --bg-0: #05060A;
+  --bg-1: #0A0B14;
+  --bg-2: #11131F;
+  --bg-3: #1A1D2E;
+  --bg-4: #232841;
+
+  /* Text */
+  --text-0: #FFFFFF;
+  --text-1: #E5E7EB;
+  --text-2: #9CA3AF;
+  --text-3: #6B7280;
+
+  /* Glass / overlays */
+  --glass-bg: rgba(255,255,255,0.03);
+  --glass-bg-2: rgba(255,255,255,0.06);
+  --glass-bg-3: rgba(255,255,255,0.09);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-border-2: rgba(255,255,255,0.14);
+  --glass-border-3: rgba(255,255,255,0.22);
+
+  /* Header surface (gray glass — keeps logo readable) */
+  --header-bg: rgba(20, 24, 38, 0.72);
+  --header-bg-scrolled: rgba(13, 16, 26, 0.86);
+  --header-border: rgba(255,255,255,0.10);
+
+  /* Card */
+  --card-bg: rgba(255,255,255,0.025);
+  --card-bg-hover: rgba(255,255,255,0.05);
+  --card-border: rgba(255,255,255,0.08);
+  --card-border-hover: rgba(255,255,255,0.18);
+  --card-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+
+  --input-bg: rgba(255,255,255,0.04);
+  --input-bg-focus: rgba(255,255,255,0.07);
+  --input-border: rgba(255,255,255,0.10);
+
+  /* Brand — same in both themes */
+  --blue: #3B82F6;
+  --blue-bright: #60A5FA;
+  --cyan: #06B6D4;
+  --cyan-bright: #22D3EE;
+  --violet: #8B5CF6;
+  --violet-bright: #A78BFA;
+  --amber: #F59E0B;
+  --orange: #F97316;
+  --teal: #14B8A6;
+  --magenta: #EC4899;
+  --rose: #F43F5E;
+
+  --svc-web: #3B82F6;
+  --svc-mobile: #8B5CF6;
+  --svc-software: #F97316;
+  --svc-maintenance: #F59E0B;
+  --svc-consulting: #A855F7;
+  --svc-seo: #14B8A6;
+}
+
+[data-theme="light"] {
+  --bg-0: #F7F8FB;
+  --bg-1: #FFFFFF;
+  --bg-2: #F1F4FA;
+  --bg-3: #E5EAF3;
+  --bg-4: #D8DFEC;
+
+  --text-0: #0B1020;
+  --text-1: #1F2937;
+  --text-2: #4B5563;
+  --text-3: #6B7280;
+
+  --glass-bg: rgba(255,255,255,0.7);
+  --glass-bg-2: rgba(255,255,255,0.85);
+  --glass-bg-3: rgba(255,255,255,0.95);
+  --glass-border: rgba(15,20,35,0.08);
+  --glass-border-2: rgba(15,20,35,0.14);
+  --glass-border-3: rgba(15,20,35,0.22);
+
+  --header-bg: rgba(255,255,255,0.78);
+  --header-bg-scrolled: rgba(255,255,255,0.92);
+  --header-border: rgba(15,20,35,0.10);
+
+  --card-bg: rgba(255,255,255,0.85);
+  --card-bg-hover: rgba(255,255,255,1);
+  --card-border: rgba(15,20,35,0.08);
+  --card-border-hover: rgba(15,20,35,0.18);
+  --card-shadow: 0 20px 60px -25px rgba(15, 23, 42, 0.25);
+
+  --input-bg: rgba(15,20,35,0.04);
+  --input-bg-focus: rgba(15,20,35,0.06);
+  --input-border: rgba(15,20,35,0.12);
+}
+
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --font-sans: 'Inter', 'Geist', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;
+  --s-5: 1.25rem; --s-6: 1.5rem; --s-8: 2rem; --s-10: 2.5rem;
+  --s-12: 3rem; --s-16: 4rem; --s-20: 5rem; --s-24: 6rem;
+
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-2xl: 32px;
+
+  --shadow-glow-blue: 0 0 40px rgba(59,130,246,0.25);
+  --shadow-glow-cyan: 0 0 40px rgba(6,182,212,0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background 320ms var(--ease-out), color 320ms var(--ease-out);
+}
+
+#root { min-height: 100vh; }
+
+::selection { background: rgba(59,130,246,0.35); color: white; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-4); }
+
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.glass-2 {
+  background: var(--glass-bg-2);
+  border: 1px solid var(--glass-border-2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.glass-3 {
+  background: var(--glass-bg-3);
+  border: 1px solid var(--glass-border-3);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+.text-grad-blue {
+  background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-grad-violet {
+  background: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-grad-amber {
+  background: linear-gradient(135deg, #FCD34D 0%, #F97316 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px;
+  font-weight: 600; font-size: 14px; letter-spacing: -0.01em;
+  cursor: pointer; border: none; user-select: none;
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), background 200ms;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+
+.btn-primary {
+  background: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%);
+  color: white;
+  box-shadow: 0 8px 30px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(59,130,246,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.btn-ghost {
+  background: var(--glass-bg-2);
+  color: var(--text-0);
+  border: 1px solid var(--glass-border-2);
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover:not(:disabled) { background: var(--glass-bg-3); border-color: var(--glass-border-3); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-0);
+  border: 1px solid var(--glass-border-2);
+}
+.btn-outline:hover:not(:disabled) { background: var(--glass-bg); }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 999px;
+  background: var(--glass-bg-2);
+  border: 1px solid var(--glass-border);
+  font-size: 12px; color: var(--text-1);
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+}
+.pill .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22D3EE;
+  box-shadow: 0 0 12px #22D3EE;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+.section-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.18em;
+  color: var(--cyan-bright); text-transform: uppercase;
+}
+.section-h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--text-0);
+  margin: 0;
+  text-wrap: balance;
+  font-family: var(--font-display);
+}
+.section-sub {
+  color: var(--text-2);
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.6;
+  max-width: 640px;
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.page { min-height: 100vh; position: relative; overflow-x: hidden; }
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.container-wide { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
+
+.input {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  background: var(--input-bg); border: 1px solid var(--input-border);
+  color: var(--text-0); font-size: 14px; font-family: inherit;
+  outline: none; transition: all 200ms;
+}
+.input::placeholder { color: var(--text-3); }
+.input:focus {
+  border-color: rgba(34,211,238,0.5);
+  background: var(--input-bg-focus);
+  box-shadow: 0 0 0 3px rgba(34,211,238,0.15);
+}
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+select.input option { background: var(--bg-2); color: var(--text-0); }
+
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Light mode adjustments for specific elements */
+[data-theme="light"] .section-eyebrow { color: #0891B2; }
+[data-theme="light"] .text-grad-blue { background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+[data-theme="light"] .btn-ghost { color: var(--text-0); }
+
+/* Force light text on top of always-dark backgrounds (hero video, login globe) */
+.on-dark-bg { color: #fff !important; }
+.on-dark-bg-muted { color: rgba(255,255,255,0.75) !important; }
+
+/* Editable highlight (visible only when admin mode is on) */
+[data-edit-mode="true"] .editable {
+  outline: 1px dashed rgba(34, 211, 238, 0.5);
+  outline-offset: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: outline 160ms, background 160ms;
+  position: relative;
+}
+[data-edit-mode="true"] .editable:hover {
+  outline-color: rgba(34, 211, 238, 1);
+  background: rgba(34, 211, 238, 0.06);
+}
+[data-edit-mode="true"] .editable::after {
+  content: "✎";
+  position: absolute; top: -10px; right: -10px;
+  width: 22px; height: 22px;
+  background: linear-gradient(135deg, #3B82F6, #06B6D4);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  opacity: 0; transition: opacity 160ms;
+  pointer-events: none;
+}
+[data-edit-mode="true"] .editable:hover::after { opacity: 1; }

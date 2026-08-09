@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="DesarPro — Desarrollo de software profesional. Web, móvil, software a medida, IA, ciberseguridad e infraestructura para empresas que quieren crecer." />
+  <meta name="theme-color" content="#05060A" />
+  <title>DesarPro · Tecnología que transforma tu negocio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305060A'/%3E%3Cpath d='M20 24 L14 32 L20 40 M44 24 L50 32 L44 40 M36 18 L28 46' stroke='%2322D3EE' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
+  <script>
+    // Apply saved theme immediately to avoid FOUC
+    (function() {
+      try {
+        var t = localStorage.getItem('desarpro:theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+
+  <!-- Libraries (load first; expose utilities on window) -->
+  <script type="text/babel" data-presets="env,react" src="src/lib/icons.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/lib/anim.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/lib/theme.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/lib/admin.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/lib/techLogos.jsx"></script>
+
+  <!-- Visual components -->
+  <script type="text/babel" data-presets="env,react" src="src/components/Logo.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/NeuralNet.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/TechLoop.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/Navbar.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/Footer.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/EvilEye.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/Backgrounds.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/FolderExpand.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/PackageCarousel.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/SpaceScene.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/ContactScene.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/ServiceTabs.jsx"></script>
+
+  <!-- New components for v8 redesign -->
+  <script type="text/babel" data-presets="env,react" src="src/components/HeroVideoBg.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/EarthGlobeScene.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/HoloAssistant.jsx"></script>
+
+  <!-- Pages -->
+  <script type="text/babel" data-presets="env,react" src="src/pages/Home.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/Projects.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/About.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/Contact.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/Login.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/Admin.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/ServicesHub.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/pages/ServicePage.jsx"></script>
+
+  <!-- Tweaks debug overlay (kept for compat — does nothing in production) -->
+  <script type="text/babel" data-presets="env,react" src="src/components/Tweaks.jsx"></script>
+
+  <!-- Root last -->
+  <script type="text/babel" data-presets="env,react" src="src/App.jsx"></script>
+</body>
+</html>
