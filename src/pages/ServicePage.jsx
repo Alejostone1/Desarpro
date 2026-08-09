@@ -30,7 +30,7 @@ function ServicePage({ id, setRoute }) {
           <div style={{ position: 'absolute', bottom: '0%', right: '5%', width: 400, height: 400, borderRadius: '50%', background: `radial-gradient(circle, ${c}1A, transparent 60%)`, filter: 'blur(60px)' }}/>
         </div>
         <div className="container" style={{ position: 'relative' }}>
-          <button onClick={() => setRoute('servicios')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 24 }}>
+          <button onClick={() => setRoute('servicios')} style={{ background: 'transparent', border: 'none', color: 'var(--text-2)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 24 }}>
             <Icon.ChevronRight size={14} style={{ transform: 'rotate(180deg)' }}/> Todos los servicios
           </button>
           <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 60, alignItems: 'center' }} className="svp-hero">
@@ -47,12 +47,12 @@ function ServicePage({ id, setRoute }) {
                 </span>
               </Reveal>
               <Reveal delay={100}>
-                <h1 style={{ fontSize: 'clamp(40px, 6vw, 76px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1, margin: '0 0 20px' }}>
+                <h1 style={{ fontSize: 'clamp(40px, 6vw, 76px)', fontWeight: 800, color: 'var(--text-0)', letterSpacing: '-0.03em', lineHeight: 1, margin: '0 0 20px' }}>
                   {svc.name}
                 </h1>
               </Reveal>
               <Reveal delay={200}>
-                <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: '0 0 32px', maxWidth: 540 }}>
+                <p style={{ fontSize: 18, color: 'var(--text-1)', lineHeight: 1.6, margin: '0 0 32px', maxWidth: 540 }}>
                   {detail.overview}
                 </p>
               </Reveal>
@@ -96,7 +96,7 @@ function ServicePage({ id, setRoute }) {
               <Reveal key={i} delay={i * 60}>
                 <div className="glass" style={{ borderRadius: 14, padding: 20, display: 'flex', gap: 14, alignItems: 'center' }}>
                   <span style={{ width: 36, height: 36, borderRadius: 10, background: `${c}1A`, color: c, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon.Check size={18} sw={2.6}/></span>
-                  <span style={{ fontSize: 15, color: '#fff', fontWeight: 500 }}>{d}</span>
+                  <span style={{ fontSize: 15, color: 'var(--text-0)', fontWeight: 500 }}>{d}</span>
                 </div>
               </Reveal>
             ))}
@@ -117,7 +117,7 @@ function ServicePage({ id, setRoute }) {
               <Reveal key={i} delay={i * 80}>
                 <div className="glass" style={{ borderRadius: 16, padding: 24, position: 'relative', height: '100%' }}>
                   <div style={{ fontSize: 48, fontWeight: 800, color: `${c}40`, lineHeight: 1, letterSpacing: '-0.04em' }}>{String(i + 1).padStart(2, '0')}</div>
-                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#fff', margin: '12px 0 0' }}>{p}</h3>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-0)', margin: '12px 0 0' }}>{p}</h3>
                 </div>
               </Reveal>
             ))}
@@ -148,8 +148,8 @@ function ServicePage({ id, setRoute }) {
             borderRadius: 24, padding: 48, textAlign: 'center',
             background: `linear-gradient(135deg, ${c}1A, ${c}08)`, border: `1px solid ${c}40`,
           }}>
-            <h3 style={{ fontSize: 32, fontWeight: 700, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.02em' }}>¿Hablamos de tu proyecto de {svc.name.toLowerCase()}?</h3>
-            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', maxWidth: 520, margin: '0 auto 24px' }}>
+            <h3 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>¿Hablamos de tu proyecto de {svc.name.toLowerCase()}?</h3>
+            <p style={{ fontSize: 16, color: 'var(--text-1)', maxWidth: 520, margin: '0 auto 24px' }}>
               Diagnóstico inicial gratuito. Te respondemos en menos de 24 horas.
             </p>
             <button onClick={() => setRoute('contacto')} className="btn btn-primary" style={{ background: `linear-gradient(135deg, ${c}, ${c}cc)`, boxShadow: `0 8px 30px ${c}50` }}>

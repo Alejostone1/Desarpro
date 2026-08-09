@@ -46,7 +46,7 @@ function Projects({ setRoute }) {
             <FolderExpand onPickIndustry={(ind) => setPickedIndustry(ind)}/>
           </Reveal>
           {pickedIndustry && (
-            <div style={{ textAlign: 'center', marginTop: 24, color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>
+            <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-1)', fontSize: 14 }}>
               Seleccionada: <strong style={{ color: pickedIndustry.color }}>{pickedIndustry.name}</strong> · {pickedIndustry.desc}
             </div>
           )}
@@ -73,11 +73,11 @@ function Projects({ setRoute }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                         <span style={{ width: 40, height: 40, borderRadius: 10, background: `${c.color}1A`, color: c.color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${c.color}40` }}><I size={20}/></span>
                         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', color: c.color, textTransform: 'uppercase' }}>{c.industry}</span>
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>· {c.year}</span>
+                        <span style={{ fontSize: 12, color: 'var(--text-3)' }}>· {c.year}</span>
                       </div>
-                      <h3 style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.15 }}>{c.title}</h3>
-                      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 16 }}>Cliente: {c.client}</div>
-                      <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: 24 }}>{c.desc}</p>
+                      <h3 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.15 }}>{c.title}</h3>
+                      <div style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>Cliente: {c.client}</div>
+                      <p style={{ fontSize: 15, color: 'var(--text-1)', lineHeight: 1.6, marginBottom: 24 }}>{c.desc}</p>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
                         {c.tags.map((t, j) => (
                           <span key={j} className="pill" style={{ fontSize: 11 }}>{t}</span>
@@ -95,8 +95,8 @@ function Projects({ setRoute }) {
                     }}>
                       {c.metrics.map((m, j) => (
                         <div key={j}>
-                          <div style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>{m.k}</div>
-                          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 6 }}>{m.v}</div>
+                          <div style={{ fontSize: 36, fontWeight: 800, color: 'var(--text-0)', letterSpacing: '-0.03em', lineHeight: 1 }}>{m.k}</div>
+                          <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 6 }}>{m.v}</div>
                         </div>
                       ))}
                     </div>

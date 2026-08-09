@@ -80,8 +80,8 @@ function ServicesHub({ setRoute }) {
       <section style={{ padding: '80px 0 120px' }}>
         <div className="container">
           <div className="glass-2" style={{ borderRadius: 24, padding: 48, textAlign: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(34,211,238,0.1))' }}>
-            <h3 style={{ fontSize: 32, fontWeight: 700, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.02em' }}>¿No sabes por dónde empezar?</h3>
-            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', maxWidth: 540, margin: '0 auto 24px' }}>
+            <h3 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>¿No sabes por dónde empezar?</h3>
+            <p style={{ fontSize: 16, color: 'var(--text-2)', maxWidth: 540, margin: '0 auto 24px' }}>
               Hagamos un diagnóstico gratuito de 30 min. Te recomendamos el paquete que más se ajusta a tu etapa.
             </p>
             <button onClick={() => setRoute('contacto')} className="btn btn-primary">Agendar diagnóstico <Icon.ArrowRight size={14}/></button>
@@ -98,22 +98,22 @@ function ServiceCard({ svc, onClick, large = false }) {
     <button onClick={onClick} className="svc-card" style={{
       width: '100%', textAlign: 'left',
       padding: large ? 28 : 24, borderRadius: 20,
-      background: 'rgba(255,255,255,0.025)',
-      border: '1px solid rgba(255,255,255,0.08)',
+      background: 'var(--card-bg)',
+      border: '1px solid var(--card-border)',
       cursor: 'pointer', position: 'relative', overflow: 'hidden',
       transition: 'all 280ms var(--ease-out)', height: '100%',
-    }}>
-      <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', background: `radial-gradient(circle, ${svc.color}24, transparent 70%)`, filter: 'blur(20px)' }}/>
+    }} onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--card-bg-hover)'; e.currentTarget.style.borderColor = 'var(--card-border-hover)'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--card-bg)'; e.currentTarget.style.borderColor = 'var(--card-border)'; }}>
+      <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', background: `radial-gradient(circle, ${svc.color}24, transparent 70%)`, filter: 'blur(20px)', opacity: 0.7 }}/>
       <span style={{
         width: large ? 52 : 44, height: large ? 52 : 44, borderRadius: 12,
         background: `${svc.color}1A`, color: svc.color, border: `1px solid ${svc.color}30`,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
       }}><I size={large ? 22 : 20}/></span>
-      <h3 style={{ fontSize: large ? 22 : 18, fontWeight: 700, color: '#fff', margin: '18px 0 6px', letterSpacing: '-0.01em', position: 'relative' }}>{svc.name}</h3>
-      <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13.5, margin: '0 0 16px', position: 'relative' }}>{svc.tagline}</p>
+      <h3 style={{ fontSize: large ? 22 : 18, fontWeight: 700, color: 'var(--text-0)', margin: '18px 0 6px', letterSpacing: '-0.01em', position: 'relative' }}>{svc.name}</h3>
+      <p style={{ color: 'var(--text-2)', fontSize: 13.5, margin: '0 0 16px', position: 'relative' }}>{svc.tagline}</p>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 6, position: 'relative' }}>
         {svc.bullets.slice(0, large ? 4 : 3).map((b, j) => (
-          <li key={j} style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
+          <li key={j} style={{ color: 'var(--text-1)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
             <Icon.Check size={12} stroke={svc.color} sw={2.4}/> {b}
           </li>
         ))}

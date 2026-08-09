@@ -7,7 +7,7 @@ function About({ setRoute }) {
         <div style={{ position: 'absolute', inset: 0, opacity: 0.4 }}>
           <NeuralNet density={50} color="#A78BFA" accent="#EC4899" linkDist={140} opacity={0.4}/>
         </div>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 30%, transparent, rgba(5,6,10,0.85) 70%)', pointerEvents: 'none' }}/>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 30%, transparent, var(--bg-0) 70%)', pointerEvents: 'none' }}/>
         <div className="container" style={{ position: 'relative', textAlign: 'center' }}>
           <Reveal><span className="section-eyebrow">Sobre nosotros</span></Reveal>
           <Reveal delay={100}>
@@ -34,7 +34,7 @@ function About({ setRoute }) {
                   <Icon.Target size={26}/>
                 </span>
                 <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#22D3EE', margin: '20px 0 12px', position: 'relative' }}>Misión</h3>
-                <p style={{ fontSize: 18, color: '#fff', lineHeight: 1.55, margin: 0, fontWeight: 500, position: 'relative' }}>
+                <p style={{ fontSize: 18, color: 'var(--text-0)', lineHeight: 1.55, margin: 0, fontWeight: 500, position: 'relative' }}>
                   Construir tecnología que resuelva problemas reales de negocio para empresas en Colombia y Latinoamérica, con foco en operación, control y crecimiento medible.
                 </p>
               </div>
@@ -46,7 +46,7 @@ function About({ setRoute }) {
                   <Icon.Telescope size={26}/>
                 </span>
                 <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#A78BFA', margin: '20px 0 12px', position: 'relative' }}>Visión</h3>
-                <p style={{ fontSize: 18, color: '#fff', lineHeight: 1.55, margin: 0, fontWeight: 500, position: 'relative' }}>
+                <p style={{ fontSize: 18, color: 'var(--text-0)', lineHeight: 1.55, margin: 0, fontWeight: 500, position: 'relative' }}>
                   Ser para 2030 el aliado tecnológico de referencia para PYMEs y startups en LATAM que quieran escalar con software propio, datos confiables e inteligencia aplicada.
                 </p>
               </div>
@@ -75,8 +75,8 @@ function About({ setRoute }) {
                 <Reveal key={i} delay={i * 100}>
                   <div className="glass" style={{ borderRadius: 16, padding: 28, height: '100%' }}>
                     <span style={{ width: 44, height: 44, borderRadius: 12, background: `${v.c}1A`, color: v.c, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}><I size={22}/></span>
-                    <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>{v.name}</h3>
-                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.55 }}>{v.d}</p>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px' }}>{v.name}</h3>
+                    <p style={{ fontSize: 14, color: 'var(--text-2)', margin: 0, lineHeight: 1.55 }}>{v.d}</p>
                   </div>
                 </Reveal>
               );
@@ -106,15 +106,15 @@ function About({ setRoute }) {
                 <div style={{ display: 'flex', gap: 24, paddingLeft: 4, paddingBottom: 36, position: 'relative' }}>
                   <div style={{
                     width: 60, height: 60, flexShrink: 0, borderRadius: '50%',
-                    background: `${m.c}15`, border: `2px solid ${m.c}`,
+                    background: 'var(--bg-1)', border: `2px solid ${m.c}`,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     color: m.c, fontWeight: 800, fontSize: 11, lineHeight: 1.1, textAlign: 'center', padding: 4,
-                    boxShadow: `0 0 30px ${m.c}40`, zIndex: 2, background: '#0A0B14',
+                    boxShadow: `0 0 30px ${m.c}40`, zIndex: 2,
                   }}>{m.mo.split(' ')[0]}</div>
                   <div className="glass" style={{ flex: 1, borderRadius: 16, padding: 24 }}>
                     <div style={{ fontSize: 12, color: m.c, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>{m.mo}</div>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>{m.t}</h3>
-                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>{m.d}</p>
+                    <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px' }}>{m.t}</h3>
+                    <p style={{ fontSize: 14, color: 'var(--text-2)', margin: 0, lineHeight: 1.55 }}>{m.d}</p>
                   </div>
                 </div>
               </Reveal>
@@ -128,8 +128,8 @@ function About({ setRoute }) {
         <div className="container">
           <div className="glass-2" style={{ borderRadius: 24, padding: 48, textAlign: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(167,139,250,0.12))' }}>
             <Icon.Users size={32} stroke="#22D3EE" style={{ marginBottom: 12 }}/>
-            <h3 style={{ fontSize: 28, fontWeight: 700, color: '#fff', margin: '0 0 12px' }}>¿Quieres trabajar con nosotros?</h3>
-            <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.7)', maxWidth: 500, margin: '0 auto 24px' }}>
+            <h3 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px' }}>¿Quieres trabajar con nosotros?</h3>
+            <p style={{ fontSize: 16, color: 'var(--text-1)', maxWidth: 500, margin: '0 auto 24px' }}>
               Estamos creciendo. Si te apasiona construir software con propósito, conversemos.
             </p>
             <button onClick={() => setRoute('contacto')} className="btn btn-primary">Hablemos <Icon.ArrowRight size={14}/></button>

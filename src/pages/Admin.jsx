@@ -157,7 +157,7 @@ function Admin({ setRoute }) {
           <a onClick={() => setRoute('home')} style={{ cursor: 'pointer' }}>
             <Logo size={32} withWordmark/>
           </a>
-          <span style={{ fontSize: 12, color: 'var(--text-2)', padding: '4px 10px', borderRadius: 999, background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B', fontWeight: 600 }}>
+          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B', fontWeight: 600 }}>
             <Icon.Shield size={11}/> ADMIN
           </span>
         </div>

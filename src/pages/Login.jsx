@@ -11,6 +11,7 @@ function FormField({ label, children }) {
 
 function Login({ setRoute }) {
   const { login: adminLogin, isAdmin } = useAdmin();
+  const t = useTranslations();
   const [mode, setMode] = React.useState('login'); // login | register | admin
   const [data, setData] = React.useState({ email: '', password: '', name: '', remember: true });
   const [adminPwd, setAdminPwd] = React.useState('');
@@ -32,7 +33,7 @@ function Login({ setRoute }) {
     if (ok) {
       setAdminSuccess(true);
     } else {
-      setAdminError('Contraseña incorrecta');
+      setAdminError(t('login.form.passwordWrong'));
       setTimeout(() => setAdminError(''), 2500);
     }
   };
@@ -88,7 +89,7 @@ function Login({ setRoute }) {
             <div className="glass-2" style={{ width: 420, maxWidth: '100%', borderRadius: 24, padding: 36, boxShadow: '0 30px 80px rgba(0,0,0,0.6)', background: 'rgba(10,12,20,0.78)', backdropFilter: 'blur(24px) saturate(140%)', border: '1px solid rgba(255,255,255,0.12)' }}>
               {/* Tabs */}
               <div style={{ display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 12, marginBottom: 24 }}>
-                {[['login', 'Ingresar'], ['register', 'Registro'], ['admin', 'Admin']].map(([id, label]) => (
+                {[['login', t('login.form.login')], ['register', t('login.form.register')], ['admin', t('login.form.admin')]].map(([id, label]) => (
                   <button key={id} onClick={() => { setMode(id); setAdminError(''); setAdminSuccess(false); }} style={{
                     flex: 1, padding: '10px 8px', borderRadius: 8,
                     background: mode === id ? (id === 'admin' ? 'linear-gradient(135deg, #F59E0B, #F97316)' : 'linear-gradient(135deg, #3B82F6, #06B6D4)') : 'transparent',
@@ -101,21 +102,21 @@ function Login({ setRoute }) {
               {mode === 'admin' ? (
                 <>
                   <h2 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Icon.Shield size={22} stroke="#F59E0B"/> Acceso administrador
+                    <Icon.Shield size={22} stroke="#F59E0B"/> {t('login.form.adminTitle')}
                   </h2>
                   <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 24px' }}>
-                    Ingresa la contraseña maestra para editar el contenido del sitio.
+                    {t('login.form.adminDescription')}
                   </p>
 
                   {adminSuccess ? (
                     <div style={{ padding: 20, borderRadius: 12, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', color: '#86efac', textAlign: 'center' }}>
                       <Icon.Check size={32} stroke="#86efac" sw={2.5}/>
-                      <div style={{ marginTop: 10, fontWeight: 600 }}>Sesión iniciada</div>
-                      <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>Redirigiendo al panel…</div>
+                      <div style={{ marginTop: 10, fontWeight: 600 }}>{t('login.form.sessionStarted')}</div>
+                      <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>{t('common.loading')}</div>
                     </div>
                   ) : (
                     <div onKeyDown={(e) => { if (e.key === 'Enter') handleAdminSubmit(e); }} style={{ display: 'grid', gap: 14 }}>
-                      <FormField label="Contraseña administrador">
+                      <FormField label={t('login.form.adminPassword')}>
                         <input
                           type="password"
                           value={adminPwd}
@@ -145,22 +146,22 @@ function Login({ setRoute }) {
               ) : (
                 <>
                   <h2 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>
-                    {mode === 'login' ? 'Hola de nuevo' : 'Crea tu cuenta'}
+                    {mode === 'login' ? t('login.greeting') : t('login.register')}
                   </h2>
                   <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 24px' }}>
-                    {mode === 'login' ? 'Ingresa tus credenciales para continuar.' : 'Regístrate para acceder al portal.'}
+                    {mode === 'login' ? t('login.loginSubtitle') : t('login.registerSubtitle')}
                   </p>
 
                   <div style={{ display: 'grid', gap: 14 }}>
                     {mode === 'register' && (
-                      <FormField label="Nombre completo">
-                        <input type="text" value={data.name} onChange={e => setData(d => ({ ...d, name: e.target.value }))} placeholder="Juan Pérez" className="input"/>
+                      <FormField label={t('login.form.name')}>
+                        <input type="text" value={data.name} onChange={e => setData(d => ({ ...d, name: e.target.value }))} placeholder={t('login.form.namePlaceholder')} className="input"/>
                       </FormField>
                     )}
-                    <FormField label="Email">
-                      <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} placeholder="tu@empresa.com" className="input"/>
+                    <FormField label={t('login.form.email')}>
+                      <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} placeholder={t('login.form.emailPlaceholder')} className="input"/>
                     </FormField>
-                    <FormField label="Contraseña">
+                    <FormField label={t('login.form.password')}>
                       <input type="password" value={data.password} onChange={e => setData(d => ({ ...d, password: e.target.value }))} placeholder="••••••••" className="input"/>
                     </FormField>
 
@@ -168,14 +169,14 @@ function Login({ setRoute }) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.75)', fontSize: 13, cursor: 'pointer' }}>
                           <input type="checkbox" checked={data.remember} onChange={e => setData(d => ({ ...d, remember: e.target.checked }))} style={{ accentColor: '#22D3EE' }}/>
-                          Recordarme
+                          {t('login.form.remember')}
                         </label>
-                        <a href="#" style={{ color: '#22D3EE', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>
+                        <a href="#" style={{ color: '#22D3EE', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>{t('login.form.forgotPassword')}</a>
                       </div>
                     )}
 
                     <button type="button" className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center' }}>
-                      {mode === 'login' ? 'Ingresar al portal' : 'Crear cuenta'} <Icon.ArrowRight size={14}/>
+                      {mode === 'login' ? t('login.form.loginBtn') : t('login.form.registerBtn')} <Icon.ArrowRight size={14}/>
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0' }}>

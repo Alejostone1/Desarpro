@@ -1,13 +1,22 @@
 // HoloAssistant — a holographic AI avatar (geometric humanoid) rendered with animated
 // SVG + canvas particle system. Stands beside the form, reacts to form state.
-// State transitions: 'idle' -> 'typing' (when form is being filled) -> 'sending' -> 'success'
 
-function HoloAssistant({ formState = 'idle' }) {
-  const focused = formState === 'focused' || formState === 'typing';
-  const submitting = formState === 'submitting';
-  const success = formState === 'success';
+function HoloAssistant({
+  formState = 'idle',
+  assistantState = 'idle',
+  activeField = null,
+  mousePosition = { x: 0.5, y: 0.45 },
+  typing = false,
+  hudMessage = 'DESARPRO AI',
+  reducedMotion = false,
+}) {
+  const focused = formState === 'focused' || formState === 'typing' || assistantState === 'listening' || assistantState === 'processing' || assistantState === 'typing';
+  const submitting = formState === 'submitting' || assistantState === 'processing';
+  const success = formState === 'success' || assistantState === 'success';
+  const error = formState === 'error' || assistantState === 'error';
+  const listening = assistantState === 'listening';
+  const processing = assistantState === 'processing' || assistantState === 'typing';
 
-  // Floating particle canvas (data motes around the figure)
   const canvasRef = React.useRef(null);
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,12 +36,13 @@ function HoloAssistant({ formState = 'idle' }) {
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    const particles = Array.from({ length: 60 }, () => ({
+    const particleCount = reducedMotion ? 28 : 56;
+    const particles = Array.from({ length: particleCount }, () => ({
       x: Math.random(),
       y: Math.random(),
-      vx: (Math.random() - 0.5) * 0.0006,
-      vy: -Math.random() * 0.0009 - 0.0002,
-      r: Math.random() * 1.6 + 0.5,
+      vx: (Math.random() - 0.5) * (reducedMotion ? 0.00028 : 0.0006),
+      vy: -Math.random() * (reducedMotion ? 0.0005 : 0.0009) - 0.0002,
+      r: Math.random() * 1.4 + 0.4,
       hue: Math.random() > 0.6 ? 'violet' : 'cyan',
       life: Math.random(),
     }));
@@ -42,21 +52,16 @@ function HoloAssistant({ formState = 'idle' }) {
       for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
-        p.life += 0.003;
+        p.life += 0.0024;
         if (p.y < -0.05 || p.x < -0.05 || p.x > 1.05) {
           p.x = Math.random();
           p.y = 1.05;
           p.life = 0;
         }
-        const alpha = Math.sin(Math.min(1, p.life) * Math.PI) * 0.7;
+        const alpha = Math.sin(Math.min(1, p.life) * Math.PI) * (reducedMotion ? 0.35 : 0.7);
         ctx.fillStyle = p.hue === 'cyan' ? `rgba(34,211,238,${alpha})` : `rgba(167,139,250,${alpha})`;
         ctx.beginPath();
         ctx.arc(p.x * w, p.y * h, p.r, 0, Math.PI * 2);
-        ctx.fill();
-        // halo
-        ctx.fillStyle = p.hue === 'cyan' ? `rgba(34,211,238,${alpha * 0.2})` : `rgba(167,139,250,${alpha * 0.2})`;
-        ctx.beginPath();
-        ctx.arc(p.x * w, p.y * h, p.r * 3, 0, Math.PI * 2);
         ctx.fill();
       }
       raf = requestAnimationFrame(tick);
@@ -67,7 +72,11 @@ function HoloAssistant({ formState = 'idle' }) {
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, []);
+  }, [reducedMotion]);
+
+  const headTilt = reducedMotion ? 0 : (listening ? -1.8 : (processing ? -1.2 : (focused ? -0.8 : 0)));
+  const bodyShift = reducedMotion ? 0 : (mousePosition.x - 0.5) * 2.4;
+  const bodyLean = reducedMotion ? 0 : ((mousePosition.y - 0.45) * 4.5);
 
   return (
     <div className="holo-stage" style={{
@@ -76,9 +85,12 @@ function HoloAssistant({ formState = 'idle' }) {
       maxWidth: 520, margin: '0 auto',
       overflow: 'hidden',
       borderRadius: 24,
-      background: 'radial-gradient(ellipse at center top, rgba(34,211,238,0.10), transparent 60%), linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(2, 6, 23, 0.7) 100%)',
-      border: '1px solid var(--glass-border-2)',
-      backdropFilter: 'blur(16px)',
+      background: 'linear-gradient(135deg, rgba(15,23,42,0.6) 0%, rgba(2,6,23,0.9) 100%), radial-gradient(circle at 50% 0%, rgba(34,211,238,0.15), transparent 60%)',
+      border: '1px solid rgba(34,211,238,0.3)',
+      backdropFilter: 'blur(20px)',
+      transform: `translate3d(${bodyShift * 0.08}px, ${bodyLean * 0.05}px, 0)`,
+      transition: 'transform 220ms ease-out, box-shadow 400ms ease-out',
+      boxShadow: focused ? '0 0 60px rgba(34,211,238,0.4), inset 0 0 80px rgba(34,211,238,0.1)' : '0 0 40px rgba(34,211,238,0.2), inset 0 0 60px rgba(34,211,238,0.05)',
     }}>
       {/* Background grid floor */}
       <svg viewBox="0 0 400 500" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" style={{ position: 'absolute', inset: 0, display: 'block' }}>
@@ -129,7 +141,7 @@ function HoloAssistant({ formState = 'idle' }) {
         </g>
 
         {/* Halo behind figure */}
-        <circle cx="200" cy="200" r="160" fill="url(#halo-glow)" style={{ animation: 'halo-pulse 4s ease-in-out infinite alternate' }}/>
+        <circle cx="200" cy="200" r="160" fill="url(#halo-glow)" style={{ animation: reducedMotion ? 'none' : 'halo-pulse 4s ease-in-out infinite alternate' }}/>
 
         {/* Holographic ground ring (under feet) */}
         <ellipse cx="200" cy="395" rx="80" ry="14" fill="none" stroke="#22D3EE" strokeWidth="1.4" opacity="0.6">
@@ -141,11 +153,11 @@ function HoloAssistant({ formState = 'idle' }) {
         <ellipse cx="200" cy="395" rx="100" ry="18" fill="rgba(34, 211, 238, 0.08)"/>
 
         {/* === HUMANOID FIGURE === */}
-        <g filter="url(#figure-glow)" style={{ animation: 'holo-breathe 3.4s ease-in-out infinite alternate' }}>
+        <g filter="url(#figure-glow)" style={{ animation: reducedMotion ? 'none' : 'holo-breathe 3.4s ease-in-out infinite alternate', transform: `translateX(${bodyShift * 0.6}px) translateY(${bodyLean * 0.2}px)` }}>
           {/* Body silhouette — clean geometric humanoid */}
 
           {/* HEAD */}
-          <g style={{ transformOrigin: '200px 130px', transform: focused ? 'rotate(-2deg)' : 'rotate(0deg)', transition: 'transform 600ms var(--ease-out)' }}>
+          <g style={{ transformOrigin: '200px 130px', transform: `rotate(${headTilt + (focused ? -1.2 : 0)}deg)`, transition: 'transform 600ms var(--ease-out)' }}>
             {/* Helmet outer */}
             <path d="M 178 110
                      Q 178 88 200 88
@@ -163,11 +175,11 @@ function HoloAssistant({ formState = 'idle' }) {
             {/* Glowing "eyes" */}
             {!success ? (
               <>
-                <circle cx="192" cy="124" r="1.6" fill="#A5F3FC">
-                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite"/>
+                <circle cx="192" cy="124" r={listening ? 1.9 : 1.6} fill="#A5F3FC">
+                  <animate attributeName="opacity" values={listening ? '0.7;1;0.7' : '0.6;1;0.6'} dur={listening ? '1.4s' : '2.2s'} repeatCount="indefinite"/>
                 </circle>
-                <circle cx="208" cy="124" r="1.6" fill="#A5F3FC">
-                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite" begin="0.3s"/>
+                <circle cx="208" cy="124" r={listening ? 1.9 : 1.6} fill="#A5F3FC">
+                  <animate attributeName="opacity" values={listening ? '0.7;1;0.7' : '0.6;1;0.6'} dur={listening ? '1.4s' : '2.2s'} repeatCount="indefinite" begin="0.3s"/>
                 </circle>
               </>
             ) : (
@@ -202,9 +214,9 @@ function HoloAssistant({ formState = 'idle' }) {
 
           {/* Chest core indicator (pulses, indicates state) */}
           <g transform="translate(200 200)">
-            <circle r="14" fill="rgba(15, 23, 42, 0.9)" stroke={success ? '#34D399' : '#22D3EE'} strokeWidth="1.4"/>
+            <circle r="14" fill="rgba(15, 23, 42, 0.9)" stroke={success ? '#34D399' : (error ? '#F59E0B' : '#22D3EE')} strokeWidth="1.4"/>
             <circle r={success ? 9 : (submitting ? 7 : focused ? 8 : 6)}
-                    fill={success ? '#34D399' : (submitting ? '#A78BFA' : '#22D3EE')}
+                    fill={success ? '#34D399' : (error ? '#F59E0B' : (submitting ? '#A78BFA' : '#22D3EE'))}
                     opacity="0.85"
                     style={{ transition: 'r 320ms var(--ease-spring), fill 240ms' }}>
               <animate attributeName="opacity" values="0.5;1;0.5" dur={submitting ? '0.6s' : '1.8s'} repeatCount="indefinite"/>
@@ -227,7 +239,7 @@ function HoloAssistant({ formState = 'idle' }) {
 
           {/* ARMS — animated subtly when focused */}
           {/* Left arm */}
-          <g style={{ transformOrigin: '166px 174px', animation: focused ? 'arm-wave-l 1.4s ease-in-out infinite alternate' : 'arm-rest-l 4s ease-in-out infinite alternate' }}>
+          <g style={{ transformOrigin: '166px 174px', animation: reducedMotion ? 'none' : (focused ? 'arm-wave-l 1.4s ease-in-out infinite alternate' : 'arm-rest-l 4s ease-in-out infinite alternate') }}>
             <rect x="156" y="180" width="20" height="40" rx="8" fill="url(#holo-body)" stroke="url(#holo-rim)" strokeWidth="1"/>
             {/* Forearm */}
             <rect x="158" y="218" width="18" height="44" rx="7" fill="url(#holo-body)" stroke="url(#holo-rim)" strokeWidth="1"/>
@@ -235,7 +247,7 @@ function HoloAssistant({ formState = 'idle' }) {
             <circle cx="167" cy="266" r="8" fill="url(#holo-body)" stroke="url(#holo-rim)" strokeWidth="1"/>
           </g>
           {/* Right arm — gestures toward form when focused */}
-          <g style={{ transformOrigin: '234px 174px', animation: focused ? 'arm-gesture 1.8s ease-in-out infinite alternate' : 'arm-rest-r 4s ease-in-out infinite alternate' }}>
+          <g style={{ transformOrigin: '234px 174px', animation: reducedMotion ? 'none' : (focused ? 'arm-gesture 1.8s ease-in-out infinite alternate' : 'arm-rest-r 4s ease-in-out infinite alternate') }}>
             <rect x="224" y="180" width="20" height="40" rx="8" fill="url(#holo-body)" stroke="url(#holo-rim)" strokeWidth="1"/>
             <rect x="224" y="218" width="18" height="44" rx="7" fill="url(#holo-body)" stroke="url(#holo-rim)" strokeWidth="1"/>
             <circle cx="233" cy="266" r="8" fill="url(#holo-body)" stroke="url(#holo-rim)" strokeWidth="1"/>
@@ -302,23 +314,33 @@ function HoloAssistant({ formState = 'idle' }) {
         position: 'absolute', left: 0, right: 0, bottom: 14,
         textAlign: 'center', pointerEvents: 'none',
       }}>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '6px 14px', borderRadius: 999,
-          background: 'rgba(2, 6, 23, 0.6)',
-          border: `1px solid ${success ? 'rgba(52, 211, 153, 0.6)' : 'rgba(34, 211, 238, 0.45)'}`,
-          backdropFilter: 'blur(6px)',
-          fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-          color: success ? '#A7F3D0' : (submitting ? '#DDD6FE' : '#A5F3FC'),
-        }}>
+        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <span style={{
-            width: 7, height: 7, borderRadius: '50%',
-            background: success ? '#34D399' : (submitting ? '#A78BFA' : '#22D3EE'),
-            boxShadow: `0 0 8px ${success ? '#34D399' : (submitting ? '#A78BFA' : '#22D3EE')}`,
-            animation: 'pulse 2s ease-in-out infinite',
-          }}/>
-          {success ? 'Mensaje enviado' : (submitting ? 'Procesando...' : (focused ? 'Escuchando' : 'Asistente DesarPro · Online'))}
-        </span>
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '6px 14px', borderRadius: 999,
+            background: 'rgba(2, 6, 23, 0.6)',
+            border: `1px solid ${success ? 'rgba(52, 211, 153, 0.6)' : (error ? 'rgba(245, 158, 11, 0.45)' : 'rgba(34, 211, 238, 0.45)')}`,
+            backdropFilter: 'blur(6px)',
+            fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+            color: success ? '#A7F3D0' : (error ? '#FDE68A' : (submitting ? '#DDD6FE' : '#A5F3FC')),
+          }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: success ? '#34D399' : (error ? '#F59E0B' : (submitting ? '#A78BFA' : '#22D3EE')),
+              boxShadow: `0 0 8px ${success ? '#34D399' : (error ? '#F59E0B' : (submitting ? '#A78BFA' : '#22D3EE'))}`,
+              animation: 'pulse 2s ease-in-out infinite',
+            }}/>
+            {success ? 'Mensaje enviado' : (error ? 'Revisemos los datos' : (submitting ? 'Procesando...' : (focused ? 'Escuchando' : 'Asistente DesarPro · Online')))}
+          </span>
+          <span style={{
+            padding: '4px 10px', borderRadius: 999,
+            background: 'rgba(7, 11, 23, 0.72)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.78)',
+            fontSize: 10, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase',
+            backdropFilter: 'blur(6px)',
+          }}>{hudMessage}</span>
+        </div>
       </div>
 
       <style>{`

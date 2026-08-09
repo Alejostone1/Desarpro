@@ -44,11 +44,13 @@ function App() {
 
 function Root() {
   return (
-    <ThemeProvider>
-      <AdminProvider>
-        <App/>
-      </AdminProvider>
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <AdminProvider>
+          <App/>
+        </AdminProvider>
+      </ThemeProvider>
+    </I18nProvider>
   );
 }
 
