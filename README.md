@@ -1,115 +1,125 @@
-# DesarPro · Sitio web profesional
+# DesarPro
 
-**Stack:** Vanilla HTML + React 18 vía Babel CDN (sin build, sin Vite, sin Node).
-**Tema:** Oscuro/claro con toggle global persistente (`localStorage`).
-**i18n preparado:** ES (default) · EN · PT — se completa desde el panel admin.
+DesarPro es un sitio web profesional moderno, tipo landing page y portal de administración, diseñado para presentar servicios de tecnología, software a medida, IA, ciberseguridad e infraestructura con una experiencia visual premium. El proyecto combina una interfaz React + Vite con un sistema de edición visual y autenticación administrativa basada en Prisma y SQLite.
 
----
+## ✨ Características principales
 
-## 🚀 Cómo abrir el proyecto
+- Diseño editorial y cinematográfico con animaciones suaves
+- Tema claro/oscuro persistente
+- Ruta por hash para navegación SPA
+- Panel administrativo con edición en vivo
+- Autenticación de administrador con backend local
+- Base de datos Prisma SQLite para usuarios del panel
+- Compatibilidad con Vite para desarrollo rápido
 
-El sitio carga un video MP4 local (`media/earth-night.mp4`) como fondo del hero,
-por lo que **no se puede abrir con doble clic** (`file://`) — los navegadores
-bloquean la reproducción de archivos locales por seguridad.
+## 🧰 Stack tecnológico
 
-### Opción 1 — VS Code Live Server (recomendado)
-1. Instala la extensión "Live Server" de Ritwick Dey.
-2. Click derecho sobre `index.html` → **Open with Live Server**.
+- React 18
+- Vite 5
+- Express.js
+- Prisma + SQLite
+- bcryptjs
+- GSAP + ScrollTrigger
+- Babel (para el modelo de componentes basado en archivos JSX cargados en la web)
 
-### Opción 2 — Python (rápido, sin instalar nada)
+## 🏗️ Estructura del proyecto
+
+```text
+.
+├── index.html
+├── package.json
+├── server.js
+├── prisma/
+│   └── schema.prisma
+├── src/
+│   ├── App.jsx
+│   ├── components/
+│   ├── lib/
+│   └── pages/
+├── media/
+└── tokens.css
+```
+
+## 🚀 Inicio rápido
+
+### Requisitos
+
+- Node.js 18 o superior
+- npm
+
+### Instalación
+
 ```bash
-cd desarpro
-python3 -m http.server 8080
+npm install
 ```
-Abrir: <http://localhost:8080>
 
-### Opción 3 — Node
+### Ejecutar en desarrollo
+
 ```bash
-cd desarpro
-npx serve .
+npm run dev
 ```
 
----
+Esto levantará:
+- la interfaz Vite en http://localhost:3000
+- el backend de autenticación en http://localhost:3001
 
-## 🔐 Panel administrador
+## 🔐 Acceso al panel administrador
 
-- **URL:** `/#admin` o usa el tab "Admin" en `/#login`
-- **Contraseña:** `Administrador01`
-- **Funcionalidad:**
-  - Editar TODO el contenido del sitio (hero, servicios, contacto, etc.)
-  - Activar "edición en vivo" → click directo sobre cualquier texto del sitio
-  - Exportar/Importar contenido en JSON
-  - Restablecer a los valores originales
-  - Cambios persisten en `localStorage` del navegador
-- Para editar el sitio **en producción**, exporta el JSON desde el admin y
-  reemplaza los `defaultValue` en `src/lib/admin.jsx` (`DEFAULT_CONTENT`).
+El login del panel usa autenticación real con base de datos local.
 
----
+### Usuario inicial
 
-## 🎨 Tema oscuro/claro
+- Email: admin@desarpro.com
+- Contraseña: Administrador01
 
-- Toggle en la barra de navegación (icono sol/luna).
-- Persiste entre sesiones vía `localStorage.desarpro:theme`.
-- Las animaciones del hero (video Earth) y del login (globo rotativo) siempre
-  permanecen oscuras — son superficies inmersivas.
+### Rutas principales
 
----
+- Inicio: http://localhost:3000/#home
+- Login: http://localhost:3000/#login
+- Panel admin: http://localhost:3000/#admin
 
-## 📂 Estructura
+## 🗄️ Base de datos
 
-```
-index.html                Punto de entrada
-tokens.css                Variables CSS (tema, colores, spacing, animaciones)
-media/                    Assets binarios
-  earth-night.mp4         Video branded del Hero (incluye logo + arcos)
-  earth-night.gif         Fallback animado para autoplay bloqueado
-  earth-still.jpg         Poster (primer frame del video)
-src/
-  lib/
-    icons.jsx             Inline SVG icons (~50)
-    anim.jsx              useInView, Reveal, Stagger, CountUp
-    theme.jsx             ThemeProvider, useTheme, ThemeToggle
-    admin.jsx             AdminProvider, useAdmin, Editable, AdminFab
-    techLogos.jsx         24 logos oficiales de marca (React, Python, Docker…)
-  components/
-    HeroVideoBg.jsx       Video MP4 fullscreen con fallbacks
-    EarthGlobeScene.jsx   Globo terráqueo rotativo (Login)
-    HoloAssistant.jsx     Avatar holográfico AI (Contacto)
-    Logo.jsx              Logo DesarPro con variantes y animación
-    Navbar.jsx            Barra de navegación con mega-menú
-    Footer.jsx, NeuralNet.jsx, TechLoop.jsx, …
-  pages/
-    Home.jsx              Hero (video Earth) + servicios + tech + proceso
-    Login.jsx             Login con globo terráqueo + tab admin
-    Contact.jsx           Formulario + asistente holográfico
-    Admin.jsx             Panel CMS completo
-    Projects.jsx, About.jsx, ServicesHub.jsx, ServicePage.jsx
-  App.jsx                 Root + routing por hash
+El proyecto usa Prisma con SQLite para almacenar usuarios del panel administrativo.
+
+### Generar la base de datos
+
+```bash
+npx prisma generate
+npx prisma db push
+node seed.js
 ```
 
----
+## 🛠️ Scripts disponibles
 
-## 🛠️ Personalización rápida
+```bash
+npm run dev      # levanta frontend + backend
+npm run build    # construye la app para producción
+npm run preview  # previsualiza el build
+```
 
-| Quiero cambiar... | Edita |
-|---|---|
-| Texto del hero, stats, servicios, contacto | Panel admin → exporta JSON |
-| Video de fondo del Hero | `media/earth-night.mp4` |
-| Colores de marca | `tokens.css` → `--blue, --cyan, --violet…` |
-| Tecnologías mostradas en el loop | `src/lib/techLogos.jsx` |
-| Logo (SVG) | `src/components/Logo.jsx` |
-| Contraseña de admin | `src/lib/admin.jsx` → `ADMIN_PASSWORD` |
+## 🎨 Personalización
 
----
+Puedes ajustar:
+- textos y contenido desde el panel admin
+- colores y variables en tokens.css
+- assets visuales en media/
+- componentes en src/components/
 
-## ⚙️ Stack técnico
+## 📌 Notas
 
-- React 18.3.1 (UMD CDN)
-- ReactDOM 18.3.1 (UMD CDN)
-- @babel/standalone 7.29.0 (compilación in-browser)
-- Inter + Space Grotesk + JetBrains Mono (Google Fonts)
-- Sin dependencias npm. Sin build step. Sin transpilación previa.
+Este proyecto está pensado como una base sólida para una agencia, estudio o consultora tecnológica que necesite mostrar servicios, procesos y un panel editorial con control administrativo.
 
----
+## 👥 Fundadores y creadores
 
-© 2026 DesarPro · Desarrollo de Software Profesional · Pereira, Colombia
+DesarPro nació de la visión y el trabajo conjunto de:
+
+- Daniel Felipe Colorado
+- Alejandro Piedrahita Muñoz
+
+Ambos impulsan este proyecto con una mirada estratégica, creativa y técnica, orientada a construir soluciones digitales modernas, escalables y con alto impacto visual.
+
+## ©️ Autor
+
+DesarPro · Desarrollo de software profesional
+Pereira, Colombia · 2026
