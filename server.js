@@ -209,6 +209,14 @@ app.delete('/api/projects/:slug', requireAdmin, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Servidor de auth listo en http://localhost:${PORT}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`El puerto ${PORT} ya está en uso. Cierra el otro proceso o cambia el puerto y vuelve a ejecutar: npm run dev`);
+    process.exit(1);
+  }
+  throw err;
 });
