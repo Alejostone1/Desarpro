@@ -264,6 +264,9 @@ function Navbar({ route, setRoute }) {
         @media (max-width: 640px) {
           .nav-actions button:not(.mobile-toggle):not(.btn-primary) { display: none !important; }
         }
+        @media (max-width: 480px) {
+          .nav-actions .btn-primary { padding: 10px 14px !important; font-size: 12px !important; }
+        }
       `}</style>
 
       {/* MOBILE DRAWER */}
@@ -274,6 +277,7 @@ function Navbar({ route, setRoute }) {
           zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
           overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+          maxWidth: '100vw',
         }}>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
@@ -327,7 +331,7 @@ function Navbar({ route, setRoute }) {
               <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 10 }}>
                 Idioma / Language
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', gap: 8 }}>
                 {['es', 'en', 'pt', 'fr', 'de'].map(lang => (
                   <button
                     key={lang}

@@ -94,7 +94,7 @@ function About({ setRoute }) {
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12 }}>Nuestro primer año</h2></Reveal>
           </div>
           <div style={{ position: 'relative', maxWidth: 900, margin: '0 auto' }}>
-            <div style={{ position: 'absolute', left: 30, top: 12, bottom: 12, width: 2, background: 'linear-gradient(180deg, #22D3EE, #A78BFA, #EC4899)', borderRadius: 2 }}/>
+            <div style={{ position: 'absolute', left: 'clamp(20px, 4vw, 30px)', top: 12, bottom: 12, width: 2, background: 'linear-gradient(180deg, #22D3EE, #A78BFA, #EC4899)', borderRadius: 2 }}/>
             {[
               { mo: 'Ene 2025', t: 'Fundación', d: 'DesarPro nace en Pereira con un equipo de 3 desarrolladores y la convicción de hacer las cosas bien.', c: '#22D3EE' },
               { mo: 'Mar 2025', t: 'Primer cliente enterprise', d: 'Lanzamos la primera plataforma SaaS multi-tenant para una marca de moda colombiana.', c: '#3B82F6' },
@@ -103,12 +103,12 @@ function About({ setRoute }) {
               { mo: 'Dic 2025', t: '11 paquetes definidos', d: 'Estructuramos nuestra oferta en 11 paquetes especializados que cubren todo el ciclo de vida.', c: '#F59E0B' },
             ].map((m, i) => (
               <Reveal key={i} delay={i * 100}>
-                <div style={{ display: 'flex', gap: 24, paddingLeft: 4, paddingBottom: 36, position: 'relative' }}>
+                <div style={{ display: 'flex', gap: 'clamp(16px, 3vw, 24px)', paddingLeft: 4, paddingBottom: 36, position: 'relative' }}>
                   <div style={{
-                    width: 60, height: 60, flexShrink: 0, borderRadius: '50%',
+                    width: 'clamp(48px, 7vw, 60px)', height: 'clamp(48px, 7vw, 60px)', flexShrink: 0, borderRadius: '50%',
                     background: 'var(--bg-1)', border: `2px solid ${m.c}`,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    color: m.c, fontWeight: 800, fontSize: 11, lineHeight: 1.1, textAlign: 'center', padding: 4,
+                    color: m.c, fontWeight: 800, fontSize: 'clamp(9px, 2vw, 11px)', lineHeight: 1.1, textAlign: 'center', padding: 4,
                     boxShadow: `0 0 30px ${m.c}40`, zIndex: 2,
                   }}>{m.mo.split(' ')[0]}</div>
                   <div className="glass" style={{ flex: 1, borderRadius: 16, padding: 24 }}>

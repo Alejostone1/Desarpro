@@ -110,6 +110,9 @@ function Projects({ setRoute }) {
               .case-card { grid-template-columns: 1fr !important; }
               .case-metrics { border-left: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; flex-direction: row !important; flex-wrap: wrap !important; }
             }
+            @media (max-width: 480px) {
+              .case-metrics { flex-direction: column !important; }
+            }
           `}</style>
         </div>
       </section>

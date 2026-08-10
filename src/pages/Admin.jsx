@@ -176,7 +176,7 @@ function Admin({ setRoute }) {
       </header>
 
       {/* Body — sidebar + main */}
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', minHeight: 'calc(100vh - 70px)' }} className="admin-layout">
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 260px) minmax(0, 1fr)', minHeight: 'calc(100vh - 70px)' }} className="admin-layout">
         {/* Sidebar */}
         <aside style={{
           padding: 20,
@@ -284,8 +284,11 @@ function Admin({ setRoute }) {
       <style>{`
         @media (max-width: 880px) {
           .admin-layout { grid-template-columns: 1fr !important; }
-          .admin-sidebar { border-right: none !important; border-bottom: 1px solid var(--card-border) !important; padding: 16px !important; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
+          .admin-sidebar { border-right: none !important; border-bottom: 1px solid var(--card-border) !important; padding: 16px !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px; }
           .admin-main { padding: 20px !important; }
+        }
+        @media (max-width: 480px) {
+          .admin-sidebar { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

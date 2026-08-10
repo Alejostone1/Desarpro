@@ -45,7 +45,7 @@ function ServicesHub({ setRoute }) {
             <Reveal><span className="section-eyebrow">Servicios principales</span></Reveal>
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>Los 6 pilares</h2></Reveal>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }} className="hub-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }} className="hub-grid">
             {ALL_SERVICES.slice(0, 6).map((s, i) => (
               <Reveal key={s.id} delay={i * 70}>
                 <ServiceCard svc={s} onClick={() => setRoute(s.id)} large/>
@@ -62,7 +62,7 @@ function ServicesHub({ setRoute }) {
             <Reveal><span className="section-eyebrow" style={{ color: '#A78BFA' }}>Especializados</span></Reveal>
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>Capacidades complementarias</h2></Reveal>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }} className="hub-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }} className="hub-grid">
             {ALL_SERVICES.slice(6).map((s, i) => (
               <Reveal key={s.id} delay={i * 70}>
                 <ServiceCard svc={s} onClick={() => setRoute(s.id)}/>
@@ -71,7 +71,6 @@ function ServicesHub({ setRoute }) {
           </div>
         </div>
         <style>{`
-          @media (max-width: 980px) { .hub-grid { grid-template-columns: repeat(2, 1fr) !important; } }
           @media (max-width: 580px) { .hub-grid { grid-template-columns: 1fr !important; } }
         `}</style>
       </section>

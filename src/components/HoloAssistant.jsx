@@ -82,7 +82,7 @@ function HoloAssistant({
     <div className="holo-stage" style={{
       position: 'relative', width: '100%',
       aspectRatio: '4 / 5',
-      maxWidth: 520, margin: '0 auto',
+      maxWidth: 'clamp(280px, 50vw, 520px)', margin: '0 auto',
       overflow: 'hidden',
       borderRadius: 24,
       background: 'linear-gradient(135deg, rgba(15,23,42,0.6) 0%, rgba(2,6,23,0.9) 100%), radial-gradient(circle at 50% 0%, rgba(34,211,238,0.15), transparent 60%)',

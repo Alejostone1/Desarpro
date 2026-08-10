@@ -2,7 +2,7 @@
 function EvilEye({ color = '#14B8A6', intensity = 0.7 }) {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 800">
+      <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 800" style={{ overflow: 'hidden' }}>
         <defs>
           <radialGradient id="ee-iris" cx="50%" cy="50%">
             <stop offset="0%" stopColor={color} stopOpacity={intensity * 0.9}/>
@@ -38,7 +38,7 @@ function EvilEye({ color = '#14B8A6', intensity = 0.7 }) {
 function LightRays({ color = '#3B82F6' }) {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1200 800" style={{ opacity: 0.4 }}>
+      <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1200 800" style={{ opacity: 0.4, overflow: 'hidden' }}>
         <defs>
           <linearGradient id="ray" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor={color} stopOpacity="0.6"/>
@@ -81,7 +81,7 @@ function Radar({ color = '#A855F7' }) {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <svg width="900" height="900" viewBox="0 0 900 900" style={{ opacity: 0.5 }}>
+      <svg width="100%" height="100%" viewBox="0 0 900 900" style={{ opacity: 0.5, maxWidth: 'clamp(300px, 50vw, 900px)', maxHeight: 'clamp(300px, 50vw, 900px)' }}>
         <defs>
           <linearGradient id="sweep" x1="0%" x2="100%">
             <stop offset="0%" stopColor={color} stopOpacity="0.6"/>

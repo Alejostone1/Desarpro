@@ -8,7 +8,7 @@ function Footer({ setRoute }) {
       background: 'linear-gradient(180deg, transparent, rgba(6,182,212,0.04))',
     }}>
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 48, marginBottom: 48 }} className="footer-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48, marginBottom: 48 }} className="footer-grid">
           <div>
             <Logo size={40}/>
             <p style={{ color: 'var(--text-2)', fontSize: 14, lineHeight: 1.65, marginTop: 18, maxWidth: 320 }}>
@@ -61,7 +61,6 @@ function Footer({ setRoute }) {
           </div>
         </div>
         <style>{`
-          @media (max-width: 980px) { .footer-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 32px !important; } }
           @media (max-width: 580px) { .footer-grid { grid-template-columns: 1fr !important; gap: 28px !important; } }
         `}</style>
 

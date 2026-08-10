@@ -42,9 +42,9 @@ function Login({ setRoute }) {
     <div className="page" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
       <EarthGlobeScene/>
 
-      <div style={{ position: 'relative', zIndex: 2, minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center' }} className="login-layout">
+      <div style={{ position: 'relative', zIndex: 2, minHeight: '100vh', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', alignItems: 'center' }} className="login-layout">
         {/* Left side — branding */}
-        <div style={{ padding: '120px 60px 60px' }} className="login-left">
+        <div style={{ padding: 'clamp(40px, 8vw, 120px) clamp(20px, 5vw, 60px) clamp(20px, 4vw, 60px)' }} className="login-left">
           <Reveal>
             <a onClick={() => setRoute('home')} style={{ cursor: 'pointer', display: 'inline-block', marginBottom: 40 }}>
               <Logo size={44} animated/>
@@ -86,7 +86,7 @@ function Login({ setRoute }) {
         {/* Right — form */}
         <div style={{ padding: 'clamp(20px, 4vw, 60px)', display: 'flex', justifyContent: 'center' }} className="login-right">
           <Reveal delay={200}>
-            <div className="glass-2" style={{ width: 420, maxWidth: '100%', borderRadius: 24, padding: 'clamp(20px, 4vw, 36px)', boxShadow: '0 30px 80px rgba(0,0,0,0.6)', background: 'rgba(10,12,20,0.78)', backdropFilter: 'blur(24px) saturate(140%)', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div className="glass-2" style={{ width: 'clamp(320px, 50vw, 420px)', maxWidth: '100%', borderRadius: 24, padding: 'clamp(20px, 4vw, 36px)', boxShadow: '0 30px 80px rgba(0,0,0,0.6)', background: 'rgba(10,12,20,0.78)', backdropFilter: 'blur(24px) saturate(140%)', border: '1px solid rgba(255,255,255,0.12)' }}>
               {/* Tabs */}
               <div style={{ display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 12, marginBottom: 24 }}>
                 {[['login', t('login.form.login')], ['register', t('login.form.register')], ['admin', t('login.form.admin')]].map(([id, label]) => (

@@ -32,8 +32,8 @@ function Home({ setRoute }) {
         <HeroVideoBg/>
 
         {/* Floating orbs for added depth */}
-        <div style={{ position: 'absolute', top: '15%', right: '8%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,238,0.15), transparent 60%)', filter: 'blur(40px)', zIndex: 1, animation: 'orb-drift 18s ease-in-out infinite alternate', pointerEvents: 'none' }}/>
-        <div style={{ position: 'absolute', bottom: '10%', left: '5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.12), transparent 60%)', filter: 'blur(40px)', zIndex: 1, animation: 'orb-drift 22s ease-in-out infinite alternate-reverse', pointerEvents: 'none' }}/>
+        <div style={{ position: 'absolute', top: '15%', right: '8%', width: 'clamp(200px, 30vw, 400px)', height: 'clamp(200px, 30vw, 400px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,238,0.15), transparent 60%)', filter: 'blur(40px)', zIndex: 1, animation: 'orb-drift 18s ease-in-out infinite alternate', pointerEvents: 'none' }}/>
+        <div style={{ position: 'absolute', bottom: '10%', left: '5%', width: 'clamp(250px, 35vw, 500px)', height: 'clamp(250px, 35vw, 500px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.12), transparent 60%)', filter: 'blur(40px)', zIndex: 1, animation: 'orb-drift 22s ease-in-out infinite alternate-reverse', pointerEvents: 'none' }}/>
 
         <div className="container" style={{ position: 'relative', zIndex: 2, textAlign: 'center', paddingTop: 60, paddingBottom: 80 }}>
           <Reveal y={20}>
@@ -70,7 +70,7 @@ function Home({ setRoute }) {
 
           {/* Stats strip — values now editable; tuned for a young company (no project counts) */}
           <Reveal delay={520} y={20}>
-            <div style={{ marginTop: 80, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, maxWidth: 900, margin: '80px auto 0' }} className="stats-grid">
+            <div style={{ marginTop: 80, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 20, maxWidth: 900, margin: '80px auto 0' }} className="stats-grid">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="glass" style={{ borderRadius: 16, padding: '16px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
@@ -149,7 +149,7 @@ function Home({ setRoute }) {
         </div>
         <style>{`
           .svc-card:hover { transform: translateY(-6px); border-color: var(--card-border-hover) !important; background: var(--card-bg-hover) !important; }
-          @media (max-width: 980px) { .svc-grid { grid-template-columns: repeat(2, 1fr) !important; } .stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+          @media (max-width: 980px) { .svc-grid { grid-template-columns: repeat(2, 1fr) !important; } }
           @media (max-width: 640px) { .svc-grid { grid-template-columns: 1fr !important; } }
           @media (max-width: 440px) { .stats-grid { grid-template-columns: 1fr !important; gap: 12px !important; } }
           @keyframes orb-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px, -30px) scale(1.1); } }

@@ -148,13 +148,13 @@ function Contact() {
         {/* Animated orbital lights */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
           {/* Primary cyan orb (top-left) */}
-          <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,238,0.25), transparent 65%)', filter: 'blur(50px)', left: '-12%', top: '-15%', animation: 'floatOrb 9s ease-in-out infinite', boxShadow: '0 0 80px rgba(34,211,238,0.4)' }}/>
+          <div style={{ position: 'absolute', width: 'clamp(200px, 30vw, 400px)', height: 'clamp(200px, 30vw, 400px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,238,0.25), transparent 65%)', filter: 'blur(50px)', left: '-12%', top: '-15%', animation: 'floatOrb 9s ease-in-out infinite', boxShadow: '0 0 80px rgba(34,211,238,0.4)' }}/>
 
           {/* Secondary violet orb (bottom-right) */}
-          <div style={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,139,250,0.22), transparent 65%)', filter: 'blur(45px)', right: '-8%', bottom: '-10%', animation: 'floatOrb 11s ease-in-out infinite reverse', boxShadow: '0 0 70px rgba(167,139,250,0.35)' }}/>
+          <div style={{ position: 'absolute', width: 'clamp(175px, 25vw, 350px)', height: 'clamp(175px, 25vw, 350px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,139,250,0.22), transparent 65%)', filter: 'blur(45px)', right: '-8%', bottom: '-10%', animation: 'floatOrb 11s ease-in-out infinite reverse', boxShadow: '0 0 70px rgba(167,139,250,0.35)' }}/>
 
           {/* Accent glow (center) */}
-          <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%)', filter: 'blur(60px)', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', animation: 'pulse 6s ease-in-out infinite' }}/>
+          <div style={{ position: 'absolute', width: 'clamp(300px, 40vw, 600px)', height: 'clamp(300px, 40vw, 600px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%)', filter: 'blur(60px)', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', animation: 'pulse 6s ease-in-out infinite' }}/>
 
           {/* Animated scan lines */}
           <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, rgba(34,211,238,0.08) 0px, rgba(34,211,238,0.08) 2px, transparent 2px, transparent 4px)', animation: 'scanlines 8s linear infinite', opacity: 0.5 }}/>
@@ -194,7 +194,7 @@ function Contact() {
             </Reveal>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 40, alignItems: 'center', marginTop: 40 }} className="contact-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1fr)', gap: 40, alignItems: 'center', marginTop: 40 }} className="contact-grid">
             {/* Left: Holographic AI assistant */}
             <Reveal>
               <HoloAssistant
@@ -280,7 +280,7 @@ function Contact() {
 
           {/* CONTACT INFO STRIP */}
           <Reveal delay={300}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 60 }} className="contact-info">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginTop: 60 }} className="contact-info">
               {[
                 { icon: 'Mail', titleK: 'contact.info.email.title', titleD: 'Email', valK: 'contact.email', valD: 'info@desarpro.com', subK: 'contact.info.email.sub', subD: 'Respuesta en 24h' },
                 { icon: 'Whatsapp', titleK: 'contact.info.wa.title', titleD: 'WhatsApp', valK: 'contact.whatsapp', valD: '+57 300 000 0000', subK: 'contact.info.wa.sub', subD: 'Lun-Vie 8am-6pm' },
@@ -320,7 +320,8 @@ function Contact() {
           @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
           .holo-stage { animation: holoBreathe 4s ease-in-out infinite !important; }
           @media (prefers-reduced-motion: no-preference) { .glass-2 { animation: formFloat 6s ease-in-out infinite; } }
-          @media (max-width: 980px) { .contact-grid { grid-template-columns: 1fr !important; } .contact-info { grid-template-columns: 1fr !important; } }
+          @media (max-width: 980px) { .contact-grid { grid-template-columns: 1fr !important; } }
+          @media (max-width: 580px) { .contact-info { grid-template-columns: 1fr !important; } }
         `}</style>
       </section>
     </div>
