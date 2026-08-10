@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap será agregado cuando se configure el dominio final
+# Sitemap: https://desarpro.com/sitemap.xml

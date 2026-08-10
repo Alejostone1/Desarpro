@@ -6,7 +6,10 @@
 const ADMIN_PASSWORD = 'Administrador01';
 const STORAGE_KEY = 'desarpro:cms:v1';
 const SESSION_KEY = 'desarpro:admin:session';
-const API_BASE = 'http://localhost:3001';
+// API base URL — configurable via window global; falls back to local dev server.
+// In production (Vercel), the backend is not available; the login function
+// gracefully falls back to the local password check below.
+const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) || 'http://localhost:3001';
 
 // === Default content registry ===
 // All editable strings live here. Any code that wants to render
