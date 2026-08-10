@@ -202,6 +202,11 @@ function Navbar({ route, setRoute }) {
         </nav>
 
         <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label="Abrir menú de navegación" style={{
+            background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
+            color: 'var(--text-0)', padding: 10, borderRadius: 12, cursor: 'pointer', minHeight: 44, minWidth: 44,
+            alignItems: 'center', justifyContent: 'center', display: 'none',
+          }}><Icon.Menu size={22}/></button>
           <ThemeToggle size={40}/>
           <div style={{ position: 'relative' }}>
             <button
@@ -244,11 +249,6 @@ function Navbar({ route, setRoute }) {
           <button onClick={() => go('contacto')} className="btn btn-primary" style={{ padding: '10px 18px', fontSize: 13, minHeight: 40, whiteSpace: 'nowrap' }}>
             {t('nav.quote')} <Icon.ArrowRight size={14}/>
           </button>
-          <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label="Abrir menú de navegación" style={{
-            background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
-            color: 'var(--text-0)', padding: 10, borderRadius: 12, cursor: 'pointer', minHeight: 44, minWidth: 44,
-            alignItems: 'center', justifyContent: 'center',
-          }}><Icon.Menu size={22}/></button>
         </div>
       </div>
       <style>{`
