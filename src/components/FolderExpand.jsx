@@ -15,7 +15,6 @@ const INDUSTRIES = [
 ];
 
 function FolderExpand({ onPickIndustry }) {
-  const [open, setOpen] = React.useState(false);
   const [selectedProject, setSelectedProject] = React.useState(null);
   const [winWidth, setWinWidth] = React.useState(() => typeof window !== 'undefined' ? window.innerWidth : 1200);
 
