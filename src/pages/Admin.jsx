@@ -14,6 +14,7 @@ function Admin({ setRoute }) {
 
   // Group content keys by prefix for the sidebar nav
   const sections = React.useMemo(() => ({
+    projects: { label: 'Proyectos', icon: 'Folder', prefixes: [], always: true },
     hero:    { label: 'Inicio · Hero',     icon: 'Sparkle',   prefixes: ['hero.'] },
     stats:   { label: 'Inicio · Stats',    icon: 'BarChart',  prefixes: ['stats.'] },
     services:{ label: 'Inicio · Servicios',icon: 'Layers',    prefixes: ['services.'] },
@@ -189,7 +190,7 @@ function Admin({ setRoute }) {
           {Object.entries(sections).map(([id, s]) => {
             const I = Icon[s.icon] || Icon.Settings;
             const count = (keysByGroup[id] || []).length;
-            if (count === 0) return null;
+            if (count === 0 && !s.always) return null;
             const active = activeSection === id;
             return (
               <button key={id} onClick={() => setActiveSection(id)} style={{
@@ -203,7 +204,7 @@ function Admin({ setRoute }) {
               }}>
                 <I size={15}/>
                 <span style={{ flex: 1 }}>{s.label}</span>
-                <span style={{ fontSize: 11, opacity: 0.6 }}>{count}</span>
+                {count > 0 && <span style={{ fontSize: 11, opacity: 0.6 }}>{count}</span>}
               </button>
             );
           })}
@@ -226,7 +227,9 @@ function Admin({ setRoute }) {
 
         {/* Main panel */}
         <main style={{ padding: 32, maxWidth: 980, width: '100%' }} className="admin-main">
-          {activeSection === '__import' ? (
+          {activeSection === 'projects' ? (
+            <ProjectsManager/>
+          ) : activeSection === '__import' ? (
             <>
               <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Icon.Upload size={22} stroke="var(--cyan-bright)"/> Importar contenido
@@ -350,6 +353,226 @@ function AdminFieldEditor({ fieldKey, value, saved, onSave }) {
           <Icon.Check size={12}/> Guardar
         </button>
       </div>
+    </div>
+  );
+}
+
+// ProjectsManager — create, edit and delete portfolio projects.
+// Uses the backend API when available (localhost) and keeps a localStorage
+// snapshot so the same edits work on static hosts.
+function ProjectsManager() {
+  const [list, setList] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [editing, setEditing] = React.useState(null); // project object | 'new'
+  const [saving, setSaving] = React.useState(false);
+  const [status, setStatus] = React.useState('');
+  const [form, setForm] = React.useState({});
+
+  const load = React.useCallback(() => {
+    setLoading(true);
+    window.fetchProjects().then((data) => {
+      setList(Array.isArray(data) ? data : []);
+      setLoading(false);
+    });
+  }, []);
+
+  React.useEffect(load, [load]);
+
+  const startNew = () => {
+    setForm({
+      slug: '', industry: '', title: '', client: '', year: String(new Date().getFullYear()),
+      color: '#22D3EE', icon: 'Folder', tagline: '', desc: '',
+      tags: [], metrics: [], featured: false, order: list.length,
+    });
+    setEditing('new');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const startEdit = (p) => {
+    setForm({
+      slug: p.slug, industry: p.industry, title: p.title, client: p.client || '',
+      year: p.year, color: p.color, icon: p.icon || 'Folder', tagline: p.tagline || '',
+      desc: p.desc || '', tags: p.tags || [], metrics: p.metrics || [],
+      featured: !!p.featured, order: p.order != null ? p.order : 0,
+    });
+    setEditing(p.slug);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const setTagsCsv = (csv) => setField('tags', csv.split(',').map((s) => s.trim()).filter(Boolean));
+
+  const setMetricsLines = (txt) => {
+    const lines = txt.split('\n').map((l) => l.trim()).filter(Boolean);
+    setField('metrics', lines.map((l) => {
+      const i = l.indexOf('|');
+      if (i === -1) return { k: l, v: '' };
+      return { k: l.slice(0, i).trim(), v: l.slice(i + 1).trim() };
+    }));
+  };
+
+  const metricsText = (m) => (m || []).map((x) => `${x.k} | ${x.v}`).join('\n');
+
+  const handleSave = async () => {
+    if (!form.title || !form.industry) {
+      setStatus('error: title e industry son obligatorios');
+      setTimeout(() => setStatus(''), 3000);
+      return;
+    }
+    setSaving(true);
+    try {
+      await window.saveProject(form);
+      setStatus('success');
+      setTimeout(() => setStatus(''), 2500);
+      setEditing(null);
+      load();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (p) => {
+    if (!window.confirm(`¿Eliminar "${p.title}"? Esta acción no se puede deshacer.`)) return;
+    await window.deleteProject(p.slug);
+    load();
+  };
+
+  const inputStyle = { minHeight: 42 };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-0)', margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Icon.Folder size={22} stroke="var(--cyan-bright)"/> Proyectos
+        </h1>
+        <button onClick={startNew} className="btn btn-primary" style={{ padding: '10px 16px', background: 'linear-gradient(135deg, #10B981, #06B6D4)' }}>
+          <Icon.Plus size={14}/> Nuevo proyecto
+        </button>
+      </div>
+      <p style={{ color: 'var(--text-2)', fontSize: 14, margin: '0 0 24px' }}>
+        Gestiona el portafolio que se muestra en «Una carpeta por sector» y en el carrusel de casos.
+        En localhost se guarda en la base de datos; en sitios estáticos se guarda una copia local del navegador.
+      </p>
+
+      {status && (
+        <div style={{
+          padding: '10px 14px', borderRadius: 10, marginBottom: 16, fontSize: 13,
+          background: status === 'success' ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+          border: `1px solid ${status === 'success' ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
+          color: status === 'success' ? '#86efac' : '#fca5a5',
+        }}>
+          {status === 'success' ? '✓ Proyecto guardado' : status.replace('error:', '✗ ')}
+        </div>
+      )}
+
+      {editing && (
+        <div style={{ marginBottom: 28, padding: 22, borderRadius: 16, background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Icon.Edit size={16}/> {editing === 'new' ? 'Nuevo proyecto' : `Editar: ${form.title || editing}`}
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="pm-grid">
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Título *</span>
+              <input type="text" value={form.title || ''} onChange={(e) => setField('title', e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Sector / industria *</span>
+              <input type="text" value={form.industry || ''} onChange={(e) => setField('industry', e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Cliente</span>
+              <input type="text" value={form.client || ''} onChange={(e) => setField('client', e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Año</span>
+              <input type="text" value={form.year || ''} onChange={(e) => setField('year', e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Slug (URL única, auto si vacío)</span>
+              <input type="text" value={form.slug || ''} onChange={(e) => setField('slug', e.target.value)} placeholder="mi-proyecto" className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Color de marca</span>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(form.color || '') ? form.color : '#22D3EE'} onChange={(e) => setField('color', e.target.value)} style={{ width: 52, height: 42, padding: 0, border: 'none', background: 'transparent', cursor: 'pointer' }}/>
+                <input type="text" value={form.color || ''} onChange={(e) => setField('color', e.target.value)} className="input" style={{ ...inputStyle, fontFamily: 'monospace' }}/>
+              </div>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Etiqueta corta (tagline)</span>
+              <input type="text" value={form.tagline || ''} onChange={(e) => setField('tagline', e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Orden</span>
+              <input type="number" value={form.order != null ? form.order : 0} onChange={(e) => setField('order', parseInt(e.target.value, 10) || 0)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Tags (separados por coma)</span>
+              <input type="text" value={(form.tags || []).join(', ')} onChange={(e) => setTagsCsv(e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 22 }}>
+              <input type="checkbox" checked={!!form.featured} onChange={(e) => setField('featured', e.target.checked)} style={{ width: 18, height: 18, accentColor: '#F59E0B' }}/>
+              <span style={{ color: 'var(--text-1)', fontSize: 13, fontWeight: 600 }}>Destacar en carrusel</span>
+            </label>
+          </div>
+          <label style={{ display: 'block', marginTop: 14 }}>
+            <span className="pm-label">Descripción</span>
+            <textarea value={form.desc || ''} onChange={(e) => setField('desc', e.target.value)} rows={4} className="input" style={{ width: '100%', resize: 'vertical' }}/>
+          </label>
+          <label style={{ display: 'block', marginTop: 14 }}>
+            <span className="pm-label">Métricas (una por línea: «valor | descripción»)</span>
+            <textarea value={metricsText(form.metrics)} onChange={(e) => setMetricsLines(e.target.value)} rows={3} className="input" style={{ width: '100%', resize: 'vertical', fontFamily: 'monospace', fontSize: 13 }}/>
+          </label>
+
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+            <button onClick={() => setEditing(null)} className="btn btn-ghost" style={{ padding: '10px 16px' }} disabled={saving}>Cancelar</button>
+            <button onClick={handleSave} className="btn btn-primary" style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #10B981, #06B6D4)' }} disabled={saving}>
+              <Icon.Check size={14}/> {saving ? 'Guardando…' : 'Guardar proyecto'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)', fontSize: 14 }}>Cargando proyectos…</div>
+      ) : list.length === 0 ? (
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)', fontSize: 14, borderRadius: 16, background: 'var(--card-bg)', border: '1px dashed var(--card-border)' }}>
+          Aún no hay proyectos. Crea el primero.
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {list.map((p) => (
+            <div key={p.slug || p.id} style={{
+              display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 14,
+              background: 'var(--card-bg)', border: '1px solid var(--card-border)',
+            }}>
+              <span style={{ width: 12, height: 12, borderRadius: 4, background: p.color, flexShrink: 0 }}/>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {p.title} {p.featured && <span style={{ fontSize: 10, fontWeight: 800, color: '#F59E0B', letterSpacing: '0.08em' }}>★</span>}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{p.industry} {p.client ? `· ${p.client}` : ''} · {p.year}</div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <button onClick={() => startEdit(p)} className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12 }}>
+                  <Icon.Edit size={12}/> Editar
+                </button>
+                <button onClick={() => handleDelete(p)} className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12, color: '#EF4444' }}>
+                  <Icon.X size={12}/> Eliminar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        .pm-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+        @media (max-width: 640px) {
+          .pm-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

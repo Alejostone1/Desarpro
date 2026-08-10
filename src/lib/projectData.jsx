@@ -2,6 +2,13 @@
 // Tries the backend API (GET /api/projects) with a short timeout; on any
 // failure (offline, Vercel static build, server down) it falls back to the
 // local catalog below so the site always renders.
+//
+// Admin writes (save/delete) go to the backend when available and also keep a
+// localStorage snapshot so edits made from the admin panel are visible even on
+// static hosts without a backend.
+
+const ADMIN_KEY = 'Administrador01';
+const STORAGE_KEY = 'desarpro:projects:v1';
 
 // Only query the backend when the site is running locally (localhost / LAN dev).
 // On deployed static hosts (Vercel) there is no backend, so skip the fetch and
@@ -12,6 +19,17 @@ function isLocalHost() {
   return h === 'localhost' || h === '127.0.0.1' || h === '::1';
 }
 const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) || (isLocalHost() ? 'http://localhost:3001' : null);
+
+function readOverrides() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function persistOverrides(list) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+}
 
 // Local fallback catalog — mirrors the seeded backend rows.
 const LOCAL_PROJECTS = [
@@ -160,7 +178,8 @@ const LOCAL_PROJECTS = [
 const LOCAL_FEATURED = LOCAL_PROJECTS.filter((p) => p.featured);
 
 async function fetchProjects() {
-  if (!API_BASE) return LOCAL_PROJECTS;
+  const overrides = readOverrides();
+  if (!API_BASE) return overrides || LOCAL_PROJECTS;
   try {
     const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = ctrl ? setTimeout(() => ctrl.abort(), 2500) : null;
@@ -189,8 +208,81 @@ async function fetchProjects() {
       featured: !!p.featured,
     }));
   } catch (e) {
-    return LOCAL_PROJECTS;
+    return overrides || LOCAL_PROJECTS;
   }
 }
 
-Object.assign(window, { fetchProjects, LOCAL_PROJECTS, LOCAL_FEATURED });
+function normalizeProject(p) {
+  return {
+    id: p.slug || p.id,
+    slug: p.slug,
+    industry: p.industry || '',
+    title: p.title || '',
+    client: p.client || null,
+    year: p.year || String(new Date().getFullYear()),
+    color: p.color || '#22D3EE',
+    icon: p.icon || 'Folder',
+    tagline: p.tagline || '',
+    desc: p.desc || '',
+    tags: Array.isArray(p.tags) ? p.tags : [],
+    metrics: Array.isArray(p.metrics) ? p.metrics : [],
+    featured: !!p.featured,
+  };
+}
+
+async function saveProject(project) {
+  const norm = normalizeProject(project);
+  let saved = norm;
+  if (API_BASE) {
+    try {
+      const res = await fetch(`${API_BASE}/api/projects`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+        body: JSON.stringify(norm),
+      });
+      const data = await res.json();
+      if (data && data.ok && data.project) saved = normalizeProject(data.project);
+    } catch (e) {}
+  }
+  // Keep the local snapshot in sync (works on static hosts too).
+  const overrides = readOverrides() || LOCAL_PROJECTS.map(normalizeProject);
+  const idx = overrides.findIndex((p) => p.slug === saved.slug);
+  let next;
+  if (idx >= 0) {
+    next = overrides.slice();
+    next[idx] = saved;
+  } else {
+    next = overrides.concat([saved]);
+  }
+  persistOverrides(next);
+  return saved;
+}
+
+async function deleteProject(slug) {
+  if (API_BASE) {
+    try {
+      await fetch(`${API_BASE}/api/projects/${encodeURIComponent(slug)}`, {
+        method: 'DELETE',
+        headers: { 'x-admin-key': ADMIN_KEY },
+      });
+    } catch (e) {}
+  }
+  const overrides = readOverrides();
+  if (overrides) {
+    const next = overrides.filter((p) => p.slug !== slug);
+    persistOverrides(next);
+  }
+}
+
+async function resetLocalProjects() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+}
+
+Object.assign(window, {
+  fetchProjects,
+  saveProject,
+  deleteProject,
+  resetLocalProjects,
+  LOCAL_PROJECTS,
+  LOCAL_FEATURED,
+});
