@@ -278,27 +278,30 @@ function Navbar({ route, setRoute }) {
         <div style={{
           position: 'fixed', inset: 0, background: '#fff',
           zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          display: 'flex', flexDirection: 'column',
           overflowY: 'auto', WebkitOverflowScrolling: 'touch',
           maxWidth: '100vw',
         }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-              <Logo size={42}/>
-              <button
-                onClick={() => setOpenMobile(false)}
-                aria-label="Cerrar menú"
-                style={{
-                  background: '#f3f4f6', border: '1px solid #e5e7eb',
-                  padding: 12, borderRadius: 14, color: '#1f2937', cursor: 'pointer',
-                  minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <Icon.X size={22}/>
-              </button>
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+            <Logo size={42}/>
+            <button
+              onClick={() => setOpenMobile(false)}
+              aria-label="Cerrar menú"
+              style={{
+                background: '#f3f4f6', border: '1px solid #e5e7eb',
+                padding: 12, borderRadius: 14, color: '#1f2937', cursor: 'pointer',
+                minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Icon.X size={22}/>
+            </button>
+          </div>
 
-            {/* Navigation links */}
+          {/* Navigation links */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+              Navegación
+            </div>
             <div style={{ display: 'grid', gap: 10 }}>
               {[
                 { id: 'home', label: t('nav.home') },
@@ -327,14 +330,12 @@ function Navbar({ route, setRoute }) {
             </div>
           </div>
 
-          {/* Drawer Footer Actions: Language Selector + Theme + Primary CTA */}
-          <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--glass-border)', display: 'grid', gap: 16 }}>
-            {/* Language grid */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 10 }}>
-                Idioma / Language
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', gap: 8 }}>
+          {/* Language grid */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+              Idioma / Language
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', gap: 8 }}>
                 {['es', 'en', 'pt', 'fr', 'de'].map(lang => (
                   <button
                     key={lang}
@@ -355,14 +356,50 @@ function Navbar({ route, setRoute }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <ThemeToggle size={48}/>
-              <button
-                onClick={() => go('contacto')}
-                className="btn btn-primary"
-                style={{ flex: 1, padding: 16, fontSize: 15, justifyContent: 'center', minHeight: 48 }}
-              >
-                {t('nav.quote')} <Icon.ArrowRight size={16}/>
+            {/* Theme toggle */}
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+                Tema / Theme
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button
+                  onClick={() => setTheme('light')}
+                  style={{
+                    flex: 1, padding: '12px', borderRadius: 10,
+                    background: theme === 'light' ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#f3f4f6',
+                    border: `1px solid ${theme === 'light' ? 'transparent' : '#e5e7eb'}`,
+                    color: theme === 'light' ? '#fff' : '#1f2937',
+                    fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  <Icon.Sun size={18}/> Claro
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  style={{
+                    flex: 1, padding: '12px', borderRadius: 10,
+                    background: theme === 'dark' ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#f3f4f6',
+                    border: `1px solid ${theme === 'dark' ? 'transparent' : '#e5e7eb'}`,
+                    color: theme === 'dark' ? '#fff' : '#1f2937',
+                    fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  <Icon.Moon size={18}/> Oscuro
+                </button>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div style={{ marginTop: 24 }}>
+              <button onClick={() => go('contacto')} style={{
+                width: '100%', padding: '16px 20px', borderRadius: 14,
+                background: 'linear-gradient(135deg, #3B82F6, #06B6D4)',
+                color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                Cotizar Proyecto <Icon.ArrowRight size={16}/>
               </button>
             </div>
           </div>
