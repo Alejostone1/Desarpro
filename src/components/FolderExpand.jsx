@@ -25,17 +25,6 @@ function FolderExpand({ onPickIndustry }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const layout = React.useMemo(() => {
-    const dist = Math.min(240, Math.max(90, (winWidth - 80) / 2.3));
-    return INDUSTRIES.map((_, i, arr) => {
-      const t = i / (arr.length - 1);
-      const angle = (t - 0.5) * (winWidth < 480 ? 60 : 90); // Narrower fan on mobile
-      const x = Math.sin(angle * Math.PI / 180) * dist;
-      const y = -Math.cos(angle * Math.PI / 180) * dist + (winWidth < 480 ? 20 : 40);
-      return { x, y, rot: angle * 0.4 };
-    });
-  }, [winWidth]);
-
   return (
     <div style={{ position: 'relative', height: winWidth < 480 ? 440 : 520, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
       {/* Horizontal scroll container */}
