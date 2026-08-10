@@ -56,6 +56,9 @@
   <script type="text/babel" data-presets="env,react" src="src/i18n/translations.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/i18n/index.jsx"></script>
 
+  <!-- Project data (backend fetch with local fallback) — load before components that use it -->
+  <script type="text/babel" data-presets="env,react" src="src/lib/projectData.jsx"></script>
+
   <!-- Visual components -->
   <script type="text/babel" data-presets="env,react" src="src/components/Logo.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/components/NeuralNet.jsx"></script>
@@ -66,6 +69,7 @@
   <script type="text/babel" data-presets="env,react" src="src/components/Backgrounds.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/components/FolderExpand.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/components/PackageCarousel.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/components/ProjectCarousel.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/components/SpaceScene.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/components/ContactScene.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/components/ServiceTabs.jsx"></script>

@@ -1,67 +1,177 @@
-// FolderExpand — horizontal scroll with project details.
+// FolderExpand — "Una carpeta por sector". Modern folder cards, theme-aware,
+// animated. Each industry has a project, so every card routes to its project
+// in the carousel.
 
-const INDUSTRIES = [
-  { name: 'VetTech', icon: 'Stethoscope', color: '#06B6D4', desc: 'Salud veterinaria · Laboratorios', count: 1 },
-  { name: 'CoffeeTech', icon: 'Coffee', color: '#A78BFA', desc: 'Agroindustria · Trazabilidad de café', count: 1 },
-  { name: 'E-commerce', icon: 'ShoppingBag', color: '#3B82F6', desc: 'Retail tecnológico', count: 1 },
-  { name: 'Fashion', icon: 'Star', color: '#EC4899', desc: 'Moda · Pedidos y catálogo', count: 1 },
-  { name: 'AgroTech', icon: 'Tractor', color: '#10B981', desc: 'Agro · Operación de campo', count: 1 },
-  { name: 'FinTech', icon: 'DollarSign', color: '#F59E0B', desc: 'Finanzas · Banca digital', count: 1 },
-  { name: 'HealthTech', icon: 'Heart', color: '#EF4444', desc: 'Salud · Telemedicina', count: 1 },
-  { name: 'EdTech', icon: 'Book', color: '#8B5CF6', desc: 'Educación · Plataformas e-learning', count: 1 },
-  { name: 'Logistics', icon: 'Truck', color: '#06B6D4', desc: 'Logística · Ruteo inteligente', count: 1 },
-  { name: 'FoodTech', icon: 'Utensils', color: '#10B981', desc: 'Alimentos · Gestión de restaurantes', count: 1 },
-];
+function FolderExpand({ projects = [], onPickIndustry }) {
+  const counts = projects.reduce((acc, p) => {
+    acc[p.industry] = (acc[p.industry] || 0) + 1;
+    return acc;
+  }, {});
 
-function FolderExpand({ onPickIndustry }) {
+  const industries = [];
+  for (const p of projects) {
+    if (industries.some((i) => i.name === p.industry)) continue;
+    industries.push({
+      name: p.industry,
+      icon: p.icon,
+      color: p.color,
+      tagline: p.tagline || p.desc,
+      count: counts[p.industry] || 1,
+    });
+  }
+
   return (
-    <div style={{ position: 'relative', height: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-      {/* Horizontal scroll container */}
-      <div style={{
-        width: '100%',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        display: 'flex',
-        gap: 16,
-        padding: '20px',
-        scrollBehavior: 'smooth',
-        WebkitOverflowScrolling: 'touch',
-        marginBottom: 20,
-      }}>
-        {INDUSTRIES.map((ind, i) => {
-          const I = Icon[ind.icon];
-          return (
-            <button key={ind.name} onClick={() => onPickIndustry?.(ind)}
-              className="industry-card"
-              style={{
-                flex: '0 0 auto',
-                width: 'min(200px, calc(100vw - 64px))',
-                padding: '16px 14px',
-                borderRadius: 14,
-                background: 'linear-gradient(180deg, #FAFAFA 0%, #E5E7EB 100%)',
-                border: '2px solid rgba(0,0,0,0.08)',
-                boxShadow: '0 10px 20px rgba(0,0,0,0.5)',
-                transition: 'all 300ms cubic-bezier(0.16,1,0.3,1)',
-                cursor: 'pointer', textAlign: 'left',
-              }}>
-              <span style={{
-                width: 32, height: 32, borderRadius: 8,
-                background: `${ind.color}22`, color: ind.color,
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8,
-              }}><I size={16}/></span>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#0A0B14' }}>{ind.name}</div>
-              <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2, lineHeight: 1.3 }}>{ind.desc}</div>
-              <div style={{ marginTop: 8, fontSize: 10, fontWeight: 600, color: ind.color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                {ind.count} proyecto{ind.count > 1 ? 's' : ''}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+    <div className="ind-grid" style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+      gap: 16,
+    }}>
+      {industries.map((ind, i) => {
+        const I = Icon[ind.icon] || Icon.Folder;
+        return (
+          <button
+            key={ind.name}
+            className="ind-card"
+            onClick={() => onPickIndustry?.(ind.name)}
+            style={{ '--ind-color': ind.color, animationDelay: `${i * 55}ms` }}
+            aria-label={`${ind.name} — ${ind.tagline}`}
+          >
+            {/* Folder tab */}
+            <span className="ind-tab">
+              <span className="ind-dot" />
+              <span className="ind-name">{ind.name}</span>
+            </span>
 
+            {/* Icon */}
+            <span className="ind-icon"><I size={22}/></span>
+
+            {/* Description */}
+            <span className="ind-tagline">{ind.tagline}</span>
+
+            {/* Footer */}
+            <span className="ind-foot">
+              <span className="ind-count">{ind.count} proyecto{ind.count > 1 ? 's' : ''}</span>
+              <span className="ind-arrow"><Icon.ArrowRight size={13}/></span>
+            </span>
+
+            {/* Glow */}
+            <span aria-hidden="true" className="ind-glow"/>
+          </button>
+        );
+      })}
+
+      <style>{`
+        .ind-card {
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+          text-align: left;
+          padding: 18px 16px 14px;
+          border-radius: 18px;
+          cursor: pointer;
+          font-family: inherit;
+          color: var(--text-0);
+          background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+          border: 1px solid var(--glass-border-2);
+          box-shadow: 0 14px 30px -22px rgba(0,0,0,0.6);
+          transition: transform 320ms var(--ease-out), border-color 320ms var(--ease-out), box-shadow 320ms var(--ease-out);
+          animation: ind-in 480ms var(--ease-out) both;
+        }
+        .ind-card:hover {
+          transform: translateY(-6px);
+          border-color: color-mix(in srgb, var(--ind-color) 45%, transparent);
+          box-shadow: 0 22px 44px -22px rgba(0,0,0,0.65), 0 0 0 1px color-mix(in srgb, var(--ind-color) 16%, transparent), 0 0 28px color-mix(in srgb, var(--ind-color) 18%, transparent);
+        }
+        .ind-card:active { transform: translateY(-2px) scale(0.99); }
+        .ind-card:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 3px; }
+
+        .ind-tab {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 5px 10px;
+          border-radius: 999px;
+          border: 1px solid color-mix(in srgb, var(--ind-color) 22%, transparent);
+          background: color-mix(in srgb, var(--ind-color) 9%, transparent);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+        .ind-dot {
+          width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+          background: var(--ind-color);
+          box-shadow: 0 0 10px var(--ind-color);
+        }
+        .ind-name { color: var(--ind-color); white-space: nowrap; }
+
+        .ind-icon {
+          width: 48px; height: 48px;
+          border-radius: 14px;
+          background: color-mix(in srgb, var(--ind-color) 14%, transparent);
+          color: var(--ind-color);
+          border: 1px solid color-mix(in srgb, var(--ind-color) 28%, transparent);
+          display: inline-flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          transition: transform 320ms var(--ease-out);
+        }
+        .ind-card:hover .ind-icon { transform: translateY(-3px) scale(1.08) rotate(-4deg); }
+
+        .ind-tagline {
+          font-size: 13px;
+          line-height: 1.45;
+          color: var(--text-2);
+          min-height: 38px;
+        }
+
+        .ind-foot {
+          width: 100%;
+          margin-top: auto;
+          padding-top: 10px;
+          border-top: 1px solid var(--glass-border);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .ind-count { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ind-color); }
+        .ind-arrow {
+          width: 28px; height: 28px;
+          border-radius: 9px;
+          background: color-mix(in srgb, var(--ind-color) 12%, transparent);
+          color: var(--ind-color);
+          border: 1px solid color-mix(in srgb, var(--ind-color) 26%, transparent);
+          display: inline-flex; align-items: center; justify-content: center;
+          transition: transform 320ms var(--ease-out);
+        }
+        .ind-card:hover .ind-arrow { transform: translateX(3px); }
+
+        .ind-glow {
+          position: absolute;
+          top: -40px; right: -40px;
+          width: 130px; height: 130px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--ind-color) 24%, transparent), transparent 70%);
+          filter: blur(24px);
+          opacity: 0;
+          transition: opacity 320ms var(--ease-out);
+          pointer-events: none;
+        }
+        .ind-card:hover .ind-glow { opacity: 1; }
+
+        [data-theme="light"] .ind-card { box-shadow: 0 14px 30px -24px rgba(15,23,42,0.35); }
+        [data-theme="light"] .ind-card:hover { box-shadow: 0 22px 44px -24px rgba(15,23,42,0.4), 0 0 0 1px color-mix(in srgb, var(--ind-color) 18%, transparent); }
+
+        @keyframes ind-in {
+          from { opacity: 0; transform: translateY(18px) scale(0.96); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
 
 window.FolderExpand = FolderExpand;
-window.INDUSTRIES = INDUSTRIES;

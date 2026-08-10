@@ -14,3 +14,20 @@ model User {
   role         String   @default("admin")
   createdAt    DateTime @default(now())
 }
+
+model Project {
+  id       Int     @id @default(autoincrement())
+  slug     String  @unique
+  industry String
+  title    String
+  client   String?
+  year     String
+  color    String
+  icon     String
+  tagline  String
+  desc     String
+  tags     String  @default("[]")
+  metrics  String  @default("[]")
+  featured Boolean @default(false)
+  order    Int     @default(0)
+}

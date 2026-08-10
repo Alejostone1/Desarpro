@@ -12,6 +12,11 @@ var __i18nTranslations = {
       services: 'Servicios',
       login: 'Iniciar sesión',
       quote: 'Cotizar Proyecto',
+      menu: 'Menú',
+      language: 'Idioma',
+      theme: 'Tema',
+      themeLight: 'Claro',
+      themeDark: 'Oscuro',
     },
     nav_services: {
       main: 'Servicios principales',
@@ -204,9 +209,28 @@ var __i18nTranslations = {
     },
     // Projects
     projects: {
+      eyebrow: 'Casos reales',
       title: 'Proyectos que',
       titleHighlight: 'resuelven',
       subtitle: 'Trabajamos con empresas en agroindustria, salud animal, retail tecnológico, moda y más. Cada proyecto es una operación, no solo un sitio web.',
+      industries: {
+        eyebrow: 'Industrias',
+        title: 'Una carpeta por sector',
+      },
+      packages: {
+        eyebrow: '11 paquetes especializados',
+        title: { pre: 'Encuentra el', highlight: 'match' },
+        subtitle: 'Desde validar una idea hasta operar una plataforma SaaS robusta. Cada paquete tiene alcance, entregables y tiempo definidos.',
+      },
+    },
+    projects_carousel: {
+      eyebrow: 'Casos destacados',
+      title: 'Operaciones digitales en producción',
+      prev: 'Anterior',
+      next: 'Siguiente',
+      similar: 'Solicitar caso similar',
+      client: 'Cliente',
+      featured: 'Destacado',
     },
     // Common
     common: {
@@ -233,6 +257,11 @@ var __i18nTranslations = {
       services: 'Services',
       login: 'Login',
       quote: 'Quote Project',
+      menu: 'Menu',
+      language: 'Language',
+      theme: 'Theme',
+      themeLight: 'Light',
+      themeDark: 'Dark',
     },
     nav_services: {
       main: 'Main Services',
@@ -415,9 +444,28 @@ var __i18nTranslations = {
       vision: 'Be the reference technology partner for companies that want to grow without compromising quality.',
     },
     projects: {
+      eyebrow: 'Real cases',
       title: 'Projects that',
       titleHighlight: 'solve',
       subtitle: 'We work with companies in agribusiness, animal health, technological retail, fashion and more. Each project is an operation, not just a website.',
+      industries: {
+        eyebrow: 'Industries',
+        title: 'One folder per sector',
+      },
+      packages: {
+        eyebrow: '11 specialized packages',
+        title: { pre: 'Find the', highlight: 'match' },
+        subtitle: 'From validating an idea to operating a robust SaaS platform. Every package has defined scope, deliverables and timing.',
+      },
+    },
+    projects_carousel: {
+      eyebrow: 'Featured cases',
+      title: 'Digital operations in production',
+      prev: 'Previous',
+      next: 'Next',
+      similar: 'Request a similar case',
+      client: 'Client',
+      featured: 'Featured',
     },
     common: {
       loading: 'Loading...',
@@ -443,6 +491,11 @@ var __i18nTranslations = {
       services: 'Serviços',
       login: 'Fazer login',
       quote: 'Orçar Projeto',
+      menu: 'Menu',
+      language: 'Idioma',
+      theme: 'Tema',
+      themeLight: 'Claro',
+      themeDark: 'Escuro',
     },
     nav_services: {
       main: 'Serviços Principais',
@@ -625,9 +678,28 @@ var __i18nTranslations = {
       vision: 'Ser o parceiro de tecnologia de referência para empresas que querem crescer sem comprometer a qualidade.',
     },
     projects: {
+      eyebrow: 'Casos reais',
       title: 'Projetos que',
       titleHighlight: 'resolvem',
       subtitle: 'Trabalhamos com empresas em agroindústria, saúde animal, varejo tecnológico, moda e muito mais. Cada projeto é uma operação, não apenas um site.',
+      industries: {
+        eyebrow: 'Indústrias',
+        title: 'Uma pasta por setor',
+      },
+      packages: {
+        eyebrow: '11 pacotes especializados',
+        title: { pre: 'Encontre o', highlight: 'match' },
+        subtitle: 'Desde validar uma ideia até operar uma plataforma SaaS robusta. Cada pacote tem escopo, entregáveis e prazo definidos.',
+      },
+    },
+    projects_carousel: {
+      eyebrow: 'Casos em destaque',
+      title: 'Operações digitais em produção',
+      prev: 'Anterior',
+      next: 'Próximo',
+      similar: 'Solicitar caso semelhante',
+      client: 'Cliente',
+      featured: 'Destaque',
     },
     common: {
       loading: 'Carregando...',
@@ -653,6 +725,11 @@ var __i18nTranslations = {
       services: 'Services',
       login: 'Connexion',
       quote: 'Devis Projet',
+      menu: 'Menu',
+      language: 'Langue',
+      theme: 'Thème',
+      themeLight: 'Clair',
+      themeDark: 'Sombre',
     },
     nav_services: {
       main: 'Services Principaux',
@@ -835,9 +912,28 @@ var __i18nTranslations = {
       vision: 'Être le partenaire technologique de référence pour les entreprises qui veulent croître sans compromettre la qualité.',
     },
     projects: {
+      eyebrow: 'Cas réels',
       title: 'Projets qui',
       titleHighlight: 'résolvent',
       subtitle: 'Nous travaillons avec des entreprises dans l\'agroalimentaire, la santé animale, le commerce technologique, la mode et bien d\'autres. Chaque projet est une opération, pas seulement un site Web.',
+      industries: {
+        eyebrow: 'Secteurs',
+        title: 'Un dossier par secteur',
+      },
+      packages: {
+        eyebrow: '11 forfaits spécialisés',
+        title: { pre: 'Trouvez le', highlight: 'match' },
+        subtitle: 'De la validation d\'une idée à l\'exploitation d\'une plateforme SaaS robuste. Chaque forfait a un périmètre, des livrables et un délai définis.',
+      },
+    },
+    projects_carousel: {
+      eyebrow: 'Cas notables',
+      title: 'Opérations numériques en production',
+      prev: 'Précédent',
+      next: 'Suivant',
+      similar: 'Demander un cas similaire',
+      client: 'Client',
+      featured: 'À la une',
     },
     common: {
       loading: 'Chargement...',
@@ -863,6 +959,11 @@ var __i18nTranslations = {
       services: 'Dienstleistungen',
       login: 'Anmelden',
       quote: 'Projekt anfordern',
+      menu: 'Menü',
+      language: 'Sprache',
+      theme: 'Design',
+      themeLight: 'Hell',
+      themeDark: 'Dunkel',
     },
     nav_services: {
       main: 'Hauptdienstleistungen',
@@ -1045,9 +1146,28 @@ var __i18nTranslations = {
       vision: 'Der bevorzugte Technologiepartner für Unternehmen, die wachsen möchten, ohne Qualität zu kompromittieren.',
     },
     projects: {
+      eyebrow: 'Echte Fälle',
       title: 'Projekte, die',
       titleHighlight: 'lösen',
       subtitle: 'Wir arbeiten mit Unternehmen in Agrarwirtschaft, Tiergesundheit, technologischem Einzelhandel, Mode und vielem mehr. Jedes Projekt ist eine Operation, nicht nur eine Website.',
+      industries: {
+        eyebrow: 'Branchen',
+        title: 'Ein Ordner pro Sektor',
+      },
+      packages: {
+        eyebrow: '11 spezialisierte Pakete',
+        title: { pre: 'Finden Sie den', highlight: 'match' },
+        subtitle: 'Von der Validierung einer Idee bis zum Betrieb einer robusten SaaS-Plattform. Jedes Paket hat definierten Umfang, Deliverables und Zeitrahmen.',
+      },
+    },
+    projects_carousel: {
+      eyebrow: 'Ausgewählte Fälle',
+      title: 'Digitale Operationen in Produktion',
+      prev: 'Zurück',
+      next: 'Weiter',
+      similar: 'Ähnlichen Fall anfragen',
+      client: 'Kunde',
+      featured: 'Hervorgehoben',
     },
     common: {
       loading: 'Wird geladen...',

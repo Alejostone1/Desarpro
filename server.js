@@ -68,6 +68,57 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, message: 'API lista' });
 });
 
+app.get('/api/projects', async (_req, res) => {
+  try {
+    const rows = await prisma.project.findMany({ orderBy: { order: 'asc' } });
+    const projects = rows.map((p) => ({
+      id: p.slug,
+      slug: p.slug,
+      industry: p.industry,
+      title: p.title,
+      client: p.client,
+      year: p.year,
+      color: p.color,
+      icon: p.icon,
+      tagline: p.tagline,
+      desc: p.desc,
+      tags: safeJson(p.tags, []),
+      metrics: safeJson(p.metrics, []),
+      featured: p.featured,
+    }));
+    res.json({ ok: true, projects });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, error: 'Error al obtener proyectos' });
+  }
+});
+
+app.get('/api/projects/:slug', async (req, res) => {
+  try {
+    const p = await prisma.project.findUnique({ where: { slug: req.params.slug } });
+    if (!p) return res.status(404).json({ ok: false, error: 'Proyecto no encontrado' });
+    res.json({
+      ok: true,
+      project: {
+        id: p.slug, slug: p.slug, industry: p.industry, title: p.title, client: p.client,
+        year: p.year, color: p.color, icon: p.icon, tagline: p.tagline, desc: p.desc,
+        tags: safeJson(p.tags, []), metrics: safeJson(p.metrics, []), featured: p.featured,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, error: 'Error al obtener el proyecto' });
+  }
+});
+
+function safeJson(value, fallback) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try { return JSON.parse(value); } catch (e) { return fallback; }
+  }
+  return fallback;
+}
+
 app.listen(PORT, () => {
   console.log(`Servidor de auth listo en http://localhost:${PORT}`);
 });

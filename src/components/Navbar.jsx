@@ -24,14 +24,24 @@ function Navbar({ route, setRoute }) {
   const [scrolled, setScrolled] = React.useState(false);
   const [openServices, setOpenServices] = React.useState(false);
   const [openMobile, setOpenMobile] = React.useState(false);
+  const [mobileLeaving, setMobileLeaving] = React.useState(false);
   const [langMenu, setLangMenu] = React.useState(false);
+
+  // Animated close: keep drawer mounted during the exit animation
+  const closeMobile = React.useCallback(() => {
+    setMobileLeaving(true);
+    window.setTimeout(() => {
+      setOpenMobile(false);
+      setMobileLeaving(false);
+    }, 300);
+  }, []);
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     const onKey = (e) => {
       if (e.key === 'Escape') {
         setOpenServices(false);
-        setOpenMobile(false);
+        closeMobile();
         setLangMenu(false);
       }
     };
@@ -41,7 +51,7 @@ function Navbar({ route, setRoute }) {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('keydown', onKey);
     };
-  }, []);
+  }, [closeMobile]);
 
   React.useEffect(() => {
     if (openMobile) {
@@ -57,7 +67,7 @@ function Navbar({ route, setRoute }) {
   const go = (r) => {
     setRoute(r);
     setOpenServices(false);
-    setOpenMobile(false);
+    closeMobile();
     setLangMenu(false);
   };
 
@@ -204,7 +214,7 @@ function Navbar({ route, setRoute }) {
         </nav>
 
         <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label="Abrir menú de navegación" style={{
+          <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label={t('nav.menu')} aria-expanded={openMobile} aria-controls="mobile-drawer" style={{
             background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
             color: 'var(--text-0)', padding: 10, borderRadius: 12, cursor: 'pointer', minHeight: 44, minWidth: 44,
             alignItems: 'center', justifyContent: 'center', display: 'none',
@@ -258,6 +268,18 @@ function Navbar({ route, setRoute }) {
         .svc-row:hover { background: var(--glass-bg-2) !important; border-color: var(--glass-border-2) !important; }
         .nav-link:hover { color: var(--text-0) !important; }
         .login-link:hover { color: var(--text-0); background: var(--glass-bg); }
+        @keyframes drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes drawer-out { from { transform: translateX(0); } to { transform: translateX(100%); } }
+        @keyframes drawer-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes drawer-item-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .mobile-drawer-overlay { background: rgba(2, 4, 10, 0.62); animation: drawer-fade 280ms ease both; backdrop-filter: blur(2px); }
+        [data-theme="light"] .mobile-drawer-overlay { background: rgba(15, 20, 35, 0.38); }
+        .mobile-drawer-overlay.leaving { animation: drawer-fade 260ms ease reverse forwards; }
+        .mobile-drawer-panel { animation: drawer-in 300ms var(--ease-out) both; }
+        .mobile-drawer-panel.leaving { animation: drawer-out 280ms var(--ease-in-out) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .mobile-drawer-panel, .mobile-drawer-overlay { animation-duration: 0.01ms !important; }
+        }
         @media (min-width: 1024px) {
           .mobile-toggle { display: none !important; }
           .desktop-nav { display: flex !important; }
@@ -276,35 +298,56 @@ function Navbar({ route, setRoute }) {
       `}</style>
     </header>
 
-    {/* MOBILE DRAWER - Outside header for better z-index */}
+    {/* MOBILE DRAWER - slide-in panel that follows the active theme via CSS vars */}
     {openMobile && (
       <>
-        <div style={{
-          position: 'fixed', inset: 0, background: '#fff',
-          zIndex: 9999, padding: 'clamp(20px, 5vw, 32px)',
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto', WebkitOverflowScrolling: 'touch',
-          maxWidth: '100vw',
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-              <Logo size={42}/>
-              <button
-                onClick={() => setOpenMobile(false)}
-                aria-label="Cerrar menú"
-                style={{
-                  background: '#f3f4f6', border: '1px solid #e5e7eb',
-                  padding: 12, borderRadius: 14, color: '#1f2937', cursor: 'pointer',
-                  minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <Icon.X size={22}/>
-              </button>
-            </div>
+        <div
+          className={`mobile-drawer-overlay${mobileLeaving ? ' leaving' : ''}`}
+          onClick={closeMobile}
+          aria-hidden="true"
+          style={{ position: 'fixed', inset: 0, zIndex: 9998, cursor: 'pointer' }}
+        />
+        <div
+          id="mobile-drawer"
+          className={`mobile-drawer-panel${mobileLeaving ? ' leaving' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('nav.menu')}
+          style={{
+            position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 9999,
+            width: 'min(92vw, 420px)', maxWidth: '100vw',
+            background: 'var(--bg-0)',
+            borderLeft: '1px solid var(--glass-border-3)',
+            boxShadow: '0 0 80px rgba(0,0,0,0.5), 0 0 60px rgba(34,211,238,0.08)',
+            display: 'flex', flexDirection: 'column',
+            overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+            padding: 'clamp(20px, 5vw, 32px)',
+            paddingTop: 'calc(env(safe-area-inset-top) + clamp(20px, 5vw, 32px))',
+            paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, animation: 'drawer-item-in 320ms var(--ease-out) both' }}>
+            <Logo size={42}/>
+            <button
+              onClick={closeMobile}
+              aria-label={t('common.close')}
+              style={{
+                background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
+                padding: 12, borderRadius: 14, color: 'var(--text-0)', cursor: 'pointer',
+                minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 200ms',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--glass-bg-3)'; e.currentTarget.style.color = 'var(--cyan-bright)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--glass-bg-2)'; e.currentTarget.style.color = 'var(--text-0)'; }}
+            >
+              <Icon.X size={22}/>
+            </button>
+          </div>
 
-            {/* Navigation links */}
-            <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
-              Navegación
+          {/* Navigation links */}
+          <div style={{ marginBottom: 32, animation: 'drawer-item-in 340ms 60ms var(--ease-out) both' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+              {t('nav.menu')}
             </div>
             <div style={{ display: 'grid', gap: 10 }}>
               {[
@@ -314,101 +357,119 @@ function Navbar({ route, setRoute }) {
                 { id: 'servicios', label: t('nav.services') },
                 { id: 'contacto', label: t('nav.contact') },
                 { id: 'login', label: t('nav.login') },
-              ].map(({ id, label }) => (
-                <button
-                  key={id}
-                  onClick={() => go(id)}
-                  style={{
-                    background: route === id ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#fff',
-                    border: `1px solid ${route === id ? 'transparent' : '#e5e7eb'}`,
-                    borderRadius: 14, padding: '16px 20px', textAlign: 'left',
-                    color: route === id ? '#fff' : '#111827',
-                    fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                    minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  }}
-                >
-                  <span>{label}</span>
-                  <Icon.ArrowRight size={16} opacity={0.6}/>
-                </button>
-              ))}
+              ].map(({ id, label }) => {
+                const active = route === id || (id === 'servicios' && (route === 'servicios' || (route && route.startsWith && route.startsWith('svc'))));
+                return (
+                  <button
+                    key={id}
+                    onClick={() => go(id)}
+                    aria-current={active ? 'page' : undefined}
+                    style={{
+                      background: active ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--glass-bg-2)',
+                      border: `1px solid ${active ? 'transparent' : 'var(--glass-border-2)'}`,
+                      borderRadius: 14, padding: '16px 20px', textAlign: 'left',
+                      color: active ? '#fff' : 'var(--text-0)',
+                      fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                      minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      boxShadow: active ? '0 8px 30px rgba(59,130,246,0.35)' : 'none',
+                      transition: 'transform 200ms var(--ease-out), background 200ms',
+                    }}
+                    onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--glass-bg-3)'; }}
+                    onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'var(--glass-bg-2)'; }}
+                  >
+                    <span>{label}</span>
+                    <Icon.ArrowRight size={16} opacity={0.6}/>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Language grid */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
-              Idioma / Language
+          <div style={{ marginBottom: 32, animation: 'drawer-item-in 340ms 110ms var(--ease-out) both' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+              {t('nav.language')}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', gap: 8 }}>
-                {['es', 'en', 'pt', 'fr', 'de'].map(lang => (
+              {['es', 'en', 'pt', 'fr', 'de'].map(lang => {
+                const activeLang = language === lang;
+                return (
                   <button
                     key={lang}
                     onClick={() => setLanguage(lang)}
+                    aria-pressed={activeLang}
                     style={{
                       padding: '10px 4px', borderRadius: 10,
-                      background: language === lang ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#f3f4f6',
-                      border: `1px solid ${language === lang ? 'transparent' : '#e5e7eb'}`,
-                      color: language === lang ? '#fff' : '#1f2937',
+                      background: activeLang ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--glass-bg-2)',
+                      border: `1px solid ${activeLang ? 'transparent' : 'var(--glass-border-2)'}`,
+                      color: activeLang ? '#fff' : 'var(--text-1)',
                       fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minHeight: 48,
+                      transition: 'transform 200ms var(--ease-out), background 200ms',
                     }}
+                    onMouseEnter={e => { if (!activeLang) e.currentTarget.style.background = 'var(--glass-bg-3)'; }}
+                    onMouseLeave={e => { if (!activeLang) e.currentTarget.style.background = 'var(--glass-bg-2)'; }}
                   >
                     <span style={{ fontSize: 16 }}>{LANGUAGE_FLAGS[lang]}</span>
                     <span style={{ fontSize: 11 }}>{LANGUAGE_LABELS[lang]}</span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Theme toggle */}
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
-                Tema / Theme
-              </div>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button
-                  onClick={() => setTheme('light')}
-                  style={{
-                    flex: 1, padding: '12px', borderRadius: 10,
-                    background: theme === 'light' ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#f3f4f6',
-                    border: `1px solid ${theme === 'light' ? 'transparent' : '#e5e7eb'}`,
-                    color: theme === 'light' ? '#fff' : '#1f2937',
-                    fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  }}
-                >
-                  <Icon.Sun size={18}/> Claro
-                </button>
-                <button
-                  onClick={() => setTheme('dark')}
-                  style={{
-                    flex: 1, padding: '12px', borderRadius: 10,
-                    background: theme === 'dark' ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#f3f4f6',
-                    border: `1px solid ${theme === 'dark' ? 'transparent' : '#e5e7eb'}`,
-                    color: theme === 'dark' ? '#fff' : '#1f2937',
-                    fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  }}
-                >
-                  <Icon.Moon size={18}/> Oscuro
-                </button>
-              </div>
+          {/* Theme toggle */}
+          <div style={{ marginBottom: 32, animation: 'drawer-item-in 340ms 160ms var(--ease-out) both' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+              {t('nav.theme')}
             </div>
-
-            {/* CTA Button */}
-            <div style={{ marginTop: 24 }}>
-              <button onClick={() => go('contacto')} style={{
-                width: '100%', padding: '16px 20px', borderRadius: 14,
-                background: 'linear-gradient(135deg, #3B82F6, #06B6D4)',
-                color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              }}>
-                Cotizar Proyecto <Icon.ArrowRight size={16}/>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setTheme('light')}
+                aria-pressed={theme === 'light'}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: 10,
+                  background: theme === 'light' ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--glass-bg-2)',
+                  border: `1px solid ${theme === 'light' ? 'transparent' : 'var(--glass-border-2)'}`,
+                  color: theme === 'light' ? '#fff' : 'var(--text-1)',
+                  fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                <Icon.Sun size={18}/> {t('nav.themeLight')}
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                aria-pressed={theme === 'dark'}
+                style={{
+                  flex: 1, padding: '12px', borderRadius: 10,
+                  background: theme === 'dark' ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--glass-bg-2)',
+                  border: `1px solid ${theme === 'dark' ? 'transparent' : 'var(--glass-border-2)'}`,
+                  color: theme === 'dark' ? '#fff' : 'var(--text-1)',
+                  fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                <Icon.Moon size={18}/> {t('nav.themeDark')}
               </button>
             </div>
           </div>
-        </>
-      )}
+
+          {/* CTA Button */}
+          <div style={{ marginTop: 'auto', paddingTop: 24, animation: 'drawer-item-in 340ms 210ms var(--ease-out) both' }}>
+            <button onClick={() => go('contacto')} style={{
+              width: '100%', padding: '16px 20px', borderRadius: 14,
+              background: 'linear-gradient(135deg, #3B82F6, #06B6D4)',
+              color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              boxShadow: '0 8px 30px rgba(59,130,246,0.4)',
+            }}>
+              {t('nav.quote')} <Icon.ArrowRight size={16}/>
+            </button>
+          </div>
+        </div>
+      </>
+    )}
     </>
   );
 }
