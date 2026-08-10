@@ -22,8 +22,6 @@ const CASES = [
 ];
 
 function Projects({ setRoute }) {
-  const [pickedIndustry, setPickedIndustry] = React.useState(null);
-
   return (
     <div className="page" style={{ paddingTop: 110 }}>
       {/* HEADER */}
@@ -43,17 +41,8 @@ function Projects({ setRoute }) {
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>Una carpeta por sector</h2></Reveal>
           </div>
           <Reveal delay={200}>
-            <FolderExpand onPickIndustry={(ind) => setPickedIndustry(ind)}/>
+            <FolderExpand onPickIndustry={(ind) => setRoute('contacto')}/>
           </Reveal>
-          {pickedIndustry && (
-            <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-1)', fontSize: 14 }}>
-              Seleccionada: <strong style={{ color: pickedIndustry.color }}>{pickedIndustry.name}</strong> · {pickedIndustry.desc}
-              <button onClick={() => setRoute('contacto')} style={{
-                marginLeft: 12, padding: '8px 16px', borderRadius: 8, background: pickedIndustry.color,
-                color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap'
-              }}>Cotizar proyecto {pickedIndustry.name}</button>
-            </div>
-          )}
         </div>
       </section>
 
