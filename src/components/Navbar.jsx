@@ -79,7 +79,8 @@ function Navbar({ route, setRoute }) {
   ];
 
   return (
-    <header style={{
+    <>
+      <header style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
       transition: 'all 320ms var(--ease-out)',
       background: scrolled ? 'var(--header-bg-scrolled)' : 'var(--header-bg)',
@@ -273,17 +274,18 @@ function Navbar({ route, setRoute }) {
           .nav-actions .btn-primary { padding: 8px 12px !important; font-size: 11px !important; }
         }
       `}</style>
+    </header>
 
-      {/* MOBILE DRAWER */}
-      {openMobile && (
-        <>
-          <div style={{
-            position: 'fixed', inset: 0, background: '#fff',
-            zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
-            display: 'flex', flexDirection: 'column',
-            overflowY: 'auto', WebkitOverflowScrolling: 'touch',
-            maxWidth: '100vw',
-          }}>
+    {/* MOBILE DRAWER - Outside header for better z-index */}
+    {openMobile && (
+      <>
+        <div style={{
+          position: 'fixed', inset: 0, background: '#fff',
+          zIndex: 9999, padding: 'clamp(20px, 5vw, 32px)',
+          display: 'flex', flexDirection: 'column',
+          overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+          maxWidth: '100vw',
+        }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
               <Logo size={42}/>
               <button
@@ -407,7 +409,7 @@ function Navbar({ route, setRoute }) {
           </div>
         </>
       )}
-    </header>
+    </>
   );
 }
 
