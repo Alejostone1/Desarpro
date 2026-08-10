@@ -245,7 +245,7 @@ function Navbar({ route, setRoute }) {
             {t('nav.quote')} <Icon.ArrowRight size={14}/>
           </button>
           <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label="Abrir menú de navegación" style={{
-            display: 'inline-flex', background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
+            background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
             color: 'var(--text-0)', padding: 10, borderRadius: 12, cursor: 'pointer', minHeight: 44, minWidth: 44,
             alignItems: 'center', justifyContent: 'center',
           }}><Icon.Menu size={22}/></button>
@@ -262,6 +262,7 @@ function Navbar({ route, setRoute }) {
         }
         @media (max-width: 1023px) {
           .desktop-nav { display: none !important; }
+          .mobile-toggle { display: inline-flex !important; }
           .nav-actions .login-link { display: none; }
         }
         @media (max-width: 640px) {
@@ -275,7 +276,7 @@ function Navbar({ route, setRoute }) {
       {/* MOBILE DRAWER */}
       {openMobile && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'var(--bg-0)',
+          position: 'fixed', inset: 0, background: '#fff',
           zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
           overflowY: 'auto', WebkitOverflowScrolling: 'touch',
@@ -311,10 +312,10 @@ function Navbar({ route, setRoute }) {
                   key={id}
                   onClick={() => go(id)}
                   style={{
-                    background: route === id ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--bg-1)',
-                    border: `1px solid ${route === id ? 'transparent' : 'var(--glass-border-2)'}`,
+                    background: route === id ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#fff',
+                    border: `1px solid ${route === id ? 'transparent' : '#e5e7eb'}`,
                     borderRadius: 14, padding: '16px 20px', textAlign: 'left',
-                    color: route === id ? '#fff' : 'var(--text-0)',
+                    color: route === id ? '#fff' : '#1f2937',
                     fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                     minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}
@@ -340,9 +341,9 @@ function Navbar({ route, setRoute }) {
                     onClick={() => setLanguage(lang)}
                     style={{
                       padding: '10px 4px', borderRadius: 10,
-                      background: language === lang ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--bg-1)',
-                      border: `1px solid ${language === lang ? 'transparent' : 'var(--glass-border-2)'}`,
-                      color: language === lang ? '#fff' : 'var(--text-0)',
+                      background: language === lang ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#f3f4f6',
+                      border: `1px solid ${language === lang ? 'transparent' : '#e5e7eb'}`,
+                      color: language === lang ? '#fff' : '#1f2937',
                       fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minHeight: 48,
                     }}
