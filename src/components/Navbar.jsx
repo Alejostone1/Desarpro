@@ -275,30 +275,31 @@ function Navbar({ route, setRoute }) {
 
       {/* MOBILE DRAWER */}
       {openMobile && (
-        <div style={{
-          position: 'fixed', inset: 0, background: '#fff',
-          zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto', WebkitOverflowScrolling: 'touch',
-          maxWidth: '100vw',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-            <Logo size={42}/>
-            <button
-              onClick={() => setOpenMobile(false)}
-              aria-label="Cerrar menú"
-              style={{
-                background: '#f3f4f6', border: '1px solid #e5e7eb',
-                padding: 12, borderRadius: 14, color: '#1f2937', cursor: 'pointer',
-                minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <Icon.X size={22}/>
-            </button>
-          </div>
+        <>
+          <div style={{
+            position: 'fixed', inset: 0, background: '#fff',
+            zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
+            display: 'flex', flexDirection: 'column',
+            overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+            maxWidth: '100vw',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+              <Logo size={42}/>
+              <button
+                onClick={() => setOpenMobile(false)}
+                aria-label="Cerrar menú"
+                style={{
+                  background: '#f3f4f6', border: '1px solid #e5e7eb',
+                  padding: 12, borderRadius: 14, color: '#1f2937', cursor: 'pointer',
+                  minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <Icon.X size={22}/>
+              </button>
+            </div>
 
-          {/* Navigation links */}
-          <div style={{ marginBottom: 32 }}>
+            {/* Navigation links */}
+            <div style={{ marginBottom: 32 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
               Navegación
             </div>
@@ -403,7 +404,7 @@ function Navbar({ route, setRoute }) {
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
