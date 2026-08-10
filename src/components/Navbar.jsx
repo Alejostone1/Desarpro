@@ -20,6 +20,7 @@ const LANGUAGE_LABELS = {
 
 function Navbar({ route, setRoute }) {
   const { language, setLanguage, t } = useI18n();
+  const { theme, setTheme } = useTheme();
   const [scrolled, setScrolled] = React.useState(false);
   const [openServices, setOpenServices] = React.useState(false);
   const [openMobile, setOpenMobile] = React.useState(false);
