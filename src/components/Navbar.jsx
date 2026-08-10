@@ -245,7 +245,7 @@ function Navbar({ route, setRoute }) {
             {t('nav.quote')} <Icon.ArrowRight size={14}/>
           </button>
           <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label="Abrir menú de navegación" style={{
-            display: 'none', background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
+            display: 'inline-flex', background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
             color: 'var(--text-0)', padding: 10, borderRadius: 12, cursor: 'pointer', minHeight: 44, minWidth: 44,
             alignItems: 'center', justifyContent: 'center',
           }}><Icon.Menu size={22}/></button>
@@ -256,9 +256,12 @@ function Navbar({ route, setRoute }) {
         .svc-row:hover { background: var(--glass-bg-2) !important; border-color: var(--glass-border-2) !important; }
         .nav-link:hover { color: var(--text-0) !important; }
         .login-link:hover { color: var(--text-0); background: var(--glass-bg); }
-        @media (max-width: 1080px) {
+        @media (min-width: 1024px) {
+          .mobile-toggle { display: none !important; }
+          .desktop-nav { display: flex !important; }
+        }
+        @media (max-width: 1023px) {
           .desktop-nav { display: none !important; }
-          .mobile-toggle { display: inline-flex !important; }
           .nav-actions .login-link { display: none; }
         }
         @media (max-width: 640px) {
