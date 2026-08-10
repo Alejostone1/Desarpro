@@ -289,8 +289,8 @@ function Navbar({ route, setRoute }) {
                 onClick={() => setOpenMobile(false)}
                 aria-label="Cerrar menú"
                 style={{
-                  background: 'var(--glass-bg-2)', border: '1px solid var(--glass-border-2)',
-                  padding: 12, borderRadius: 14, color: 'var(--text-0)', cursor: 'pointer',
+                  background: '#f3f4f6', border: '1px solid #e5e7eb',
+                  padding: 12, borderRadius: 14, color: '#1f2937', cursor: 'pointer',
                   minHeight: 44, minWidth: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
@@ -315,7 +315,7 @@ function Navbar({ route, setRoute }) {
                     background: route === id ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : '#fff',
                     border: `1px solid ${route === id ? 'transparent' : '#e5e7eb'}`,
                     borderRadius: 14, padding: '16px 20px', textAlign: 'left',
-                    color: route === id ? '#fff' : '#1f2937',
+                    color: route === id ? '#fff' : '#111827',
                     fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                     minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}
