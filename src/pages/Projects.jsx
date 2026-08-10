@@ -48,6 +48,10 @@ function Projects({ setRoute }) {
           {pickedIndustry && (
             <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-1)', fontSize: 14 }}>
               Seleccionada: <strong style={{ color: pickedIndustry.color }}>{pickedIndustry.name}</strong> · {pickedIndustry.desc}
+              <button onClick={() => setRoute('contacto')} style={{
+                marginLeft: 12, padding: '8px 16px', borderRadius: 8, background: pickedIndustry.color,
+                color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap'
+              }}>Cotizar proyecto {pickedIndustry.name}</button>
             </div>
           )}
         </div>
@@ -67,7 +71,7 @@ function Projects({ setRoute }) {
                 <Reveal key={c.id} delay={i * 120}>
                   <article className="glass case-card" style={{
                     borderRadius: 24, padding: 0, overflow: 'hidden',
-                    display: 'grid', gridTemplateColumns: '1.4fr 1fr', minHeight: 320,
+                    display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', minHeight: 320,
                   }}>
                     <div style={{ padding: 'clamp(20px, 4vw, 40px)', position: 'relative' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -112,6 +116,9 @@ function Projects({ setRoute }) {
             }
             @media (max-width: 480px) {
               .case-metrics { flex-direction: column !important; }
+            }
+            @media (max-width: 375px) {
+              .case-card { minHeight: auto !important; }
             }
           `}</style>
         </div>

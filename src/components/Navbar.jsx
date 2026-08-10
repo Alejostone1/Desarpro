@@ -241,7 +241,7 @@ function Navbar({ route, setRoute }) {
             fontSize: 13, fontWeight: 600, padding: '10px 14px', borderRadius: 999, cursor: 'pointer',
             fontFamily: 'inherit', minHeight: 40,
           }}>{t('nav.login')}</button>
-          <button onClick={() => go('contacto')} className="btn btn-primary" style={{ padding: '10px 18px', fontSize: 13, minHeight: 40 }}>
+          <button onClick={() => go('contacto')} className="btn btn-primary" style={{ padding: '10px 18px', fontSize: 13, minHeight: 40, whiteSpace: 'nowrap' }}>
             {t('nav.quote')} <Icon.ArrowRight size={14}/>
           </button>
           <button onClick={() => setOpenMobile(true)} className="mobile-toggle" aria-label="Abrir menú de navegación" style={{
@@ -268,15 +268,14 @@ function Navbar({ route, setRoute }) {
           .nav-actions button:not(.mobile-toggle):not(.btn-primary) { display: none !important; }
         }
         @media (max-width: 480px) {
-          .nav-actions .btn-primary { padding: 10px 14px !important; font-size: 12px !important; }
+          .nav-actions .btn-primary { padding: 8px 12px !important; font-size: 11px !important; }
         }
       `}</style>
 
       {/* MOBILE DRAWER */}
       {openMobile && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'var(--bg-0)', opacity: 0.99,
-          backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+          position: 'fixed', inset: 0, background: 'var(--bg-0)',
           zIndex: 999, padding: 'clamp(20px, 5vw, 32px)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
           overflowY: 'auto', WebkitOverflowScrolling: 'touch',
@@ -312,10 +311,10 @@ function Navbar({ route, setRoute }) {
                   key={id}
                   onClick={() => go(id)}
                   style={{
-                    background: route === id ? 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(34,211,238,0.15))' : 'var(--card-bg)',
-                    border: `1px solid ${route === id ? 'rgba(34,211,238,0.4)' : 'var(--card-border)'}`,
+                    background: route === id ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--bg-1)',
+                    border: `1px solid ${route === id ? 'transparent' : 'var(--glass-border-2)'}`,
                     borderRadius: 14, padding: '16px 20px', textAlign: 'left',
-                    color: route === id ? '#22D3EE' : 'var(--text-0)',
+                    color: route === id ? '#fff' : 'var(--text-0)',
                     fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                     minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}
@@ -341,9 +340,9 @@ function Navbar({ route, setRoute }) {
                     onClick={() => setLanguage(lang)}
                     style={{
                       padding: '10px 4px', borderRadius: 10,
-                      background: language === lang ? 'rgba(34,211,238,0.2)' : 'var(--glass-bg-2)',
-                      border: `1px solid ${language === lang ? '#22D3EE' : 'var(--glass-border-2)'}`,
-                      color: language === lang ? '#22D3EE' : 'var(--text-1)',
+                      background: language === lang ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'var(--bg-1)',
+                      border: `1px solid ${language === lang ? 'transparent' : 'var(--glass-border-2)'}`,
+                      color: language === lang ? '#fff' : 'var(--text-0)',
                       fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minHeight: 48,
                     }}
