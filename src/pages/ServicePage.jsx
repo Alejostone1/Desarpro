@@ -112,7 +112,7 @@ function ServicePage({ id, setRoute }) {
             <Reveal><span className="section-eyebrow" style={{ color: c }}>Proceso</span></Reveal>
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(32px, 4.5vw, 56px)' }}>Cómo lo hacemos</h2></Reveal>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${detail.process.length}, 1fr)`, gap: 14 }} className="proc-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }} className="proc-grid">
             {detail.process.map((p, i) => (
               <Reveal key={i} delay={i * 80}>
                 <div className="glass" style={{ borderRadius: 16, padding: 24, position: 'relative', height: '100%' }}>
@@ -122,7 +122,6 @@ function ServicePage({ id, setRoute }) {
               </Reveal>
             ))}
           </div>
-          <style>{`@media (max-width: 800px) { .proc-grid { grid-template-columns: repeat(2, 1fr) !important; } }`}</style>
         </div>
       </section>
 

@@ -57,31 +57,31 @@ function PackageCarousel({ onCTA }) {
     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32, alignItems: 'stretch' }} className="pkg-grid">
       {/* Active card */}
       <div className="glass-2" style={{
-        position: 'relative', borderRadius: 24, padding: 40,
+        position: 'relative', borderRadius: 24, padding: 'clamp(20px, 4vw, 40px)',
         background: `linear-gradient(135deg, ${pkg.color}18 0%, rgba(255,255,255,0.03) 60%)`,
         border: `1px solid ${pkg.color}40`,
-        overflow: 'hidden', minHeight: 540,
+        overflow: 'hidden', minHeight: 480,
       }}>
         <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%',
           background: `radial-gradient(circle, ${pkg.color}40, transparent 70%)`, filter: 'blur(40px)' }}/>
         <div style={{ position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <span style={{
-              width: 64, height: 64, borderRadius: 16,
+              width: 56, height: 56, borderRadius: 16,
               background: `${pkg.color}28`, color: pkg.color,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              border: `1px solid ${pkg.color}40`,
-            }}><I size={32}/></span>
+              border: `1px solid ${pkg.color}40`, flexShrink: 0,
+            }}><I size={28}/></span>
             <div>
               <div style={{ fontSize: 11, letterSpacing: '0.18em', color: pkg.color, textTransform: 'uppercase', fontWeight: 700 }}>Paquete {String(active + 1).padStart(2, '0')} / 11</div>
-              <h3 style={{ fontSize: 40, fontWeight: 800, color: '#fff', margin: '4px 0 0', letterSpacing: '-0.02em' }}>{pkg.name}</h3>
+              <h3 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', margin: '4px 0 0', letterSpacing: '-0.02em' }}>{pkg.name}</h3>
             </div>
           </div>
-          <div style={{ fontSize: 18, color: '#E5E7EB', fontWeight: 600, marginBottom: 8 }}>{pkg.tag}</div>
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', marginBottom: 24, lineHeight: 1.6 }}>{pkg.headline}</p>
+          <div style={{ fontSize: 17, color: '#E5E7EB', fontWeight: 600, marginBottom: 8 }}>{pkg.tag}</div>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', marginBottom: 24, lineHeight: 1.6 }}>{pkg.headline}</p>
           <div style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Incluye</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 20px' }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px 20px' }}>
               {pkg.includes.map((it, i) => (
                 <li key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13.5, color: '#E5E7EB',
                   animation: `pkg-item-in 400ms ${i * 50}ms both var(--ease-out)` }}>

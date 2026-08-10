@@ -210,9 +210,9 @@ function Contact() {
 
             {/* Right: Form */}
             <Reveal delay={120}>
-              <div className="glass-2" style={{ borderRadius: 24, padding: 36, transform: `perspective(1000px) rotateX(${formTiltY * 0.18}deg) rotateY(${formTiltX * 0.2}deg) translateY(${status === 'success' ? 0 : 3}px)`, transition: 'transform 220ms ease-out, box-shadow 220ms ease-out', boxShadow: status === 'success' ? '0 24px 80px rgba(16,185,129,0.18)' : '0 16px 50px rgba(2,6,23,0.25)', animation: status === 'submitting' ? 'cardPulse 1.2s ease-in-out infinite' : 'none' }}>
+              <div className="glass-2" style={{ borderRadius: 24, padding: 'clamp(20px, 4vw, 36px)', transform: `perspective(1000px) rotateX(${formTiltY * 0.18}deg) rotateY(${formTiltX * 0.2}deg) translateY(${status === 'success' ? 0 : 3}px)`, transition: 'transform 220ms ease-out, box-shadow 220ms ease-out', boxShadow: status === 'success' ? '0 24px 80px rgba(16,185,129,0.18)' : '0 16px 50px rgba(2,6,23,0.25)', animation: status === 'submitting' ? 'cardPulse 1.2s ease-in-out infinite' : 'none' }}>
                 {status === 'success' ? (
-                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <div style={{ textAlign: 'center', padding: '30px 0' }}>
                     <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid #10B981', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', marginBottom: 20, animation: 'success-pop 600ms cubic-bezier(0.16,1,0.3,1)' }}>
                       <Icon.Check size={32} sw={3}/>
                     </div>
@@ -222,7 +222,7 @@ function Contact() {
                     <p style={{ fontSize: 15, color: 'var(--text-2)', margin: '0 0 24px' }}>
                       <Editable id="contact.success.subtitle" defaultValue="Te respondemos en menos de 24 horas hábiles."/>
                     </p>
-                    <button onClick={() => { setStatus('idle'); setAssistantState('idle'); setHudMessage(t('assistant.name')); setTyping(false); setActiveField(null); setState({ name: '', email: '', company: '', service: 'svc-software', budget: '$5k–$15k', msg: '' }); if (resetTimerRef.current) clearTimeout(resetTimerRef.current); }} className="btn btn-ghost">{t('contact.form.anotherMessage')}</button>
+                    <button onClick={() => { setStatus('idle'); setAssistantState('idle'); setHudMessage(t('assistant.name')); setTyping(false); setActiveField(null); setState({ name: '', email: '', company: '', service: 'svc-software', budget: '$5k–$15k', msg: '' }); if (resetTimerRef.current) clearTimeout(resetTimerRef.current); }} className="btn btn-ghost" style={{ minHeight: 44 }}>{t('contact.form.anotherMessage')}</button>
                   </div>
                 ) : (
                   <form onSubmit={submit}>
@@ -232,19 +232,19 @@ function Contact() {
                     </h3>
                     <div style={{ display: 'grid', gap: 14 }}>
                       <ContactFormField label={t('contact.form.name')} error={errors.name}>
-                        <input type="text" value={state.name} onChange={e => update('name', e.target.value)} onFocus={() => handleFieldFocus('name', 'listening', t('assistant.status.listening'))} onBlur={handleBlur} placeholder={t('contact.form.namePlaceholder')} className="input"/>
+                        <input type="text" value={state.name} onChange={e => update('name', e.target.value)} onFocus={() => handleFieldFocus('name', 'listening', t('assistant.status.listening'))} onBlur={handleBlur} placeholder={t('contact.form.namePlaceholder')} className="input" style={{ minHeight: 44 }}/>
                       </ContactFormField>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14 }}>
                         <ContactFormField label={t('contact.form.email')} error={errors.email}>
-                          <input type="email" value={state.email} onChange={e => update('email', e.target.value)} onFocus={() => handleFieldFocus('email', 'listening', t('assistant.status.thinking'))} onBlur={handleBlur} placeholder={t('contact.form.emailPlaceholder')} className="input"/>
+                          <input type="email" value={state.email} onChange={e => update('email', e.target.value)} onFocus={() => handleFieldFocus('email', 'listening', t('assistant.status.thinking'))} onBlur={handleBlur} placeholder={t('contact.form.emailPlaceholder')} className="input" style={{ minHeight: 44 }}/>
                         </ContactFormField>
                         <ContactFormField label={t('contact.form.company')}>
-                          <input type="text" value={state.company} onChange={e => update('company', e.target.value)} onFocus={() => handleFieldFocus('company', 'processing', t('assistant.status.processing'))} onBlur={handleBlur} placeholder={t('contact.form.companyPlaceholder')} className="input"/>
+                          <input type="text" value={state.company} onChange={e => update('company', e.target.value)} onFocus={() => handleFieldFocus('company', 'processing', t('assistant.status.processing'))} onBlur={handleBlur} placeholder={t('contact.form.companyPlaceholder')} className="input" style={{ minHeight: 44 }}/>
                         </ContactFormField>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14 }}>
                         <ContactFormField label={t('contact.form.service')}>
-                          <select value={state.service} onChange={e => update('service', e.target.value)} onFocus={() => handleFieldFocus('service', 'processing', t('assistant.status.processing'))} onBlur={handleBlur} className="input">
+                          <select value={state.service} onChange={e => update('service', e.target.value)} onFocus={() => handleFieldFocus('service', 'processing', t('assistant.status.processing'))} onBlur={handleBlur} className="input" style={{ minHeight: 44 }}>
                             <option value="svc-web">{t('services.web.name')}</option>
                             <option value="svc-mobile">{t('services.mobile.name')}</option>
                             <option value="svc-software">{t('services.software.name')}</option>
@@ -256,7 +256,7 @@ function Contact() {
                           </select>
                         </ContactFormField>
                         <ContactFormField label={t('contact.form.budget')}>
-                          <select value={state.budget} onChange={e => update('budget', e.target.value)} onFocus={() => handleFieldFocus('budget', 'processing', t('assistant.status.processing'))} onBlur={handleBlur} className="input">
+                          <select value={state.budget} onChange={e => update('budget', e.target.value)} onFocus={() => handleFieldFocus('budget', 'processing', t('assistant.status.processing'))} onBlur={handleBlur} className="input" style={{ minHeight: 44 }}>
                             <option>{'< $5k USD'}</option>
                             <option>$5k–$15k</option>
                             <option>$15k–$50k</option>
@@ -268,7 +268,7 @@ function Contact() {
                       <ContactFormField label={t('contact.form.message')} error={errors.msg}>
                         <textarea rows={4} value={state.msg} onChange={e => update('msg', e.target.value)} onFocus={() => handleFieldFocus('message', 'listening', t('assistant.status.listening'))} onBlur={handleBlur} placeholder={t('contact.form.messagePlaceholder')} className="input" style={{ resize: 'vertical', minHeight: 100 }}/>
                       </ContactFormField>
-                      <button type="submit" className="btn btn-primary" disabled={status === 'submitting'} style={{ marginTop: 8, padding: '14px 24px', justifyContent: 'center' }}>
+                      <button type="submit" className="btn btn-primary" disabled={status === 'submitting'} style={{ marginTop: 8, padding: '14px 24px', justifyContent: 'center', minHeight: 48 }}>
                         {status === 'submitting' ? <><span className="spinner"/> {t('contact.form.submitting')}</> : <>{t('contact.form.submit')} <Icon.ArrowRight size={14}/></> }
                       </button>
                     </div>

@@ -65,17 +65,17 @@ function Projects({ setRoute }) {
               const I = Icon[c.icon];
               return (
                 <Reveal key={c.id} delay={i * 120}>
-                  <article className="glass" style={{
+                  <article className="glass case-card" style={{
                     borderRadius: 24, padding: 0, overflow: 'hidden',
                     display: 'grid', gridTemplateColumns: '1.4fr 1fr', minHeight: 320,
-                  }} className-mobile="case-card">
-                    <div style={{ padding: 40, position: 'relative' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                        <span style={{ width: 40, height: 40, borderRadius: 10, background: `${c.color}1A`, color: c.color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${c.color}40` }}><I size={20}/></span>
+                  }}>
+                    <div style={{ padding: 'clamp(20px, 4vw, 40px)', position: 'relative' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                        <span style={{ width: 40, height: 40, borderRadius: 10, background: `${c.color}1A`, color: c.color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${c.color}40`, flexShrink: 0 }}><I size={20}/></span>
                         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', color: c.color, textTransform: 'uppercase' }}>{c.industry}</span>
                         <span style={{ fontSize: 12, color: 'var(--text-3)' }}>· {c.year}</span>
                       </div>
-                      <h3 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.15 }}>{c.title}</h3>
+                      <h3 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', fontWeight: 700, color: 'var(--text-0)', margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.15 }}>{c.title}</h3>
                       <div style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>Cliente: {c.client}</div>
                       <p style={{ fontSize: 15, color: 'var(--text-1)', lineHeight: 1.6, marginBottom: 24 }}>{c.desc}</p>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
@@ -85,17 +85,17 @@ function Projects({ setRoute }) {
                       </div>
                       <button onClick={() => setRoute('contacto')} style={{
                         background: 'transparent', border: 'none', color: c.color, fontSize: 14, fontWeight: 600,
-                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, padding: 0,
+                        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, padding: 0, minHeight: 44,
                       }}>Solicitar caso similar <Icon.ArrowRight size={14}/></button>
                     </div>
-                    <div style={{
+                    <div className="case-metrics" style={{
                       background: `linear-gradient(135deg, ${c.color}18, transparent 60%), rgba(255,255,255,0.02)`,
                       borderLeft: '1px solid rgba(255,255,255,0.06)',
-                      padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24,
+                      padding: 'clamp(20px, 4vw, 40px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 24,
                     }}>
                       {c.metrics.map((m, j) => (
                         <div key={j}>
-                          <div style={{ fontSize: 36, fontWeight: 800, color: 'var(--text-0)', letterSpacing: '-0.03em', lineHeight: 1 }}>{m.k}</div>
+                          <div style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: 'var(--text-0)', letterSpacing: '-0.03em', lineHeight: 1 }}>{m.k}</div>
                           <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 6 }}>{m.v}</div>
                         </div>
                       ))}
@@ -105,6 +105,12 @@ function Projects({ setRoute }) {
               );
             })}
           </div>
+          <style>{`
+            @media (max-width: 768px) {
+              .case-card { grid-template-columns: 1fr !important; }
+              .case-metrics { border-left: none !important; border-top: 1px solid rgba(255,255,255,0.06) !important; flex-direction: row !important; flex-wrap: wrap !important; }
+            }
+          `}</style>
         </div>
       </section>
 

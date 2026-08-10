@@ -8,7 +8,7 @@ function Footer({ setRoute }) {
       background: 'linear-gradient(180deg, transparent, rgba(6,182,212,0.04))',
     }}>
       <div className="container">
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 48, marginBottom: 48 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 48, marginBottom: 48 }} className="footer-grid">
           <div>
             <Logo size={40}/>
             <p style={{ color: 'var(--text-2)', fontSize: 14, lineHeight: 1.65, marginTop: 18, maxWidth: 320 }}>
@@ -19,7 +19,7 @@ function Footer({ setRoute }) {
                 const I = Icon[n];
                 return (
                   <a key={n} href="#" style={{
-                    width: 38, height: 38, borderRadius: 10,
+                    width: 44, height: 44, borderRadius: 10,
                     background: 'var(--glass-bg-3)', border: '1px solid var(--glass-border)',
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     color: 'var(--text-1)', textDecoration: 'none',
@@ -27,7 +27,7 @@ function Footer({ setRoute }) {
                   }}
                   onMouseEnter={e => { e.currentTarget.style.color = '#22D3EE'; e.currentTarget.style.borderColor = 'rgba(34,211,238,0.4)'; e.currentTarget.style.background = 'rgba(34,211,238,0.08)'; }}
                   onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-1)'; e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.background = 'var(--glass-bg-3)'; }}
-                  ><I size={16}/></a>
+                  ><I size={18}/></a>
                 );
               })}
             </div>
@@ -37,7 +37,7 @@ function Footer({ setRoute }) {
             <h4 style={{ color: 'var(--text-0)', fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 0, marginBottom: 18 }}>{t('footer.nav.title')}</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10 }}>
               {[['home', t('footer.nav.home')],['proyectos', t('footer.nav.projects')],['nosotros', t('footer.nav.about')],['servicios', t('footer.nav.services')],['contacto', t('footer.nav.contact')]].map(([id, label]) => (
-                <li key={id}><a onClick={() => go(id)} style={{ color: 'var(--text-2)', cursor: 'pointer', fontSize: 14, textDecoration: 'none', transition: 'color 200ms' }} onMouseEnter={e => e.currentTarget.style.color = '#22D3EE'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}>{label}</a></li>
+                <li key={id}><a onClick={() => go(id)} style={{ color: 'var(--text-2)', cursor: 'pointer', fontSize: 14, textDecoration: 'none', transition: 'color 200ms', display: 'inline-block', minHeight: 32 }} onMouseEnter={e => e.currentTarget.style.color = '#22D3EE'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}>{label}</a></li>
               ))}
             </ul>
           </div>
@@ -46,7 +46,7 @@ function Footer({ setRoute }) {
             <h4 style={{ color: 'var(--text-0)', fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 0, marginBottom: 18 }}>{t('footer.services.title')}</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10 }}>
               {[['svc-web',t('footer.services.web')],['svc-mobile',t('footer.services.mobile')],['svc-software',t('footer.services.software')],['svc-maintenance',t('footer.services.support')],['svc-consulting',t('footer.services.consulting')],['svc-seo',t('footer.services.seo')]].map(([id, label]) => (
-                <li key={id}><a onClick={() => go(id)} style={{ color: 'var(--text-2)', cursor: 'pointer', fontSize: 14, textDecoration: 'none' }} onMouseEnter={e => e.currentTarget.style.color = '#22D3EE'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}>{label}</a></li>
+                <li key={id}><a onClick={() => go(id)} style={{ color: 'var(--text-2)', cursor: 'pointer', fontSize: 14, textDecoration: 'none', display: 'inline-block', minHeight: 32 }} onMouseEnter={e => e.currentTarget.style.color = '#22D3EE'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}>{label}</a></li>
               ))}
             </ul>
           </div>
@@ -60,6 +60,10 @@ function Footer({ setRoute }) {
             </ul>
           </div>
         </div>
+        <style>{`
+          @media (max-width: 980px) { .footer-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 32px !important; } }
+          @media (max-width: 580px) { .footer-grid { grid-template-columns: 1fr !important; gap: 28px !important; } }
+        `}</style>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 24, borderTop: '1px solid var(--glass-border)', flexWrap: 'wrap', gap: 12 }}>
           <span style={{ fontSize: 13, color: 'var(--text-3)' }}>© 2025–{new Date().getFullYear()} DesarPro. {t('footer.rights')}</span>

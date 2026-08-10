@@ -84,17 +84,17 @@ function Login({ setRoute }) {
         </div>
 
         {/* Right — form */}
-        <div style={{ padding: '120px 60px 60px', display: 'flex', justifyContent: 'center' }} className="login-right">
+        <div style={{ padding: 'clamp(20px, 4vw, 60px)', display: 'flex', justifyContent: 'center' }} className="login-right">
           <Reveal delay={200}>
-            <div className="glass-2" style={{ width: 420, maxWidth: '100%', borderRadius: 24, padding: 36, boxShadow: '0 30px 80px rgba(0,0,0,0.6)', background: 'rgba(10,12,20,0.78)', backdropFilter: 'blur(24px) saturate(140%)', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div className="glass-2" style={{ width: 420, maxWidth: '100%', borderRadius: 24, padding: 'clamp(20px, 4vw, 36px)', boxShadow: '0 30px 80px rgba(0,0,0,0.6)', background: 'rgba(10,12,20,0.78)', backdropFilter: 'blur(24px) saturate(140%)', border: '1px solid rgba(255,255,255,0.12)' }}>
               {/* Tabs */}
               <div style={{ display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 12, marginBottom: 24 }}>
                 {[['login', t('login.form.login')], ['register', t('login.form.register')], ['admin', t('login.form.admin')]].map(([id, label]) => (
                   <button key={id} onClick={() => { setMode(id); setAdminError(''); setAdminSuccess(false); }} style={{
-                    flex: 1, padding: '10px 8px', borderRadius: 8,
+                    flex: 1, padding: '10px 6px', borderRadius: 8,
                     background: mode === id ? (id === 'admin' ? 'linear-gradient(135deg, #F59E0B, #F97316)' : 'linear-gradient(135deg, #3B82F6, #06B6D4)') : 'transparent',
                     color: mode === id ? '#fff' : 'rgba(255,255,255,0.6)',
-                    fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', transition: 'all 200ms',
+                    fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', transition: 'all 200ms', minHeight: 40,
                   }}>{label}</button>
                 ))}
               </div>
@@ -123,6 +123,7 @@ function Login({ setRoute }) {
                           onChange={e => setAdminPwd(e.target.value)}
                           placeholder="••••••••••••"
                           className="input"
+                          style={{ minHeight: 44 }}
                           autoFocus
                         />
                       </FormField>
@@ -133,7 +134,7 @@ function Login({ setRoute }) {
                         </div>
                       )}
 
-                      <button type="button" onClick={handleAdminSubmit} className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center', background: 'linear-gradient(135deg, #F59E0B, #F97316)' }}>
+                      <button type="button" onClick={handleAdminSubmit} className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center', background: 'linear-gradient(135deg, #F59E0B, #F97316)', minHeight: 48 }}>
                         Entrar al panel <Icon.ArrowRight size={14}/>
                       </button>
 
@@ -155,27 +156,27 @@ function Login({ setRoute }) {
                   <div style={{ display: 'grid', gap: 14 }}>
                     {mode === 'register' && (
                       <FormField label={t('login.form.name')}>
-                        <input type="text" value={data.name} onChange={e => setData(d => ({ ...d, name: e.target.value }))} placeholder={t('login.form.namePlaceholder')} className="input"/>
+                        <input type="text" value={data.name} onChange={e => setData(d => ({ ...d, name: e.target.value }))} placeholder={t('login.form.namePlaceholder')} className="input" style={{ minHeight: 44 }}/>
                       </FormField>
                     )}
                     <FormField label={t('login.form.email')}>
-                      <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} placeholder={t('login.form.emailPlaceholder')} className="input"/>
+                      <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} placeholder={t('login.form.emailPlaceholder')} className="input" style={{ minHeight: 44 }}/>
                     </FormField>
                     <FormField label={t('login.form.password')}>
-                      <input type="password" value={data.password} onChange={e => setData(d => ({ ...d, password: e.target.value }))} placeholder="••••••••" className="input"/>
+                      <input type="password" value={data.password} onChange={e => setData(d => ({ ...d, password: e.target.value }))} placeholder="••••••••" className="input" style={{ minHeight: 44 }}/>
                     </FormField>
 
                     {mode === 'login' && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.75)', fontSize: 13, cursor: 'pointer' }}>
-                          <input type="checkbox" checked={data.remember} onChange={e => setData(d => ({ ...d, remember: e.target.checked }))} style={{ accentColor: '#22D3EE' }}/>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.75)', fontSize: 13, cursor: 'pointer', minHeight: 40 }}>
+                          <input type="checkbox" checked={data.remember} onChange={e => setData(d => ({ ...d, remember: e.target.checked }))} style={{ accentColor: '#22D3EE', width: 18, height: 18 }}/>
                           {t('login.form.remember')}
                         </label>
                         <a href="#" style={{ color: '#22D3EE', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>{t('login.form.forgotPassword')}</a>
                       </div>
                     )}
 
-                    <button type="button" className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center' }}>
+                    <button type="button" className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center', minHeight: 48 }}>
                       {mode === 'login' ? t('login.form.loginBtn') : t('login.form.registerBtn')} <Icon.ArrowRight size={14}/>
                     </button>
 
@@ -186,11 +187,11 @@ function Login({ setRoute }) {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                      <button type="button" className="btn btn-ghost on-dark-bg" style={{ padding: '12px', justifyContent: 'center', fontSize: 13 }}>
+                      <button type="button" className="btn btn-ghost on-dark-bg" style={{ padding: '12px', justifyContent: 'center', fontSize: 13, minHeight: 44 }}>
                         <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#fff" d="M12 11v3h5c-.2 1.4-1.5 4-5 4-3 0-5.5-2.5-5.5-5.5S9 7 12 7c1.7 0 2.8.7 3.5 1.3l2.4-2.3C16.5 4.7 14.5 4 12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8c4.6 0 7.7-3.2 7.7-7.8 0-.5 0-1-.1-1.2H12z"/></svg>
                         Google
                       </button>
-                      <button type="button" className="btn btn-ghost on-dark-bg" style={{ padding: '12px', justifyContent: 'center', fontSize: 13 }}>
+                      <button type="button" className="btn btn-ghost on-dark-bg" style={{ padding: '12px', justifyContent: 'center', fontSize: 13, minHeight: 44 }}>
                         <Icon.Github size={16}/> GitHub
                       </button>
                     </div>

@@ -72,11 +72,11 @@ function Home({ setRoute }) {
           <Reveal delay={520} y={20}>
             <div style={{ marginTop: 80, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, maxWidth: 900, margin: '80px auto 0' }} className="stats-grid">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="glass" style={{ borderRadius: 16, padding: 20, textAlign: 'center' }}>
-                  <div style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
+                <div key={i} className="glass" style={{ borderRadius: 16, padding: '16px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
                     <Editable id={`stats.${i}.value`} defaultValue={['12', '11', '24h', '100%'][i-1]}/>
                   </div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.65)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em', wordBreak: 'break-word' }}>
                     <Editable id={`stats.${i}.label`} defaultValue={['Servicios tecnológicos', 'Paquetes estratégicos', 'Tiempo de respuesta', 'Soluciones a medida'][i-1]}/>
                   </div>
                 </div>
@@ -151,6 +151,7 @@ function Home({ setRoute }) {
           .svc-card:hover { transform: translateY(-6px); border-color: var(--card-border-hover) !important; background: var(--card-bg-hover) !important; }
           @media (max-width: 980px) { .svc-grid { grid-template-columns: repeat(2, 1fr) !important; } .stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
           @media (max-width: 640px) { .svc-grid { grid-template-columns: 1fr !important; } }
+          @media (max-width: 440px) { .stats-grid { grid-template-columns: 1fr !important; gap: 12px !important; } }
           @keyframes orb-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px, -30px) scale(1.1); } }
           @keyframes fade-pulse { from { opacity: 0.3; } to { opacity: 1; } }
         `}</style>

@@ -10,19 +10,27 @@ const INDUSTRIES = [
 
 function FolderExpand({ onPickIndustry }) {
   const [open, setOpen] = React.useState(false);
-  const layout = React.useMemo(() => {
-    return INDUSTRIES.map((_, i, arr) => {
-      const t = i / (arr.length - 1);
-      const angle = (t - 0.5) * 90; // -45..45
-      const dist = 240;
-      const x = Math.sin(angle * Math.PI / 180) * dist;
-      const y = -Math.cos(angle * Math.PI / 180) * dist + 40;
-      return { x, y, rot: angle * 0.5 };
-    });
+  const [winWidth, setWinWidth] = React.useState(() => typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  React.useEffect(() => {
+    const onResize = () => setWinWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  const layout = React.useMemo(() => {
+    const dist = Math.min(240, Math.max(90, (winWidth - 80) / 2.3));
+    return INDUSTRIES.map((_, i, arr) => {
+      const t = i / (arr.length - 1);
+      const angle = (t - 0.5) * (winWidth < 480 ? 60 : 90); // Narrower fan on mobile
+      const x = Math.sin(angle * Math.PI / 180) * dist;
+      const y = -Math.cos(angle * Math.PI / 180) * dist + (winWidth < 480 ? 20 : 40);
+      return { x, y, rot: angle * 0.4 };
+    });
+  }, [winWidth]);
+
   return (
-    <div style={{ position: 'relative', height: 520, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+    <div style={{ position: 'relative', height: winWidth < 480 ? 440 : 520, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'hidden' }}>
       {/* Sheets */}
       {INDUSTRIES.map((ind, i) => {
         const I = Icon[ind.icon];
@@ -31,8 +39,8 @@ function FolderExpand({ onPickIndustry }) {
           <button key={ind.name} onClick={() => onPickIndustry?.(ind)}
             className="industry-sheet"
             style={{
-              position: 'absolute', bottom: 100,
-              width: 200, padding: 20,
+              position: 'absolute', bottom: winWidth < 480 ? 80 : 100,
+              width: 'min(200px, calc(100vw - 64px))', padding: '16px 14px',
               borderRadius: 14,
               background: 'linear-gradient(180deg, #FAFAFA 0%, #E5E7EB 100%)',
               border: '1px solid rgba(0,0,0,0.08)',
@@ -48,13 +56,13 @@ function FolderExpand({ onPickIndustry }) {
               transformOrigin: 'bottom center',
             }}>
             <span style={{
-              width: 36, height: 36, borderRadius: 8,
+              width: 32, height: 32, borderRadius: 8,
               background: `${ind.color}22`, color: ind.color,
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-            }}><I size={18}/></span>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#0A0B14' }}>{ind.name}</div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4, lineHeight: 1.4 }}>{ind.desc}</div>
-            <div style={{ marginTop: 12, fontSize: 11, fontWeight: 600, color: ind.color, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+            }}><I size={16}/></span>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0A0B14' }}>{ind.name}</div>
+            <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2, lineHeight: 1.3 }}>{ind.desc}</div>
+            <div style={{ marginTop: 8, fontSize: 10, fontWeight: 600, color: ind.color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               {ind.count} proyecto{ind.count > 1 ? 's' : ''}
             </div>
           </button>
@@ -63,7 +71,7 @@ function FolderExpand({ onPickIndustry }) {
 
       {/* Folder */}
       <div onClick={() => setOpen(!open)} style={{
-        position: 'relative', width: 320, height: 220, cursor: 'pointer',
+        position: 'relative', width: 'min(320px, calc(100vw - 48px))', height: 200, cursor: 'pointer',
         zIndex: 20,
         transform: open ? 'translateY(20px)' : 'translateY(0)',
         transition: 'transform 600ms cubic-bezier(0.16,1,0.3,1)',
