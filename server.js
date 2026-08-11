@@ -41,7 +41,12 @@ app.use(bodyParser.json({ limit: '2mb' }));
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   const allowAll = CORS_ORIGINS.includes('*');
-  if (origin && (allowAll || CORS_ORIGINS.includes(origin))) {
+  const allowed = origin && (
+    allowAll
+    || CORS_ORIGINS.includes(origin)
+    || CORS_ORIGINS.some((entry) => entry.startsWith('*.') && origin.endsWith(entry.slice(1)))
+  );
+  if (allowed) {
     res.header('Access-Control-Allow-Origin', allowAll ? '*' : origin);
     if (!allowAll) res.header('Vary', 'Origin');
   }

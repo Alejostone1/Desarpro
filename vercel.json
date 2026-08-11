@@ -1,5 +1,11 @@
 {
   "installCommand": "npm install --ignore-scripts",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://desarpro-production.up.railway.app/api/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
