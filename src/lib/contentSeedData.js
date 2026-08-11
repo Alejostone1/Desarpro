@@ -339,6 +339,120 @@
     return { title: byLang[lang].title, tagline: byLang[lang].tagline, desc: byLang[lang].desc };
   }
 
+  // ===== Services catalog =====
+  // Canonical 12-service catalog (6 core/featured + 6 specialized). ES text
+  // defaults mirror ALL_SERVICES + service_pages from translations.jsx.
+  var SERVICE_CATALOG = [
+    { kind: 'web',         slug: 'svc-web',         icon: 'Globe',     color: '#3B82F6', featured: true },
+    { kind: 'mobile',      slug: 'svc-mobile',      icon: 'Smartphone', color: '#8B5CF6', featured: true },
+    { kind: 'software',    slug: 'svc-software',    icon: 'Layers',     color: '#F97316', featured: true },
+    { kind: 'maintenance', slug: 'svc-maintenance', icon: 'Wrench',     color: '#F59E0B', featured: true },
+    { kind: 'consulting',  slug: 'svc-consulting',  icon: 'Compass',    color: '#A855F7', featured: true },
+    { kind: 'seo',         slug: 'svc-seo',         icon: 'Search',     color: '#14B8A6', featured: true },
+    { kind: 'ai',          slug: 'svc-ai',          icon: 'Brain',      color: '#EC4899', featured: false },
+    { kind: 'security',    slug: 'svc-security',    icon: 'Shield',     color: '#EF4444', featured: false },
+    { kind: 'cloud',       slug: 'svc-cloud',       icon: 'Cloud',      color: '#06B6D4', featured: false },
+    { kind: 'data',        slug: 'svc-data',        icon: 'Database',   color: '#10B981', featured: false },
+    { kind: 'bi',          slug: 'svc-bi',          icon: 'BarChart',   color: '#F59E0B', featured: false },
+    { kind: 'api',         slug: 'svc-api',         icon: 'Plug',       color: '#8B5CF6', featured: false },
+  ];
+
+  // ES fallbacks per service (used only when a translation tree is missing).
+  var SERVICE_ES_DEFAULTS = {
+    web: { name: 'Desarrollo Web', tagline: 'Sitios, portales y plataformas modernas', bullets: ['Landing pages de alta conversión', 'Portales corporativos', 'Progressive Web Apps', 'Headless CMS'], overview: 'Construimos sitios y plataformas web modernas, rápidas y optimizadas para conversión. Desde landing pages hasta portales corporativos completos con CMS headless y arquitectura escalable.', deliverables: ['Diseño UX/UI personalizado', 'Sitio responsive y accesible (WCAG AA)', 'CMS headless (Strapi · Sanity)', 'SEO técnico on-page', 'Integración con analítica GA4', 'Optimización Core Web Vitals', 'Hosting y despliegue', 'Capacitación de uso'], process: ['Diagnóstico', 'Wireframes', 'Diseño UI', 'Desarrollo', 'QA & Despliegue'] },
+    mobile: { name: 'Aplicaciones Móviles', tagline: 'Apps nativas y multiplataforma', bullets: ['iOS y Android nativo', 'React Native · Flutter', 'Push notifications', 'Offline-first'], overview: 'Aplicaciones móviles nativas y multiplataforma con experiencia fluida, soporte offline y notificaciones push. Publicamos en App Store y Google Play con todo el proceso técnico incluido.', deliverables: ['App iOS y Android', 'Diseño nativo por plataforma', 'Notificaciones push', 'Modo offline', 'Autenticación segura', 'Integración con backend', 'Publicación en stores', 'Analítica de uso'], process: ['Concepto', 'Prototipo', 'Desarrollo', 'Beta TestFlight', 'Lanzamiento'] },
+    software: { name: 'Software a Medida', tagline: 'ERP, CRM y plataformas SaaS', bullets: ['Multi-tenant SaaS', 'Roles y permisos', 'Reportería avanzada', 'Integraciones'], overview: 'ERPs, CRMs y plataformas SaaS multi-tenant a medida. Cuando los productos del mercado no se ajustan, construimos el sistema que tu operación realmente necesita.', deliverables: ['Arquitectura multi-tenant', 'Panel administrativo', 'Roles y permisos granulares', 'Reportería avanzada', 'Integraciones API', 'Auditoría de cambios', 'Documentación técnica', 'Capacitación de equipo'], process: ['Análisis funcional', 'Arquitectura', 'MVP', 'Iteración', 'Producción'] },
+    maintenance: { name: 'Mantenimiento y Soporte', tagline: 'Sistemas vivos en el tiempo', bullets: ['Soporte 24/7', 'Mejora continua', 'Hotfixes y patches', 'Backups gestionados'], overview: 'Mantenimiento evolutivo y correctivo para sistemas en producción. Tu sistema sigue mejorando, no solo "no se cae". Soporte continuo con SLA real.', deliverables: ['Soporte técnico mensual', 'Mantenimiento correctivo', 'Mejora continua', 'Backups gestionados', 'Monitoreo 24/7', 'Reportes mensuales', 'Hotfixes priorizados', 'Actualizaciones de seguridad'], process: ['Onboarding', 'Diagnóstico', 'Plan mensual', 'Sprints continuos'] },
+    consulting: { name: 'Consultoría TI', tagline: 'Estrategia y arquitectura', bullets: ['Diagnóstico tecnológico', 'Roadmap', 'Selección de stack', 'Auditoría de procesos'], overview: 'Consultoría tecnológica para tomar buenas decisiones antes de invertir. Auditamos tu stack, procesos y equipo, y te entregamos un roadmap accionable.', deliverables: ['Diagnóstico tecnológico', 'Auditoría de código existente', 'Selección de stack', 'Roadmap a 12 meses', 'Evaluación de proveedores', 'Estrategia de escalabilidad', 'Análisis de costos', 'Workshop ejecutivo'], process: ['Kick-off', 'Auditoría', 'Análisis', 'Roadmap', 'Presentación'] },
+    seo: { name: 'SEO y Posicionamiento', tagline: 'Crecimiento orgánico medible', bullets: ['SEO técnico', 'Content strategy', 'Core Web Vitals', 'Tracking GA4'], overview: 'SEO técnico y estratégico que se traduce en tráfico calificado. No promesas vacías: métricas, plan y resultados verificables mes a mes.', deliverables: ['Auditoría SEO técnico', 'Investigación de keywords', 'Optimización on-page', 'Estrategia de contenidos', 'Schema markup', 'Core Web Vitals', 'Reportes mensuales', 'Tracking GA4 + Search Console'], process: ['Auditoría', 'Plan keywords', 'Optimización', 'Contenido', 'Reporte'] },
+    ai: { name: 'IA Aplicada', tagline: 'IA integrada en tu operación', bullets: ['Chatbots inteligentes', 'Modelos predictivos', 'Procesamiento de documentos', 'OpenAI · Claude · Gemini'], overview: 'Integramos inteligencia artificial en tu operación: chatbots inteligentes, modelos predictivos, procesamiento de documentos y automatizaciones que ahorran horas reales de trabajo.', deliverables: ['Chatbot multicanal (web · WhatsApp)', 'Modelos predictivos sobre tus datos', 'OCR y procesamiento de documentos', 'Automatizaciones inteligentes', 'Dashboards de IA', 'Integración con OpenAI · Claude', 'Pipelines de fine-tuning', 'Monitoreo de calidad'], process: ['Caso de uso', 'POC', 'Modelo', 'Integración', 'Operación'] },
+    security: { name: 'Ciberseguridad', tagline: 'Auditoría y hardening', bullets: ['OWASP Top 10', 'Pentesting', 'Hardening de servidores', 'Reportes de cumplimiento'], overview: 'Auditorías de seguridad, pentesting y hardening para sistemas en producción. Encontramos vulnerabilidades antes que los atacantes y te ayudamos a cerrarlas.', deliverables: ['Auditoría OWASP Top 10', 'Pentest de aplicación', 'Hardening de servidores', 'Revisión de auth y permisos', 'Análisis de dependencias', 'Reporte ejecutivo', 'Plan de remediación', 'Re-test post-fix'], process: ['Scope', 'Recon', 'Análisis', 'Reporte', 'Fix & Re-test'] },
+    cloud: { name: 'DevOps & Cloud', tagline: 'Infraestructura escalable', bullets: ['AWS · GCP · Azure', 'Docker · Kubernetes', 'CI/CD pipelines', 'Monitoreo y alertas'], overview: 'DevOps y arquitectura cloud para sistemas que necesitan escalar sin caerse. Infraestructura como código, CI/CD, contenedores y monitoreo.', deliverables: ['Diseño de arquitectura cloud', 'Infraestructura como código', 'Dockerización', 'Pipelines CI/CD', 'Despliegue en AWS · GCP · Azure', 'Monitoreo y alertas', 'Backups automáticos', 'Documentación operativa'], process: ['Diseño', 'IaC', 'CI/CD', 'Despliegue', 'Operación'] },
+    data: { name: 'Bases de Datos', tagline: 'Datos confiables y rápidos', bullets: ['Diseño relacional', 'Modelado NoSQL', 'Optimización de queries', 'Migraciones seguras'], overview: 'Diseño, optimización y migración de bases de datos. Modelos relacionales y NoSQL bien pensados para que tus datos sean confiables y rápidos de consultar.', deliverables: ['Diseño relacional', 'Modelado NoSQL', 'Optimización de queries', 'Índices y particionamiento', 'Migraciones seguras', 'Backups y recuperación', 'Replicación', 'Documentación de schema'], process: ['Análisis', 'Diseño', 'Migración', 'Optimización'] },
+    bi: { name: 'Analítica y BI', tagline: 'Datos en decisiones', bullets: ['Power BI · Metabase', 'Dashboards ejecutivos', 'KPIs personalizados', 'ETL automatizados'], overview: 'Convertimos datos dispersos en dashboards ejecutivos con KPIs claros. ETL automatizados, integración de fuentes y reportes que se actualizan solos.', deliverables: ['Modelado dimensional', 'ETL automatizado', 'Dashboards ejecutivos', 'KPIs personalizados', 'Reportes programados', 'Integración de fuentes', 'Capacitación', 'Soporte continuo'], process: ['Discovery', 'Modelado', 'ETL', 'Dashboards', 'Operación'] },
+    api: { name: 'Integración APIs', tagline: 'Sistemas que se hablan', bullets: ['REST y GraphQL', 'Webhooks', 'Pasarelas de pago', 'Facturación electrónica DIAN'], overview: 'Conectamos tus sistemas con todo lo que necesite hablarse: pasarelas de pago, facturación electrónica DIAN, ERPs, WhatsApp Business, y APIs públicas.', deliverables: ['APIs REST y GraphQL', 'Webhooks', 'Pasarelas de pago', 'Facturación electrónica DIAN', 'WhatsApp Business API', 'Integraciones SAP · Siesa', 'Documentación OpenAPI', 'SDK cliente'], process: ['Discovery', 'Diseño', 'Implementación', 'Testing', 'Operación'] },
+  };
+
+  // Build the full multi-language service seed from the i18n tree, falling back
+  // to ES defaults when a language is missing a service subtree.
+  function resolveServiceSeed(translations) {
+    return SERVICE_CATALOG.map(function (s, i) {
+      var tr = {};
+      LANGUAGES.forEach(function (lang) {
+        var t = translations && translations[lang];
+        var svc = t && t.services && t.services[s.kind];
+        var sp = t && t.service_pages && t.service_pages[s.kind];
+        var d = SERVICE_ES_DEFAULTS[s.kind];
+        tr[lang] = {
+          name: (svc && svc.name) || d.name,
+          tagline: (svc && svc.desc) || d.tagline,
+          bullets: (svc && svc.bullets) || d.bullets,
+          overview: (sp && sp.overview) || d.overview,
+          deliverables: (sp && sp.deliverables) || d.deliverables,
+          process: (sp && sp.process) || d.process,
+        };
+      });
+      return {
+        slug: s.slug,
+        kind: s.kind,
+        icon: s.icon,
+        color: s.color,
+        featured: s.featured,
+        active: true,
+        order: i,
+        translations: tr,
+      };
+    });
+  }
+
+  // ===== Technologies catalog =====
+  // Mirrors src/lib/techLogos.jsx (name + color + logical category).
+  var TECHNOLOGY_SEED = [
+    { name: 'React',         color: '#61DAFB', category: 'Frontend' },
+    { name: 'Next.js',       color: '#FFFFFF', category: 'Frontend' },
+    { name: 'Vue.js',        color: '#42B883', category: 'Frontend' },
+    { name: 'Angular',       color: '#DD0031', category: 'Frontend' },
+    { name: 'JavaScript',    color: '#F7DF1E', category: 'Frontend' },
+    { name: 'TypeScript',    color: '#3178C6', category: 'Frontend' },
+    { name: 'Tailwind CSS',  color: '#06B6D4', category: 'Frontend' },
+    { name: 'Figma',         color: '#F24E1E', category: 'Diseño' },
+    { name: 'Node.js',       color: '#8CC84B', category: 'Backend' },
+    { name: 'Python',        color: '#3776AB', category: 'Backend' },
+    { name: 'GraphQL',       color: '#E10098', category: 'Backend' },
+    { name: 'Firebase',      color: '#FFCA28', category: 'Backend' },
+    { name: 'PostgreSQL',    color: '#336791', category: 'Data' },
+    { name: 'MySQL',         color: '#00758F', category: 'Data' },
+    { name: 'MongoDB',       color: '#47A248', category: 'Data' },
+    { name: 'Redis',         color: '#DC382D', category: 'Data' },
+    { name: 'AWS',           color: '#FF9900', category: 'Cloud' },
+    { name: 'Google Cloud',  color: '#4285F4', category: 'Cloud' },
+    { name: 'Docker',        color: '#2496ED', category: 'DevOps' },
+    { name: 'Kubernetes',    color: '#326CE5', category: 'DevOps' },
+    { name: 'Nginx',         color: '#009639', category: 'DevOps' },
+    { name: 'Linux',         color: '#FCC624', category: 'DevOps' },
+    { name: 'Git',           color: '#F05032', category: 'DevOps' },
+    { name: 'GitHub',        color: '#FFFFFF', category: 'DevOps' },
+  ];
+
+  // ===== SEO defaults (ES) =====
+  // Seeded for every route; non-es languages fall back to the ES row server-side.
+  var SEO_DEFAULTS = {
+    home:       { title: 'DesarPro · Tecnología que transforma tu negocio', description: 'Desarrollo de software profesional. Web, móvil, software a medida, IA, ciberseguridad e infraestructura para empresas que quieren crecer.', keywords: 'desarrollo de software, apps móviles, SaaS, IA, ciberseguridad, Colombia, LATAM' },
+    servicios:  { title: 'Servicios · DesarPro', description: '12 servicios tecnológicos: desarrollo web, apps móviles, software a medida, IA, ciberseguridad, DevOps, datos y analítica.', keywords: 'servicios de software, desarrollo web, apps móviles, IA, devops' },
+    proyectos:  { title: 'Proyectos · DesarPro', description: 'Casos reales de plataformas digitales en producción: agroindustria, salud, retail, moda, finanzas, educación y logística.', keywords: 'proyectos software, casos de éxito, desarrollo a medida' },
+    nosotros:   { title: 'Nosotros · DesarPro', description: 'DesarPro nació en Pereira, Colombia, con una idea simple: las empresas no necesitan más promesas tecnológicas, necesitan sistemas que funcionen.', keywords: 'agencia de software, desarrollo de software Colombia, Pereira' },
+    contacto:   { title: 'Contacto · DesarPro', description: 'Escríbenos sobre tu proyecto. Te respondemos en menos de 24 horas hábiles con un primer diagnóstico gratuito.', keywords: 'contacto desarrollo software, cotizar proyecto' },
+    login:      { title: 'Panel administrador · DesarPro', description: 'Acceso restringido al panel de administración de DesarPro.', keywords: 'admin, login' },
+    '404':      { title: 'Página no encontrada · DesarPro', description: 'La página que buscas no existe. Vuelve al inicio o explora nuestros servicios.', keywords: '404, no encontrado' },
+  };
+
+  var SITE_CONFIG_DEFAULTS = {
+    sections: { hero: true, stats: true, services: true, tech: true, process: true, cta: true },
+    heroImage: '',
+    announcement: '',
+    announcementActive: false,
+  };
+
   return {
     LANGUAGES: LANGUAGES,
     CONTENT_DEFAULTS: CONTENT_DEFAULTS,
@@ -348,6 +462,12 @@
     PROJECT_SEED: PROJECT_SEED,
     PROJECT_TRANSLATIONS: PROJECT_TRANSLATIONS,
     resolveProjectTranslations: resolveProjectTranslations,
+    SERVICE_CATALOG: SERVICE_CATALOG,
+    SERVICE_ES_DEFAULTS: SERVICE_ES_DEFAULTS,
+    resolveServiceSeed: resolveServiceSeed,
+    TECHNOLOGY_SEED: TECHNOLOGY_SEED,
+    SEO_DEFAULTS: SEO_DEFAULTS,
+    SITE_CONFIG_DEFAULTS: SITE_CONFIG_DEFAULTS,
     sectionFor: sectionFor,
     typeFor: typeFor,
     orderIndex: orderIndex,

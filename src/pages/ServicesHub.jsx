@@ -17,6 +17,12 @@ const ALL_SERVICES = [
 
 function ServicesHub({ setRoute }) {
   const t = useTranslations();
+  const { language } = useI18n();
+  const { services: dbServices } = useServices(language);
+  const merged = window.mergeServices(ALL_SERVICES, dbServices);
+  const visible = merged.filter((s) => s.active !== false);
+  const core = dbServices && dbServices.length ? visible.filter((s) => s.featured) : visible.slice(0, 6);
+  const specialized = dbServices && dbServices.length ? visible.filter((s) => !s.featured) : visible.slice(6);
   return (
     <div className="page" style={{ paddingTop: 110 }}>
       <section style={{ position: 'relative', padding: '60px 0 40px', overflow: 'hidden' }}>
@@ -47,7 +53,7 @@ function ServicesHub({ setRoute }) {
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>{t('services_hub.coreTitle')}</h2></Reveal>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }} className="hub-grid">
-            {ALL_SERVICES.slice(0, 6).map((s, i) => (
+            {core.map((s, i) => (
               <Reveal key={s.id} delay={i * 70}>
                 <ServiceCard svc={s} onClick={() => setRoute(s.id)} large/>
               </Reveal>
@@ -64,7 +70,7 @@ function ServicesHub({ setRoute }) {
             <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>{t('services_hub.specializedTitle')}</h2></Reveal>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }} className="hub-grid">
-            {ALL_SERVICES.slice(6).map((s, i) => (
+            {specialized.map((s, i) => (
               <Reveal key={s.id} delay={i * 70}>
                 <ServiceCard svc={s} onClick={() => setRoute(s.id)}/>
               </Reveal>
@@ -110,10 +116,10 @@ function ServiceCard({ svc, onClick, large = false }) {
         background: `${svc.color}1A`, color: svc.color, border: `1px solid ${svc.color}30`,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
       }}><I size={large ? 22 : 20}/></span>
-      <h3 style={{ fontSize: large ? 22 : 18, fontWeight: 700, color: 'var(--text-0)', margin: '18px 0 6px', letterSpacing: '-0.01em', position: 'relative' }}>{t(`services.${svc.k}.name`)}</h3>
-      <p style={{ color: 'var(--text-2)', fontSize: 13.5, margin: '0 0 16px', position: 'relative' }}>{t(`services.${svc.k}.desc`)}</p>
+      <h3 style={{ fontSize: large ? 22 : 18, fontWeight: 700, color: 'var(--text-0)', margin: '18px 0 6px', letterSpacing: '-0.01em', position: 'relative' }}>{svc.name || t(`services.${svc.k}.name`)}</h3>
+      <p style={{ color: 'var(--text-2)', fontSize: 13.5, margin: '0 0 16px', position: 'relative' }}>{svc.tagline || t(`services.${svc.k}.desc`)}</p>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 6, position: 'relative' }}>
-        {t(`services.${svc.k}.bullets`).slice(0, large ? 4 : 3).map((b, j) => (
+        {(svc.bullets && svc.bullets.length ? svc.bullets : t(`services.${svc.k}.bullets`)).slice(0, large ? 4 : 3).map((b, j) => (
           <li key={j} style={{ color: 'var(--text-1)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
             <Icon.Check size={12} stroke={svc.color} sw={2.4}/> {b}
           </li>

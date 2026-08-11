@@ -89,10 +89,102 @@ model ProjectTranslation {
   @@unique([projectId, lang])
 }
 
+// Contact form submissions / sales leads. status flow:
+// new -> contacted -> in_progress -> won | lost
+model Lead {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String   @default("")
+  company   String   @default("")
+  service   String   @default("")
+  budget    String   @default("")
+  message   String   @default("")
+  status    String   @default("new") // new | contacted | in_progress | won | lost
+  notes     String   @default("")
+  source    String   @default("contact") // contact | manual
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Services catalog (12 services). `featured` marks the 6 core services shown
+// on the home preview; the rest are "specialized". Text lives per-language in
+// ServiceTranslation (bullets/deliverables/process are JSON arrays).
+model Service {
+  id           Int                  @id @default(autoincrement())
+  slug         String               @unique // svc-web
+  kind         String               @unique // web
+  icon         String               @default("Layers")
+  color        String               @default("#22D3EE")
+  featured     Boolean              @default(false)
+  active       Boolean              @default(true)
+  order        Int                  @default(0)
+  translations ServiceTranslation[]
+
+  @@index([active])
+  @@index([featured])
+}
+
+model ServiceTranslation {
+  id           Int     @id @default(autoincrement())
+  serviceId    Int
+  lang         String
+  name         String  @default("")
+  tagline      String  @default("")
+  overview     String  @default("")
+  bullets      String  @default("[]")     // JSON array
+  deliverables String  @default("[]")     // JSON array
+  process      String  @default("[]")     // JSON array
+  service      Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, lang])
+}
+
+// Technologies marquee (TechLoop). Icons are rendered client-side from the
+// bundled TECH_LOGOS map; the DB stores which are active/ordered/categorized.
+model Technology {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  color    String  @default("#22D3EE")
+  category String  @default("Otros") // Frontend | Backend | Cloud | Data | DevOps | Mobile | Diseño | IA
+  featured Boolean @default(true)
+  active   Boolean @default(true)
+  order    Int     @default(0)
+
+  @@index([active])
+}
+
+// Per-route, per-language SEO metadata (title, description, keywords, OG).
+model SeoEntry {
+  id            Int      @id @default(autoincrement())
+  route         String   // home | servicios | svc-web | proyectos | nosotros | contacto | 404
+  lang          String
+  title         String   @default("")
+  description   String   @default("")
+  keywords      String   @default("")
+  ogTitle       String   @default("")
+  ogDescription String   @default("")
+  ogImage       String   @default("")
+  updatedAt     DateTime @updatedAt
+
+  @@unique([route, lang])
+}
+
+// Site-wide settings (section visibility, hero image, announcement, contact
+// details). `value` is a JSON object keyed by setting name.
+model SiteConfig {
+  id    Int    @id @default(autoincrement())
+  key   String @unique // sections | heroImage | announcement | contact
+  value String @default("{}")
+}
+
 // Automatic backups taken before destructive operations (e.g. reset).
 model ContentSnapshot {
   id        Int      @id @default(autoincrement())
   kind      String   @default("backup") // backup | reset-before | import-before
-  data      String   // JSON: { content, projects }
+  data      String   // JSON: { content, projects, services, technologies }
   createdAt DateTime @default(now())
 }

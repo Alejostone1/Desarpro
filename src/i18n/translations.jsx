@@ -364,6 +364,13 @@ var __i18nTranslations = {
       idealFor: 'IDEAL PARA',
       talkCta: 'Hablemos de tu proyecto',
     },
+    // Not found (404)
+    notfound: {
+      title: 'Página no encontrada',
+      subtitle: 'El contenido que buscas no existe o fue movido.',
+      ctaHome: 'Volver al inicio',
+      ctaServices: 'Ver servicios',
+    },
     // Common
     common: {
       loading: 'Cargando...',
@@ -757,6 +764,12 @@ var __i18nTranslations = {
       idealFor: 'IDEAL FOR',
       talkCta: 'Let\'s talk about your project',
     },
+    notfound: {
+      title: 'Page not found',
+      subtitle: 'The content you are looking for does not exist or has been moved.',
+      ctaHome: 'Back to home',
+      ctaServices: 'View services',
+    },
     common: {
       loading: 'Loading...',
       error: 'Error',
@@ -1149,6 +1162,12 @@ var __i18nTranslations = {
       idealFor: 'IDEAL PARA',
       talkCta: 'Vamos falar sobre seu projeto',
     },
+    notfound: {
+      title: 'Página não encontrada',
+      subtitle: 'O conteúdo que você procura não existe ou foi movido.',
+      ctaHome: 'Voltar ao início',
+      ctaServices: 'Ver serviços',
+    },
     common: {
       loading: 'Carregando...',
       error: 'Erro',
@@ -1539,6 +1558,12 @@ var __i18nTranslations = {
       includes: 'Inclut',
       idealFor: 'IDÉAL POUR',
       talkCta: 'Parlons de votre projet',
+    },
+    notfound: {
+      title: 'Page introuvable',
+      subtitle: 'Le contenu que vous recherchez n\'existe pas ou a été déplacé.',
+      ctaHome: 'Retour à l\'accueil',
+      ctaServices: 'Voir les services',
     },
     common: {
       loading: 'Chargement...',
@@ -1931,6 +1956,12 @@ var __i18nTranslations = {
       includes: 'Inklusive',
       idealFor: 'IDEAL FÜR',
       talkCta: 'Sprechen wir über Ihr Projekt',
+    },
+    notfound: {
+      title: 'Seite nicht gefunden',
+      subtitle: 'Der gesuchte Inhalt existiert nicht oder wurde verschoben.',
+      ctaHome: 'Zurück zur Startseite',
+      ctaServices: 'Dienste ansehen',
     },
     common: {
       loading: 'Wird geladen...',

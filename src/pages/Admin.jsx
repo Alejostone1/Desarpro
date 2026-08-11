@@ -16,24 +16,30 @@ function Admin({ setRoute }) {
   const { theme } = useTheme();
   const [pwd, setPwd] = React.useState('');
   const [err, setErr] = React.useState('');
-  const [activeSection, setActiveSection] = React.useState('hero');
+  const [activeSection, setActiveSection] = React.useState('dashboard');
   const [savedKey, setSavedKey] = React.useState(null);
   const [importText, setImportText] = React.useState('');
   const [importStatus, setImportStatus] = React.useState('');
 
   const sections = React.useMemo(() => ({
-    projects: { label: 'Proyectos', icon: 'Folder', prefixes: [], always: true },
-    hero:    { label: 'Inicio · Hero',     icon: 'Sparkle',   prefixes: ['hero.'] },
-    stats:   { label: 'Inicio · Stats',    icon: 'BarChart',  prefixes: ['stats.'] },
-    services:{ label: 'Inicio · Servicios',icon: 'Layers',    prefixes: ['services.'] },
-    tech:    { label: 'Inicio · Tecnología',icon: 'Cpu',      prefixes: ['tech.'] },
-    process: { label: 'Inicio · Proceso',  icon: 'Compass',   prefixes: ['process.'] },
-    cta:     { label: 'Inicio · CTA',      icon: 'ArrowRight',prefixes: ['cta.'] },
-    contact: { label: 'Contacto',          icon: 'Mail',      prefixes: ['contact.'] },
-    login:   { label: 'Login',             icon: 'Lock',      prefixes: ['login.'] },
-    about:   { label: 'Nosotros',          icon: 'Users',     prefixes: ['about.'] },
-    footer:  { label: 'Footer',            icon: 'Globe',     prefixes: ['footer.'] },
-    other:   { label: 'Otros',             icon: 'Settings',  prefixes: [] },
+    dashboard:   { label: 'Dashboard',        icon: 'Activity',   prefixes: [], always: true },
+    projects:    { label: 'Proyectos',        icon: 'Folder',     prefixes: [], always: true },
+    leads:       { label: 'Leads',            icon: 'Mail',       prefixes: [], always: true },
+    services:    { label: 'Servicios',        icon: 'Layers',     prefixes: [], always: true },
+    tech:        { label: 'Tecnologías',      icon: 'Cpu',        prefixes: [], always: true },
+    seo:         { label: 'SEO',              icon: 'Search',     prefixes: [], always: true },
+    config:      { label: 'Configuración',    icon: 'Settings',   prefixes: [], always: true },
+    hero:        { label: 'Inicio · Hero',     icon: 'Sparkle',    prefixes: ['hero.'] },
+    stats:       { label: 'Inicio · Stats',    icon: 'BarChart',   prefixes: ['stats.'] },
+    home_services:{ label: 'Inicio · Servicios', icon: 'Layers',   prefixes: ['services.'] },
+    home_tech:   { label: 'Inicio · Tecnología', icon: 'Cpu',      prefixes: ['tech.'] },
+    process:     { label: 'Inicio · Proceso',  icon: 'Compass',    prefixes: ['process.'] },
+    cta:         { label: 'Inicio · CTA',      icon: 'ArrowRight', prefixes: ['cta.'] },
+    contact:     { label: 'Contacto',          icon: 'Mail',       prefixes: ['contact.'] },
+    login:       { label: 'Login',             icon: 'Lock',       prefixes: ['login.'] },
+    about:       { label: 'Nosotros',          icon: 'Users',      prefixes: ['about.'] },
+    footer:      { label: 'Footer',            icon: 'Globe',      prefixes: ['footer.'] },
+    other:       { label: 'Otros',             icon: 'Settings',   prefixes: [] },
   }), []);
 
   const allKeys = Object.keys(fullContent || {});
@@ -266,6 +272,18 @@ function Admin({ setRoute }) {
 
           {activeSection === 'projects' ? (
             <ProjectsManager/>
+          ) : activeSection === 'dashboard' ? (
+            <DashboardView goTo={setActiveSection}/>
+          ) : activeSection === 'leads' ? (
+            <LeadsManager/>
+          ) : activeSection === 'services' ? (
+            <ServicesManager/>
+          ) : activeSection === 'tech' ? (
+            <TechManager/>
+          ) : activeSection === 'seo' ? (
+            <SeoManager/>
+          ) : activeSection === 'config' ? (
+            <ConfigManager/>
           ) : activeSection === '__import' ? (
             <>
               <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 10 }}>

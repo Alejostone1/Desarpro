@@ -21,6 +21,8 @@ const LANGUAGE_LABELS = {
 function Navbar({ route, setRoute }) {
   const { language, setLanguage, t } = useI18n();
   const { theme, setTheme } = useTheme();
+  const { config: siteConfig } = useSiteConfig();
+  const showAnnouncement = !!siteConfig && siteConfig.announcementActive === true && typeof siteConfig.announcement === 'string' && siteConfig.announcement.trim() !== '';
   const [scrolled, setScrolled] = React.useState(false);
   const [openServices, setOpenServices] = React.useState(false);
   const [openMobile, setOpenMobile] = React.useState(false);
@@ -90,8 +92,17 @@ function Navbar({ route, setRoute }) {
 
   return (
     <>
+      {showAnnouncement && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 101,
+          background: 'linear-gradient(90deg, #F59E0B, #F97316)',
+          color: '#1a1205', fontSize: 13, fontWeight: 700, textAlign: 'center',
+          padding: '9px 16px', letterSpacing: '0.02em',
+          boxShadow: '0 4px 20px rgba(245,158,11,0.4)',
+        }}>{siteConfig.announcement}</div>
+      )}
       <header style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+      position: 'fixed', top: showAnnouncement ? 38 : 0, left: 0, right: 0, zIndex: 100,
       transition: 'all 320ms var(--ease-out)',
       background: scrolled ? 'var(--header-bg-scrolled)' : 'var(--header-bg)',
       backdropFilter: 'blur(20px) saturate(180%)',

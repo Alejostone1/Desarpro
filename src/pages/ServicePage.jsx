@@ -2,7 +2,9 @@
 
 function ServicePage({ id, setRoute }) {
   const t = useTranslations();
-  const svc = (window.ALL_SERVICES || []).find(s => s.id === id);
+  const { language } = useI18n();
+  const { services: dbServices } = useServices(language);
+  const svc = window.mergeServices(window.ALL_SERVICES || [], dbServices).find(s => s.id === id);
   if (!svc) {
     return (
       <div className="page" style={{ paddingTop: 200, textAlign: 'center' }}>
@@ -14,11 +16,12 @@ function ServicePage({ id, setRoute }) {
   const I = Icon[svc.icon];
   const c = svc.color;
 
-  // Dynamic content per service
+  // Dynamic content per service — DB first (localized), static translations as fallback.
   const detail = {
-    overview: t(`service_pages.${svc.k}.overview`),
-    deliverables: t(`service_pages.${svc.k}.deliverables`),
-    process: t(`service_pages.${svc.k}.process`),
+    name: svc.name || t(`services.${svc.k}.name`),
+    overview: svc.overview || t(`service_pages.${svc.k}.overview`),
+    deliverables: (svc.deliverables && svc.deliverables.length) ? svc.deliverables : t(`service_pages.${svc.k}.deliverables`),
+    process: (svc.process && svc.process.length) ? svc.process : t(`service_pages.${svc.k}.process`),
     tech: (SERVICE_DETAILS[id] || {}).tech || ['React', 'Node.js', 'PostgreSQL'],
   };
 
@@ -49,7 +52,7 @@ function ServicePage({ id, setRoute }) {
               </Reveal>
               <Reveal delay={100}>
                 <h1 style={{ fontSize: 'clamp(40px, 6vw, 76px)', fontWeight: 800, color: 'var(--text-0)', letterSpacing: '-0.03em', lineHeight: 1, margin: '0 0 20px' }}>
-                  {t(`services.${svc.k}.name`)}
+                  {detail.name}
                 </h1>
               </Reveal>
               <Reveal delay={200}>
@@ -72,7 +75,7 @@ function ServicePage({ id, setRoute }) {
                 position: 'relative', overflow: 'hidden',
                 boxShadow: `0 20px 60px ${c}40, 0 0 80px ${c}30`,
               }}>
-                <img src={`./media/servicios/${svc.id}.png`} alt={t(`services.${svc.k}.name`)} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+                <img src={`./media/servicios/${svc.id}.png`} alt={detail.name} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
                 <div style={{ display: 'none', width: '100%', height: '100%', background: `linear-gradient(135deg, ${c}30, ${c}10)`, alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ width: 160, height: 160, borderRadius: 40, background: `${c}30`, color: c, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${c}80`, boxShadow: `0 0 80px ${c}80, inset 0 0 60px ${c}20` }}>
                     <I size={80} sw={1.4}/>
@@ -148,7 +151,7 @@ function ServicePage({ id, setRoute }) {
             borderRadius: 24, padding: 48, textAlign: 'center',
             background: `linear-gradient(135deg, ${c}1A, ${c}08)`, border: `1px solid ${c}40`,
           }}>
-            <h3 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>{t('common.letsTalkProject')} {t(`services.${svc.k}.name`).toLowerCase()}?</h3>
+            <h3 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>{t('common.letsTalkProject')} {detail.name.toLowerCase()}?</h3>
             <p style={{ fontSize: 16, color: 'var(--text-1)', maxWidth: 520, margin: '0 auto 24px' }}>
               {t('common.freeDiagnostic')}
             </p>

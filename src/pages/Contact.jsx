@@ -92,7 +92,7 @@ function Contact() {
     }, delay);
   }, []);
 
-  const submit = (ev) => {
+  const submit = async (ev) => {
     ev.preventDefault();
     if (!validate()) {
       setStatus('error');
@@ -106,12 +106,31 @@ function Contact() {
     setAssistantState('processing');
     setHudMessage(t('assistant.status.analyzing'));
     setTyping(false);
-    setTimeout(() => {
+    const res = await submitContact({
+      name: state.name,
+      email: state.email,
+      company: state.company,
+      service: state.service,
+      budget: state.budget,
+      message: state.msg,
+    });
+    if (res && res.ok) {
       setStatus('success');
       setAssistantState('success');
       setHudMessage(t('assistant.status.success'));
+      desarproToast({ type: 'success', title: t('contact.success.title'), message: t('contact.success.subtitle') });
       resetAssistant(1400);
-    }, 1400);
+    } else {
+      setStatus('error');
+      setAssistantState('error');
+      setHudMessage(t('assistant.status.error'));
+      desarproToast({
+        type: 'error',
+        title: 'No se pudo enviar el mensaje',
+        message: (res && res.data && res.data.error) || 'Verifica tu conexión e inténtalo de nuevo.',
+      });
+      resetAssistant(1800);
+    }
   };
 
   const update = (k, v) => {

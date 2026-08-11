@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const { LANGUAGES, CONTENT_DEFAULTS, ALL_KEYS, sectionFor, typeFor, resolveValue, resolveProjectTranslations, PROJECT_SEED } = require('./src/lib/contentSeedData.js');
+const { LANGUAGES, CONTENT_DEFAULTS, ALL_KEYS, sectionFor, typeFor, resolveValue, resolveProjectTranslations, PROJECT_SEED, resolveServiceSeed, TECHNOLOGY_SEED, SEO_DEFAULTS, SITE_CONFIG_DEFAULTS } = require('./src/lib/contentSeedData.js');
 
 // Load the real i18n translations (ES/EN/PT/FR/DE) so the DB is seeded with
 // the exact strings the site already uses — nothing invented.
@@ -143,10 +143,126 @@ async function seedProjects() {
   console.log(`Proyectos: ${created} creados / ${updated} actualizados · traducciones ${createdTr} creadas / ${updatedTr} actualizadas (${PROJECTS.length} x ${LANGUAGES.length} idiomas)`);
 }
 
+async function seedServices() {
+  const services = resolveServiceSeed(TRANSLATIONS);
+  let created = 0;
+  let updated = 0;
+
+  for (const s of services) {
+    const existing = await prisma.service.findUnique({ where: { slug: s.slug } });
+    if (existing) {
+      await prisma.service.update({
+        where: { slug: s.slug },
+        data: { kind: s.kind, icon: s.icon, color: s.color, featured: s.featured, active: true, order: s.order },
+      });
+      updated += 1;
+    } else {
+      await prisma.service.create({
+        data: { slug: s.slug, kind: s.kind, icon: s.icon, color: s.color, featured: s.featured, active: true, order: s.order },
+      });
+      created += 1;
+    }
+    const row = await prisma.service.findUnique({ where: { slug: s.slug } });
+    for (const lang of LANGUAGES) {
+      const tr = s.translations[lang];
+      await prisma.serviceTranslation.upsert({
+        where: { serviceId_lang: { serviceId: row.id, lang } },
+        update: {
+          name: tr.name, tagline: tr.tagline,
+          bullets: JSON.stringify(tr.bullets || []),
+          overview: tr.overview,
+          deliverables: JSON.stringify(tr.deliverables || []),
+          process: JSON.stringify(tr.process || []),
+        },
+        create: {
+          serviceId: row.id, lang,
+          name: tr.name, tagline: tr.tagline,
+          bullets: JSON.stringify(tr.bullets || []),
+          overview: tr.overview,
+          deliverables: JSON.stringify(tr.deliverables || []),
+          process: JSON.stringify(tr.process || []),
+        },
+      });
+    }
+  }
+  console.log(`Servicios: ${created} creados / ${updated} actualizados (${services.length} x ${LANGUAGES.length} idiomas)`);
+}
+
+async function seedTechnologies() {
+  let created = 0;
+  let updated = 0;
+  for (let i = 0; i < TECHNOLOGY_SEED.length; i++) {
+    const t = TECHNOLOGY_SEED[i];
+    const existing = await prisma.technology.findUnique({ where: { name: t.name } });
+    if (existing) {
+      await prisma.technology.update({
+        where: { name: t.name },
+        data: { color: t.color, category: t.category, featured: true, active: true, order: i },
+      });
+      updated += 1;
+    } else {
+      await prisma.technology.create({
+        data: { name: t.name, color: t.color, category: t.category, featured: true, active: true, order: i },
+      });
+      created += 1;
+    }
+  }
+  console.log(`Tecnologías: ${created} creadas / ${updated} actualizadas (${TECHNOLOGY_SEED.length})`);
+}
+
+async function seedSeo() {
+  let created = 0;
+  let updated = 0;
+  for (const route of Object.keys(SEO_DEFAULTS)) {
+    const def = SEO_DEFAULTS[route];
+    for (const lang of LANGUAGES) {
+      const data = {
+        title: lang === 'es' ? def.title : '',
+        description: lang === 'es' ? def.description : '',
+        keywords: lang === 'es' ? (def.keywords || '') : '',
+        ogTitle: lang === 'es' ? def.title : '',
+        ogDescription: lang === 'es' ? def.description : '',
+      };
+      const existing = await prisma.seoEntry.findUnique({ where: { route_lang: { route, lang } } });
+      if (existing) {
+        await prisma.seoEntry.update({ where: { route_lang: { route, lang } }, data });
+        updated += 1;
+      } else {
+        await prisma.seoEntry.create({ data: { route, lang, ...data } });
+        created += 1;
+      }
+    }
+  }
+  console.log(`SEO: ${created} entradas creadas / ${updated} actualizadas (${Object.keys(SEO_DEFAULTS).length} rutas x ${LANGUAGES.length} idiomas)`);
+}
+
+async function seedSiteConfig() {
+  let created = 0;
+  let updated = 0;
+  for (const key of Object.keys(SITE_CONFIG_DEFAULTS)) {
+    const value = JSON.stringify(SITE_CONFIG_DEFAULTS[key]);
+    const existing = await prisma.siteConfig.findUnique({ where: { key } });
+    if (existing) {
+      if (existing.value !== value) {
+        await prisma.siteConfig.update({ where: { key }, data: { value } });
+        updated += 1;
+      }
+    } else {
+      await prisma.siteConfig.create({ data: { key, value } });
+      created += 1;
+    }
+  }
+  console.log(`Configuración: ${created} claves creadas / ${updated} actualizadas`);
+}
+
 async function main() {
   await seedAdmin();
   await seedContent();
   await seedProjects();
+  await seedServices();
+  await seedTechnologies();
+  await seedSeo();
+  await seedSiteConfig();
   console.log('Seed completado. El contenido ahora vive en la base de datos (SQLite).');
 }
 

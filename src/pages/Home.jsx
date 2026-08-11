@@ -3,6 +3,10 @@
 
 function Home({ setRoute }) {
   const { content } = useAdmin();
+  const { language } = useI18n();
+  const { services: dbServices } = useServices(language);
+  const { config: siteConfig } = useSiteConfig();
+  const sec = siteConfig.sections || {};
 
   const services = [
     { id: 'svc-web', name: 'Desarrollo Web', icon: 'Globe', color: '#3B82F6',
@@ -24,12 +28,18 @@ function Home({ setRoute }) {
       tagline: 'Crecimiento orgánico medible',
       bullets: ['SEO técnico', 'Content strategy', 'Tracking y analítica', 'Core Web Vitals'] },
   ];
+  const serviceList = window.mergeServices(services, dbServices).filter((s) => s.active !== false).slice(0, 6);
 
   return (
     <div className="page">
       {/* HERO with branded Earth video */}
+      {sec.hero !== false && (
       <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', overflow: 'hidden', paddingTop: 80 }}>
-        <HeroVideoBg/>
+        {typeof siteConfig.heroImage === 'string' && siteConfig.heroImage ? (
+          <div style={{ position: 'absolute', inset: 0, background: `#020308 url("${siteConfig.heroImage}") center/cover no-repeat` }}/>
+        ) : (
+          <HeroVideoBg/>
+        )}
 
         {/* Floating orbs for added depth */}
         <div style={{ position: 'absolute', top: '15%', right: '8%', width: 'clamp(200px, 30vw, 400px)', height: 'clamp(200px, 30vw, 400px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,211,238,0.15), transparent 60%)', filter: 'blur(40px)', zIndex: 1, animation: 'orb-drift 18s ease-in-out infinite alternate', pointerEvents: 'none' }}/>
@@ -69,6 +79,7 @@ function Home({ setRoute }) {
           </Reveal>
 
           {/* Stats strip — values now editable; tuned for a young company (no project counts) */}
+          {sec.stats !== false && (
           <Reveal delay={520} y={20}>
             <div style={{ marginTop: 80, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 20, maxWidth: 900, margin: '80px auto 0' }} className="stats-grid">
               {[1, 2, 3, 4].map(i => (
@@ -83,6 +94,7 @@ function Home({ setRoute }) {
               ))}
             </div>
           </Reveal>
+          )}
         </div>
 
         {/* Scroll indicator */}
@@ -91,8 +103,10 @@ function Home({ setRoute }) {
           <div style={{ width: 1, height: 30, background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)' }}/>
         </div>
       </section>
+      )}
 
       {/* SERVICES PREVIEW */}
+      {sec.services !== false && (
       <section style={{ position: 'relative', padding: '120px 0', background: 'var(--bg-0)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
@@ -111,7 +125,7 @@ function Home({ setRoute }) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }} className="svc-grid">
-            {services.map((s, i) => {
+            {serviceList.map((s, i) => {
               const I = Icon[s.icon];
               return (
                 <Reveal key={s.id} delay={i * 80}>
@@ -156,8 +170,10 @@ function Home({ setRoute }) {
           @keyframes fade-pulse { from { opacity: 0.3; } to { opacity: 1; } }
         `}</style>
       </section>
+      )}
 
       {/* TECH LOOP */}
+      {sec.tech !== false && (
       <section style={{ position: 'relative', padding: '60px 0 120px', background: 'var(--bg-0)' }}>
         <div className="container" style={{ marginBottom: 40, textAlign: 'center' }}>
           <Reveal><span className="section-eyebrow"><Editable id="tech.eyebrow" defaultValue="Stack moderno"/></span></Reveal>
@@ -176,8 +192,10 @@ function Home({ setRoute }) {
           </div>
         </Reveal>
       </section>
+      )}
 
       {/* PROCESS */}
+      {sec.process !== false && (
       <section style={{ position: 'relative', padding: '80px 0', background: 'var(--bg-0)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
@@ -211,8 +229,10 @@ function Home({ setRoute }) {
         </div>
         <style>{`@media (max-width: 980px) { .process-grid { grid-template-columns: repeat(2, 1fr) !important; } } @media (max-width: 580px) { .process-grid { grid-template-columns: 1fr !important; } }`}</style>
       </section>
+      )}
 
       {/* CTA */}
+      {sec.cta !== false && (
       <section style={{ position: 'relative', padding: '120px 0', background: 'var(--bg-0)' }}>
         <div className="container">
           <div className="glass-2" style={{
@@ -244,6 +264,7 @@ function Home({ setRoute }) {
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 }
