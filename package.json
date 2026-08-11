@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "start": "node server.js",
     "start:api": "node scripts/start-api.js",
-    "postinstall": "prisma generate",
+    "postinstall": "node scripts/postinstall.js",
     "db:migrate": "prisma migrate dev --name cms",
     "db:push": "prisma db push",
     "db:seed": "node seed.js"

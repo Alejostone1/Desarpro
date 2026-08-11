@@ -3,6 +3,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 
 if (process.env.RUN_DB_SETUP !== '0') {
+  execSync('npx prisma generate', { stdio: 'inherit' });
   execSync('npx prisma db push', { stdio: 'inherit' });
   try {
     execSync('node seed.js', { stdio: 'inherit' });
