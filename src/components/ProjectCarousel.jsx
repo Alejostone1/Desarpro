@@ -103,7 +103,7 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
         ref={viewportRef}
         className="pc-panel"
         role="region"
-        aria-roledescription="carrusel"
+        aria-roledescription={t('common.carousel')}
         aria-label={t('projects_carousel.eyebrow')}
         tabIndex={0}
         onKeyDown={(e) => {
@@ -180,7 +180,7 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
           {/* Right — outcomes */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: 'var(--text-3)', textTransform: 'uppercase' }}>
-              Resultados
+              {t('common.results')}
             </div>
             {activeProject.metrics && activeProject.metrics.length > 0 ? (
               <div className="pc-metrics" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
@@ -193,7 +193,7 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
               </div>
             ) : (
               <div className="glass" style={{ padding: '16px 18px', borderRadius: 14, background: 'var(--bg-3)', borderColor: 'var(--glass-border-2)' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-2)' }}>Estudio de caso en curso.</div>
+                <div style={{ fontSize: 13, color: 'var(--text-2)' }}>{t('common.studyInProgress')}</div>
               </div>
             )}
             <button onClick={onCTA} className="btn btn-primary" style={{

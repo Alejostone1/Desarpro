@@ -33,7 +33,7 @@ function Login({ setRoute }) {
     if (res && res.ok) {
       setAdminSuccess(true);
     } else {
-      setAdminError(res && res.error === 'server' ? 'Servidor no disponible' : t('login.form.passwordWrong'));
+      setAdminError(res && res.error === 'server' ? t('common.serverError') : t('login.form.passwordWrong'));
       setTimeout(() => setAdminError(''), 2500);
     }
   };
@@ -135,11 +135,11 @@ function Login({ setRoute }) {
                       )}
 
                       <button type="button" onClick={handleAdminSubmit} className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center', background: 'linear-gradient(135deg, #F59E0B, #F97316)', minHeight: 48 }}>
-                        Entrar al panel <Icon.ArrowRight size={14}/>
+                        {t('login.form.enterPanel')} <Icon.ArrowRight size={14}/>
                       </button>
 
                       <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '8px 0 0', lineHeight: 1.55 }}>
-                        Solo personal autorizado. Sesión guardada localmente.
+                        {t('login.form.adminOnly')}
                       </p>
                     </div>
                   )}
@@ -182,7 +182,7 @@ function Login({ setRoute }) {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0' }}>
                       <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }}/>
-                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>O continúa con</span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('login.form.orContinueWith')}</span>
                       <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }}/>
                     </div>
 
@@ -197,7 +197,7 @@ function Login({ setRoute }) {
                     </div>
 
                     <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '8px 0 0', lineHeight: 1.55 }}>
-                      Al continuar aceptas nuestros <a href="#" style={{ color: '#22D3EE' }}>Términos</a> y <a href="#" style={{ color: '#22D3EE' }}>Privacidad</a>.
+                      {t('login.form.continueAgree')} <a href="#" style={{ color: '#22D3EE' }}>{t('footer.legal.terms')}</a> y <a href="#" style={{ color: '#22D3EE' }}>{t('footer.legal.privacy')}</a>.
                     </p>
                   </div>
                 </>

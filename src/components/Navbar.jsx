@@ -229,7 +229,7 @@ function Navbar({ route, setRoute }) {
                 padding: '7px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', minHeight: 40,
               }}
-              aria-label="Seleccionar idioma"
+              aria-label={t('nav.language')}
             >
               {LANGUAGE_FLAGS[language]} {LANGUAGE_LABELS[language]}
             </button>

@@ -1,12 +1,13 @@
 // ServicePage — generic detail page for any service id.
 
 function ServicePage({ id, setRoute }) {
+  const t = useTranslations();
   const svc = (window.ALL_SERVICES || []).find(s => s.id === id);
   if (!svc) {
     return (
       <div className="page" style={{ paddingTop: 200, textAlign: 'center' }}>
-        <h2 className="section-h2">Servicio no encontrado</h2>
-        <button onClick={() => setRoute('servicios')} className="btn btn-primary" style={{ marginTop: 24 }}>Ver servicios</button>
+        <h2 className="section-h2">{t('common.serviceNotFound')}</h2>
+        <button onClick={() => setRoute('servicios')} className="btn btn-primary" style={{ marginTop: 24 }}>{t('common.viewServices')}</button>
       </div>
     );
   }
@@ -14,11 +15,11 @@ function ServicePage({ id, setRoute }) {
   const c = svc.color;
 
   // Dynamic content per service
-  const detail = SERVICE_DETAILS[id] || {
-    overview: svc.tagline,
-    deliverables: svc.bullets,
-    process: ['Diagnóstico', 'Diseño', 'Desarrollo', 'Despliegue'],
-    tech: ['React', 'Node.js', 'PostgreSQL'],
+  const detail = {
+    overview: t(`service_pages.${svc.k}.overview`),
+    deliverables: t(`service_pages.${svc.k}.deliverables`),
+    process: t(`service_pages.${svc.k}.process`),
+    tech: (SERVICE_DETAILS[id] || {}).tech || ['React', 'Node.js', 'PostgreSQL'],
   };
 
   return (
@@ -31,7 +32,7 @@ function ServicePage({ id, setRoute }) {
         </div>
         <div className="container" style={{ position: 'relative' }}>
           <button onClick={() => setRoute('servicios')} style={{ background: 'transparent', border: 'none', color: 'var(--text-2)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 24 }}>
-            <Icon.ChevronRight size={14} style={{ transform: 'rotate(180deg)' }}/> Todos los servicios
+            <Icon.ChevronRight size={14} style={{ transform: 'rotate(180deg)' }}/> {t('common.allServices')}
           </button>
           <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 60, alignItems: 'center' }} className="svp-hero">
             <div>
@@ -43,12 +44,12 @@ function ServicePage({ id, setRoute }) {
                   marginBottom: 24,
                 }}>
                   <span style={{ width: 28, height: 28, borderRadius: 999, background: `${c}28`, color: c, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><I size={14}/></span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: c, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Servicio</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: c, textTransform: 'uppercase', letterSpacing: '0.12em' }}>{t('common.service')}</span>
                 </span>
               </Reveal>
               <Reveal delay={100}>
                 <h1 style={{ fontSize: 'clamp(40px, 6vw, 76px)', fontWeight: 800, color: 'var(--text-0)', letterSpacing: '-0.03em', lineHeight: 1, margin: '0 0 20px' }}>
-                  {svc.name}
+                  {t(`services.${svc.k}.name`)}
                 </h1>
               </Reveal>
               <Reveal delay={200}>
@@ -59,9 +60,9 @@ function ServicePage({ id, setRoute }) {
               <Reveal delay={300}>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                   <button onClick={() => setRoute('contacto')} className="btn btn-primary" style={{ background: `linear-gradient(135deg, ${c}, ${c}cc)`, boxShadow: `0 8px 30px ${c}50` }}>
-                    Cotizar este servicio <Icon.ArrowRight size={14}/>
+                    {t('common.quoteThisService')} <Icon.ArrowRight size={14}/>
                   </button>
-                  <button onClick={() => setRoute('proyectos')} className="btn btn-ghost">Ver casos</button>
+                  <button onClick={() => setRoute('proyectos')} className="btn btn-ghost">{t('common.viewCases')}</button>
                 </div>
               </Reveal>
             </div>
@@ -71,7 +72,7 @@ function ServicePage({ id, setRoute }) {
                 position: 'relative', overflow: 'hidden',
                 boxShadow: `0 20px 60px ${c}40, 0 0 80px ${c}30`,
               }}>
-                <img src={`./media/servicios/${svc.id}.png`} alt={svc.name} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+                <img src={`./media/servicios/${svc.id}.png`} alt={t(`services.${svc.k}.name`)} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
                 <div style={{ display: 'none', width: '100%', height: '100%', background: `linear-gradient(135deg, ${c}30, ${c}10)`, alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ width: 160, height: 160, borderRadius: 40, background: `${c}30`, color: c, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${c}80`, boxShadow: `0 0 80px ${c}80, inset 0 0 60px ${c}20` }}>
                     <I size={80} sw={1.4}/>
@@ -88,8 +89,8 @@ function ServicePage({ id, setRoute }) {
       <section style={{ padding: '80px 0' }}>
         <div className="container">
           <div style={{ marginBottom: 32 }}>
-            <Reveal><span className="section-eyebrow" style={{ color: c }}>Entregables</span></Reveal>
-            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(32px, 4.5vw, 56px)' }}>Lo que recibes</h2></Reveal>
+            <Reveal><span className="section-eyebrow" style={{ color: c }}>{t('common.deliverables')}</span></Reveal>
+            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(32px, 4.5vw, 56px)' }}>{t('common.whatYouReceive')}</h2></Reveal>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="del-grid">
             {detail.deliverables.map((d, i) => (
@@ -109,8 +110,8 @@ function ServicePage({ id, setRoute }) {
       <section style={{ padding: '60px 0' }}>
         <div className="container">
           <div style={{ marginBottom: 32 }}>
-            <Reveal><span className="section-eyebrow" style={{ color: c }}>Proceso</span></Reveal>
-            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(32px, 4.5vw, 56px)' }}>Cómo lo hacemos</h2></Reveal>
+            <Reveal><span className="section-eyebrow" style={{ color: c }}>{t('common.process')}</span></Reveal>
+            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(32px, 4.5vw, 56px)' }}>{t('common.howWeDoIt')}</h2></Reveal>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }} className="proc-grid">
             {detail.process.map((p, i) => (
@@ -129,8 +130,8 @@ function ServicePage({ id, setRoute }) {
       <section style={{ padding: '60px 0' }}>
         <div className="container">
           <div style={{ marginBottom: 32 }}>
-            <Reveal><span className="section-eyebrow" style={{ color: c }}>Stack</span></Reveal>
-            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>Tecnologías típicas</h2></Reveal>
+            <Reveal><span className="section-eyebrow" style={{ color: c }}>{t('common.stack')}</span></Reveal>
+            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12, fontSize: 'clamp(28px, 4vw, 44px)' }}>{t('common.typicalTech')}</h2></Reveal>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {detail.tech.map((t, i) => (
@@ -147,12 +148,12 @@ function ServicePage({ id, setRoute }) {
             borderRadius: 24, padding: 48, textAlign: 'center',
             background: `linear-gradient(135deg, ${c}1A, ${c}08)`, border: `1px solid ${c}40`,
           }}>
-            <h3 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>¿Hablamos de tu proyecto de {svc.name.toLowerCase()}?</h3>
+            <h3 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px', letterSpacing: '-0.02em' }}>{t('common.letsTalkProject')} {t(`services.${svc.k}.name`).toLowerCase()}?</h3>
             <p style={{ fontSize: 16, color: 'var(--text-1)', maxWidth: 520, margin: '0 auto 24px' }}>
-              Diagnóstico inicial gratuito. Te respondemos en menos de 24 horas.
+              {t('common.freeDiagnostic')}
             </p>
             <button onClick={() => setRoute('contacto')} className="btn btn-primary" style={{ background: `linear-gradient(135deg, ${c}, ${c}cc)`, boxShadow: `0 8px 30px ${c}50` }}>
-              Empezar conversación <Icon.ArrowRight size={14}/>
+              {t('common.startConversation')} <Icon.ArrowRight size={14}/>
             </button>
           </div>
         </div>

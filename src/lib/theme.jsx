@@ -38,12 +38,13 @@ function useTheme() {
 
 function ThemeToggle({ size = 38, style = {} }) {
   const { theme, toggle } = useTheme();
+  const { t } = useI18n();
   const isDark = theme === 'dark';
   return (
     <button
       onClick={toggle}
-      aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-      title={isDark ? 'Modo claro' : 'Modo oscuro'}
+      aria-label={isDark ? t('common.themeToLight') : t('common.themeToDark')}
+      title={isDark ? t('common.themeToLight') : t('common.themeToDark')}
       style={{
         width: size, height: size,
         background: 'var(--glass-bg-2)',

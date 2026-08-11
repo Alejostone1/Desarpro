@@ -10,6 +10,7 @@ function HoloAssistant({
   hudMessage = 'DESARPRO AI',
   reducedMotion = false,
 }) {
+  const t = useTranslations();
   const focused = formState === 'focused' || formState === 'typing' || assistantState === 'listening' || assistantState === 'processing' || assistantState === 'typing';
   const submitting = formState === 'submitting' || assistantState === 'processing';
   const success = formState === 'success' || assistantState === 'success';
@@ -330,7 +331,7 @@ function HoloAssistant({
               boxShadow: `0 0 8px ${success ? '#34D399' : (error ? '#F59E0B' : (submitting ? '#A78BFA' : '#22D3EE'))}`,
               animation: 'pulse 2s ease-in-out infinite',
             }}/>
-            {success ? 'Mensaje enviado' : (error ? 'Revisemos los datos' : (submitting ? 'Procesando...' : (focused ? 'Escuchando' : 'Asistente DesarPro · Online')))}
+            {success ? t('assistant.status.success') : (error ? t('assistant.status.error') : (submitting ? t('assistant.status.processing') : (focused ? t('assistant.status.listening') : `${t('assistant.name')} · ${t('assistant.online')}`)))}
           </span>
           <span style={{
             padding: '4px 10px', borderRadius: 999,

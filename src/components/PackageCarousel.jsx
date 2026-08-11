@@ -49,6 +49,7 @@ const PACKAGES = [
 ];
 
 function PackageCarousel({ onCTA }) {
+  const t = useTranslations();
   const [active, setActive] = React.useState(1); // BUSINESS by default
   const pkg = PACKAGES[active];
   const I = Icon[pkg.icon];
@@ -73,16 +74,16 @@ function PackageCarousel({ onCTA }) {
               border: `1px solid ${pkg.color}40`, flexShrink: 0,
             }}><I size={28}/></span>
             <div>
-              <div style={{ fontSize: 11, letterSpacing: '0.18em', color: pkg.color, textTransform: 'uppercase', fontWeight: 700 }}>Paquete {String(active + 1).padStart(2, '0')} / 11</div>
+              <div style={{ fontSize: 11, letterSpacing: '0.18em', color: pkg.color, textTransform: 'uppercase', fontWeight: 700 }}>{t('packages.label')} {String(active + 1).padStart(2, '0')} / 11</div>
               <h3 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', margin: '4px 0 0', letterSpacing: '-0.02em' }}>{pkg.name}</h3>
             </div>
           </div>
-          <div style={{ fontSize: 17, color: '#E5E7EB', fontWeight: 600, marginBottom: 8 }}>{pkg.tag}</div>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', marginBottom: 24, lineHeight: 1.6 }}>{pkg.headline}</p>
+          <div style={{ fontSize: 17, color: '#E5E7EB', fontWeight: 600, marginBottom: 8 }}>{t(`packages_data.${pkg.id}.tag`)}</div>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', marginBottom: 24, lineHeight: 1.6 }}>{t(`packages_data.${pkg.id}.headline`)}</p>
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Incluye</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{t('packages.includes')}</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px 20px' }}>
-              {pkg.includes.map((it, i) => (
+              {t(`packages_data.${pkg.id}.includes`).map((it, i) => (
                 <li key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13.5, color: '#E5E7EB',
                   animation: `pkg-item-in 400ms ${i * 50}ms both var(--ease-out)` }}>
                   <Icon.Check size={14} stroke={pkg.color} sw={2.4}/> <span>{it}</span>
@@ -91,10 +92,10 @@ function PackageCarousel({ onCTA }) {
             </ul>
           </div>
           <div style={{ paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>IDEAL PARA</div>
-            <div style={{ fontSize: 14, color: '#fff', marginBottom: 20 }}>{pkg.ideal}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>{t('packages.idealFor')}</div>
+            <div style={{ fontSize: 14, color: '#fff', marginBottom: 20 }}>{t(`packages_data.${pkg.id}.ideal`)}</div>
             <button onClick={onCTA} className="btn btn-primary" style={{ background: `linear-gradient(135deg, ${pkg.color} 0%, ${pkg.color}cc 100%)`, boxShadow: `0 8px 30px ${pkg.color}60` }}>
-              Hablemos de tu proyecto <Icon.ArrowRight size={14}/>
+              {t('packages.talkCta')} <Icon.ArrowRight size={14}/>
             </button>
           </div>
         </div>
@@ -119,7 +120,7 @@ function PackageCarousel({ onCTA }) {
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10,
               }}><PI size={16}/></span>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', letterSpacing: '0.02em' }}>{p.name}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>{p.tag}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>{t(`packages_data.${p.id}.tag`)}</div>
             </button>
           );
         })}
