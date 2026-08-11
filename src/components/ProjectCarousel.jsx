@@ -7,37 +7,32 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
   const t = useTranslations();
   const n = projects && projects.length ? projects.length : 0;
   const viewportRef = React.useRef(null);
-  const [active, setActive] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
   const [reduced, setReduced] = React.useState(false);
 
+  // Fully controlled: the selected project lives in the parent (activeId).
+  // No internal "active" state, so local navigation and external selection
+  // (industry cards) can never fight each other.
+  const activeIdx = n ? projects.findIndex((p) => p.id === activeId) : -1;
+  const active = activeIdx >= 0 ? activeIdx : 0;
+  const activeProject = n ? projects[active] : null;
+
   const go = React.useCallback((dir) => {
-    if (n < 2) return;
-    setActive((a) => (a + dir + n) % n);
-  }, [n]);
+    if (!onChange || n < 2) return;
+    const next = (active + dir + n) % n;
+    onChange(projects[next].id);
+  }, [onChange, n, active, projects]);
 
   const select = React.useCallback((i) => {
-    setActive(((i % n) + n) % n);
-  }, [n]);
-
-  // Controlled mode: parent changes activeId (e.g. industry card clicked) →
-  // move the panel to that project. Only reacts to a REAL external change, so
-  // local navigation (next/prev/dots/thumbnails) is never overridden.
-  const prevActiveIdRef = React.useRef(activeId);
-  React.useEffect(() => {
-    if (activeId == null || n === 0) return;
-    if (activeId === prevActiveIdRef.current) return;
-    prevActiveIdRef.current = activeId;
-    const idx = projects.findIndex((p) => p.id === activeId);
-    if (idx >= 0 && idx !== active) setActive(idx);
-  }, [activeId, projects, active, n]);
-
-  // Notify parent whenever the selected project changes.
-  React.useEffect(() => {
     if (!onChange || n === 0) return;
-    const currentId = projects[active] && projects[active].id;
-    if (currentId != null && currentId !== activeId) onChange(currentId);
-  }, [active, projects, onChange, activeId, n]);
+    onChange(projects[((i % n) + n) % n].id);
+  }, [onChange, n, projects]);
+
+  // Keep the parent in sync on mount or if activeId becomes invalid.
+  React.useEffect(() => {
+    if (n === 0 || !onChange || !activeProject) return;
+    if (activeProject.id !== activeId) onChange(activeProject.id);
+  }, [activeProject, activeId, onChange, n]);
 
   // prefers-reduced-motion
   React.useEffect(() => {
@@ -55,11 +50,9 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
   // Autoplay — slow, stops on hover/touch; restarts after every advance.
   React.useEffect(() => {
     if (reduced || paused || n < 2) return;
-    const id = window.setInterval(() => {
-      setActive((a) => (a + 1) % n);
-    }, 6500);
+    const id = window.setInterval(() => go(1), 6500);
     return () => window.clearInterval(id);
-  }, [reduced, paused, n, active]);
+  }, [reduced, paused, n, go]);
 
   // Swipe on the main panel (touch-action: pan-y keeps vertical scrolling native).
   React.useEffect(() => {
@@ -102,8 +95,6 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
   }, [n, go]);
 
   if (n === 0) return null;
-
-  const activeProject = projects[active];
 
   return (
     <div className="pc-root" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
