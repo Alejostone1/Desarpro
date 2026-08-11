@@ -2,15 +2,16 @@
 // Projects are fetched from the backend API with a local fallback (see projectData).
 
 function Projects({ setRoute }) {
+  const { language } = useI18n();
   const t = useTranslations();
   const [projects, setProjects] = React.useState(LOCAL_PROJECTS || []);
   const [selectedId, setSelectedId] = React.useState(null);
   const carouselRef = React.useRef(null);
 
-  // Load from backend (falls back to local catalog if the API is unreachable).
+  // Load from backend (localized by language; falls back to the local catalog).
   React.useEffect(() => {
     let live = true;
-    window.fetchProjects().then((data) => {
+    window.fetchProjects(language).then((data) => {
       if (!live) return;
       const list = Array.isArray(data) && data.length ? data : (LOCAL_PROJECTS || []);
       setProjects(list);
@@ -18,7 +19,7 @@ function Projects({ setRoute }) {
       if (firstFeatured) setSelectedId(firstFeatured.id);
     });
     return () => { live = false; };
-  }, []);
+  }, [language]);
 
   const handlePickIndustry = React.useCallback((industry) => {
     const match = projects.find((p) => p.industry === industry);

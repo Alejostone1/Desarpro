@@ -1,18 +1,23 @@
-// projectData — single source of truth for projects.
-// Tries the backend API (GET /api/projects) with a short timeout; on any
-// failure (offline, Vercel static build, server down) it falls back to the
-// local catalog below so the site always renders.
+// projectData — single source of truth for portfolio projects.
 //
-// Admin writes (save/delete) go to the backend when available and also keep a
-// localStorage snapshot so edits made from the admin panel are visible even on
-// static hosts without a backend.
+// The database (via the backend API) is the source of truth:
+//  - Public:  GET  /api/projects?lang=<lang> -> localized active projects.
+//  - Admin:   GET  /api/admin/projects       -> all projects incl. inactive + translations.
+//  - Writes:  POST /api/projects, PUT /api/projects/:slug, DELETE /api/projects/:slug
+//             authenticated with the admin session token (x-admin-token header).
+//
+// No localStorage snapshots: static-host fallback only shows the bundled ES catalog
+// when the API is unreachable (offline / no backend deployed).
 
-const ADMIN_KEY = 'Administrador01';
-const STORAGE_KEY = 'desarpro:projects:v1';
+const TOKEN_KEY = 'desarpro:admin:token';
 
-// Only query the backend when the site is running locally (localhost / LAN dev).
-// On deployed static hosts (Vercel) there is no backend, so skip the fetch and
-// render straight from the local catalog — no artificial loading delay.
+function readToken() {
+  try { return sessionStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
+}
+
+// Only query the backend when the site can reach one. Auto-detect localhost dev;
+// on deployed static hosts (Vercel) with no configured backend we render the
+// bundled catalog with no artificial loading delay.
 function isLocalHost() {
   if (typeof window === 'undefined') return true;
   const h = window.location.hostname;
@@ -20,18 +25,32 @@ function isLocalHost() {
 }
 const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) || (isLocalHost() ? 'http://localhost:3001' : null);
 
-function readOverrides() {
+function readLang() {
+  if (typeof window === 'undefined') return 'es';
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) { return null; }
+    return window.__CURRENT_LANG || localStorage.getItem('desarpro:language') || 'es';
+  } catch (e) { return 'es'; }
 }
 
-function persistOverrides(list) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+async function apiReq(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const token = readToken();
+  if (token) headers['x-admin-token'] = token;
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: opts.method || 'GET',
+      headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+    return { status: res.status, ok: res.ok, data };
+  } catch (e) {
+    return { status: 0, ok: false, data: null };
+  }
 }
 
-// Local fallback catalog — mirrors the seeded backend rows.
+// Local fallback catalog — mirrors the seeded backend rows (ES).
 const LOCAL_PROJECTS = [
   {
     id: 'vetai', slug: 'vetai', industry: 'VetTech', color: '#06B6D4', icon: 'Stethoscope',
@@ -177,41 +196,6 @@ const LOCAL_PROJECTS = [
 
 const LOCAL_FEATURED = LOCAL_PROJECTS.filter((p) => p.featured);
 
-async function fetchProjects() {
-  const overrides = readOverrides();
-  if (!API_BASE) return overrides || LOCAL_PROJECTS;
-  try {
-    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timer = ctrl ? setTimeout(() => ctrl.abort(), 2500) : null;
-    const res = await fetch(`${API_BASE}/api/projects`, {
-      signal: ctrl ? ctrl.signal : undefined,
-    });
-    if (timer) clearTimeout(timer);
-    if (!res.ok) throw new Error('bad status');
-    const data = await res.json();
-    if (!data || !data.ok || !Array.isArray(data.projects) || data.projects.length === 0) {
-      throw new Error('empty payload');
-    }
-    return data.projects.map((p) => ({
-      id: p.slug || p.id,
-      slug: p.slug,
-      industry: p.industry,
-      title: p.title,
-      client: p.client,
-      year: p.year,
-      color: p.color,
-      icon: p.icon,
-      tagline: p.tagline,
-      desc: p.desc,
-      tags: p.tags || [],
-      metrics: p.metrics || [],
-      featured: !!p.featured,
-    }));
-  } catch (e) {
-    return overrides || LOCAL_PROJECTS;
-  }
-}
-
 function normalizeProject(p) {
   return {
     id: p.slug || p.id,
@@ -227,62 +211,79 @@ function normalizeProject(p) {
     tags: Array.isArray(p.tags) ? p.tags : [],
     metrics: Array.isArray(p.metrics) ? p.metrics : [],
     featured: !!p.featured,
+    active: p.active !== undefined ? !!p.active : true,
+    order: typeof p.order === 'number' ? p.order : 0,
+    translations: p.translations || null,
   };
 }
 
+// Public list — localized active projects, or the bundled ES catalog when the API is down.
+async function fetchProjects(lang) {
+  const l = (lang && ['es', 'en', 'pt', 'fr', 'de'].includes(lang)) ? lang : readLang();
+  if (!API_BASE) return LOCAL_PROJECTS.map(normalizeProject);
+  try {
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(() => ctrl.abort(), 2500) : null;
+    const res = await fetch(`${API_BASE}/api/projects?lang=${encodeURIComponent(l)}`, {
+      signal: ctrl ? ctrl.signal : undefined,
+    });
+    if (timer) clearTimeout(timer);
+    if (!res.ok) throw new Error('bad status');
+    const data = await res.json();
+    if (!data || !data.ok || !Array.isArray(data.projects) || data.projects.length === 0) {
+      throw new Error('empty payload');
+    }
+    return data.projects.map(normalizeProject);
+  } catch (e) {
+    return LOCAL_PROJECTS.map(normalizeProject);
+  }
+}
+
+// Admin list — all projects (incl. inactive) with full translations.
+async function fetchAdminProjects(lang) {
+  if (!API_BASE) return { ok: false, status: 0, projects: [] };
+  const l = (lang && ['es', 'en', 'pt', 'fr', 'de'].includes(lang)) ? lang : 'es';
+  const res = await apiReq(`/api/admin/projects?lang=${encodeURIComponent(l)}`);
+  if (res.ok && res.data && Array.isArray(res.data.projects)) {
+    return { ok: true, status: res.status, projects: res.data.projects.map(normalizeProject) };
+  }
+  return { ok: false, status: res.status, projects: [] };
+}
+
+// Create or update a project (upsert by slug). Expects a payload with base fields
+// plus `translations: { es: { title, tagline, desc }, en: {...}, ... }`.
 async function saveProject(project) {
-  const norm = normalizeProject(project);
-  let saved = norm;
-  if (API_BASE) {
-    try {
-      const res = await fetch(`${API_BASE}/api/projects`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
-        body: JSON.stringify(norm),
-      });
-      const data = await res.json();
-      if (data && data.ok && data.project) saved = normalizeProject(data.project);
-    } catch (e) {}
+  if (!API_BASE) return { ok: false, status: 0 };
+  const payload = Object.assign({}, project);
+  const res = await apiReq('/api/projects', { method: 'POST', body: payload });
+  if (res.ok && res.data && res.data.ok && res.data.project) {
+    return { ok: true, status: res.status, project: normalizeProject(res.data.project) };
   }
-  // Keep the local snapshot in sync (works on static hosts too).
-  const overrides = readOverrides() || LOCAL_PROJECTS.map(normalizeProject);
-  const idx = overrides.findIndex((p) => p.slug === saved.slug);
-  let next;
-  if (idx >= 0) {
-    next = overrides.slice();
-    next[idx] = saved;
-  } else {
-    next = overrides.concat([saved]);
+  return { ok: false, status: res.status, error: (res.data && res.data.error) || 'Error al guardar' };
+}
+
+// Partial update of an existing project.
+async function updateProject(slug, patch) {
+  if (!API_BASE) return { ok: false, status: 0 };
+  const res = await apiReq(`/api/projects/${encodeURIComponent(slug)}`, { method: 'PUT', body: patch });
+  if (res.ok && res.data && res.data.ok && res.data.project) {
+    return { ok: true, status: res.status, project: normalizeProject(res.data.project) };
   }
-  persistOverrides(next);
-  return saved;
+  return { ok: false, status: res.status, error: (res.data && res.data.error) || 'Error al actualizar' };
 }
 
 async function deleteProject(slug) {
-  if (API_BASE) {
-    try {
-      await fetch(`${API_BASE}/api/projects/${encodeURIComponent(slug)}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-key': ADMIN_KEY },
-      });
-    } catch (e) {}
-  }
-  const overrides = readOverrides();
-  if (overrides) {
-    const next = overrides.filter((p) => p.slug !== slug);
-    persistOverrides(next);
-  }
-}
-
-async function resetLocalProjects() {
-  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  if (!API_BASE) return { ok: false, status: 0 };
+  const res = await apiReq(`/api/projects/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+  return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
 
 Object.assign(window, {
   fetchProjects,
+  fetchAdminProjects,
   saveProject,
+  updateProject,
   deleteProject,
-  resetLocalProjects,
   LOCAL_PROJECTS,
   LOCAL_FEATURED,
 });

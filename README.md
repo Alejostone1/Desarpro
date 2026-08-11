@@ -103,23 +103,36 @@ npm run preview
 
 ## 🗄️ Base de Datos (Desarrollo Local)
 
-El proyecto usa Prisma con SQLite para almacenar usuarios del panel administrativo.
+El proyecto usa Prisma con SQLite. La base de datos es la fuente de verdad del
+contenido del sitio (textos en 5 idiomas, proyectos y usuarios del panel admin).
 
 ```bash
 npx prisma generate
-npx prisma db push
+npx prisma migrate dev --name cms   # o: npx prisma db push
 node seed.js
+```
+
+Para levantar el backend de la API junto con el frontend:
+
+```bash
+npm run dev          # Vite (3000) + API (3001) en paralelo
 ```
 
 ## 🔐 Panel Administrador
 
-El sistema incluye un panel administrativo para edición de contenido en vivo.
+- Accede desde: `/#admin` (o `/#login` → pestaña **Admin**)
+- Inicia sesión con `admin@desarpro.com` / `Administrador01` (creado por `seed.js`)
+- Funcionalidad:
+  - Edición en vivo de textos con `<Editable>` en el sitio (`Activar edición en vivo`)
+  - Panel de edición de contenido por sección, en los **5 idiomas** (ES · EN · PT · FR · DE)
+  - Gestión de proyectos multi-idioma: crear, editar, eliminar, **mostrar/ocultar**,
+    **destacar** en el carrusel y **reordenar**
+  - **Exportar / Importar** JSON y **Restablecer** todo a los valores iniciales
+- Los cambios se guardan en la **base de datos** vía API con sesión por token.
+  El `localStorage` solo guarda preferencias (idioma, tema) y la sesión admin.
 
-- Accede desde: `/#login` → pestaña **Admin**
-- Funcionalidad: edición inline de textos, gestión de contenido
-- Datos almacenados en localStorage del navegador
-
-> **Nota**: En producción (Vercel), la autenticación funciona localmente sin backend.
+> **Nota**: Si la API no está disponible (deploy estático sin backend), el sitio
+> se muestra en modo solo-lectura con el catálogo integrado.
 
 ## 🌐 Deploy en Vercel
 
@@ -150,6 +163,15 @@ PR / branch → Preview (automático)
 ### Variables de Entorno en Vercel
 
 No se requieren variables de entorno para el despliegue en Vercel. El sitio funciona como contenido estático.
+
+Si se desea conectar un **backend remoto** (API con la base de datos), descomentar
+y completar la etiqueta en `index.html`:
+
+```html
+<meta name="desarpro:api" content="https://tu-api.desarpro.co">
+```
+
+En `localhost` la API se detecta automáticamente en `http://localhost:3001`.
 
 ## 🌍 Dominio Personalizado (Futuro)
 

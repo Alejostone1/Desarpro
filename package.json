@@ -5,7 +5,13 @@
   "scripts": {
     "dev": "concurrently -k \"vite\" \"node server.js\"",
     "build": "node ./node_modules/vite/bin/vite.js build && node copy-build-assets.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:migrate": "prisma migrate dev --name cms",
+    "db:push": "prisma db push",
+    "db:seed": "node seed.js"
+  },
+  "prisma": {
+    "seed": "node seed.js"
   },
   "engines": {
     "node": ">=18"

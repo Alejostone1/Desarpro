@@ -29,11 +29,11 @@ function Login({ setRoute }) {
   const handleAdminSubmit = async (e) => {
     e.preventDefault();
     setAdminError('');
-    const ok = await adminLogin(adminPwd);
-    if (ok) {
+    const res = await adminLogin(adminPwd);
+    if (res && res.ok) {
       setAdminSuccess(true);
     } else {
-      setAdminError(t('login.form.passwordWrong'));
+      setAdminError(res && res.error === 'server' ? 'Servidor no disponible' : t('login.form.passwordWrong'));
       setTimeout(() => setAdminError(''), 2500);
     }
   };

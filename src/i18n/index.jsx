@@ -26,8 +26,13 @@ function I18nProvider({ children }) {
     }
   }, []);
 
-  const t = React.useCallback((key) => {
-    const keys = key.split('.');
+  // Expose the current language globally so data libs (projects, admin content)
+  // can localize their fetches without importing React context.
+  React.useEffect(() => {
+    try { window.__CURRENT_LANG = language; } catch (e) {}
+  }, [language]);
+
+  const t = React.useCallback((key) => {    const keys = key.split('.');
     let value = __i18nTranslations[language];
 
     for (const k of keys) {
@@ -47,7 +52,7 @@ function I18nProvider({ children }) {
       }
     }
 
-    return typeof value === 'string' ? value : key;
+    return typeof value === 'string' || Array.isArray(value) ? value : key;
   }, [language]);
 
   const value = React.useMemo(() => ({

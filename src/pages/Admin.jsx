@@ -1,9 +1,18 @@
-// Admin — full CMS panel for editing all editable content keys grouped by section.
-// Password gate uses useAdmin().login(pwd). Once authenticated, shows grouped editors
-// with save, reset, edit-mode toggle, export/import JSON, and logout.
+// Admin — full CMS panel for editing content grouped by section, in all 5
+// languages (es/en/pt/fr/de), plus a multi-language ProjectsManager.
+//
+// Session is provided by useAdmin() (token stored in sessionStorage by the
+// backend login). Every save persists to the database through the API.
+// Export / Import / Reset are async and talk to the backend.
+
+const LANGS = ['es', 'en', 'pt', 'fr', 'de'];
+const LANG_LABELS = { es: 'ES', en: 'EN', pt: 'PT', fr: 'FR', de: 'DE' };
 
 function Admin({ setRoute }) {
-  const { isAdmin, login, logout, content, set, reset, exportData, importData, editMode, setEditMode } = useAdmin();
+  const {
+    isAdmin, login, logout, fullContent, serverUp, saveState, lastUpdated,
+    set, setAll, reset, exportData, importData, editMode, setEditMode, authError,
+  } = useAdmin();
   const { theme } = useTheme();
   const [pwd, setPwd] = React.useState('');
   const [err, setErr] = React.useState('');
@@ -12,7 +21,6 @@ function Admin({ setRoute }) {
   const [importText, setImportText] = React.useState('');
   const [importStatus, setImportStatus] = React.useState('');
 
-  // Group content keys by prefix for the sidebar nav
   const sections = React.useMemo(() => ({
     projects: { label: 'Proyectos', icon: 'Folder', prefixes: [], always: true },
     hero:    { label: 'Inicio · Hero',     icon: 'Sparkle',   prefixes: ['hero.'] },
@@ -28,7 +36,8 @@ function Admin({ setRoute }) {
     other:   { label: 'Otros',             icon: 'Settings',  prefixes: [] },
   }), []);
 
-  const allKeys = Object.keys(content || {});
+  const allKeys = Object.keys(fullContent || {});
+  const keyOrder = fullContent || {};
   const keysByGroup = {};
   Object.entries(sections).forEach(([id, s]) => {
     keysByGroup[id] = allKeys.filter(k => s.prefixes.some(p => k.startsWith(p)));
@@ -36,52 +45,61 @@ function Admin({ setRoute }) {
   const claimedKeys = new Set([].concat(...Object.values(keysByGroup)));
   keysByGroup.other = allKeys.filter(k => !claimedKeys.has(k));
 
+  const sortKeys = (keys) => keys.slice().sort((a, b) => {
+    const oa = typeof keyOrder[a] === 'object' && keyOrder[a].order != null ? keyOrder[a].order : 999;
+    const ob = typeof keyOrder[b] === 'object' && keyOrder[b].order != null ? keyOrder[b].order : 999;
+    return oa - ob;
+  });
+
   const handleLogin = async () => {
     setErr('');
-    const ok = await login(pwd);
-    if (!ok) {
-      setErr('Contraseña incorrecta');
-      setTimeout(() => setErr(''), 2500);
+    const res = await login(pwd);
+    if (!res || !res.ok) {
+      setErr(res && res.error === 'server' ? 'Servidor no disponible. Verifica que la API esté activa.' : 'Contraseña incorrecta');
+      setTimeout(() => setErr(''), 3500);
     }
   };
 
-  const handleSave = (key, value) => {
-    set(key, value);
+  const handleSave = async (key, translations) => {
     setSavedKey(key);
+    await setAll(key, translations);
     setTimeout(() => setSavedKey(null), 1200);
   };
 
-  const handleExport = () => {
-    const data = exportData();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `desarpro-content-${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = () => {
-    setImportStatus('');
+  const handleExport = async () => {
     try {
-      const ok = importData(importText);
-      if (ok) {
-        setImportStatus('success');
-        setImportText('');
-      } else {
-        setImportStatus('error');
-      }
-      setTimeout(() => setImportStatus(''), 3000);
+      const data = await exportData();
+      if (!data) throw new Error('empty');
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `desarpro-content-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (e) {
-      setImportStatus('error');
-      setTimeout(() => setImportStatus(''), 3000);
+      window.alert('No se pudo exportar. Revisa la conexión con la API.');
     }
   };
 
-  const handleReset = () => {
-    if (window.confirm('¿Restablecer todo el contenido a los valores originales? Esto no se puede deshacer.')) {
-      reset();
+  const handleImport = async () => {
+    setImportStatus('');
+    const res = await importData(importText);
+    if (res && res.ok) {
+      setImportStatus('success');
+      setImportText('');
+    } else {
+      setImportStatus('error');
+    }
+    setTimeout(() => setImportStatus(''), 3000);
+  };
+
+  const handleReset = async () => {
+    if (window.confirm('¿Restablecer TODO el contenido (textos y proyectos) a los valores originales? Esto no se puede deshacer.')) {
+      const res = await reset();
+      if (!res || !res.ok) {
+        window.alert('No se pudo restablecer. Revisa la conexión con la API.');
+      }
     }
   };
 
@@ -106,6 +124,12 @@ function Admin({ setRoute }) {
                 <p style={{ fontSize: 13, color: 'var(--text-2)', margin: '4px 0 0' }}>Acceso restringido</p>
               </div>
             </div>
+
+            {authError === 'expired' && (
+              <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 10, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', color: '#FBBF24', fontSize: 13 }}>
+                Tu sesión expiró. Ingresa de nuevo para continuar.
+              </div>
+            )}
 
             <div style={{ display: 'grid', gap: 14, marginTop: 24 }} onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}>
               <label style={{ display: 'block' }}>
@@ -141,8 +165,11 @@ function Admin({ setRoute }) {
   }
 
   // ----- DASHBOARD VIEW -----
-  const activeKeys = keysByGroup[activeSection] || [];
+  const activeKeys = sortKeys(keysByGroup[activeSection] || []);
   const SectionIcon = Icon[sections[activeSection].icon] || Icon.Settings;
+  const serverLabel = serverUp === false ? { text: 'API sin conexión · solo lectura', color: '#F87171' }
+    : serverUp === null ? { text: 'Conectando…', color: '#FBBF24' }
+    : { text: 'API en línea', color: '#34D399' };
 
   return (
     <div className="page" style={{ minHeight: '100vh', background: 'var(--bg-0)' }}>
@@ -154,12 +181,15 @@ function Admin({ setRoute }) {
         borderBottom: '1px solid var(--card-border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <a onClick={() => setRoute('home')} style={{ cursor: 'pointer' }}>
             <Logo size={32} withWordmark/>
           </a>
           <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B', fontWeight: 600 }}>
             <Icon.Shield size={11}/> ADMIN
+          </span>
+          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 999, border: `1px solid ${serverLabel.color}`, color: serverLabel.color, fontWeight: 600, background: `${serverLabel.color}14` }}>
+            {serverUp === false ? <Icon.X size={11}/> : <Icon.Activity size={11}/>} {serverLabel.text}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -227,6 +257,13 @@ function Admin({ setRoute }) {
 
         {/* Main panel */}
         <main style={{ padding: 32, maxWidth: 980, width: '100%' }} className="admin-main">
+          {authError === 'expired' && (
+            <div style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 12, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', color: '#FBBF24', fontSize: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Icon.Lock size={15}/> Sesión expirada. Tus cambios se seguirán mostrando, pero necesitas volver a iniciar sesión para guardar.
+              <button onClick={() => { logout(); }} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid rgba(245,158,11,0.4)', color: '#FBBF24', borderRadius: 8, padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>Re-ingresar</button>
+            </div>
+          )}
+
           {activeSection === 'projects' ? (
             <ProjectsManager/>
           ) : activeSection === '__import' ? (
@@ -235,12 +272,12 @@ function Admin({ setRoute }) {
                 <Icon.Upload size={22} stroke="var(--cyan-bright)"/> Importar contenido
               </h1>
               <p style={{ color: 'var(--text-2)', fontSize: 14, margin: '0 0 24px' }}>
-                Pega un JSON previamente exportado para restaurar el contenido del sitio.
+                Pega un JSON previamente exportado para restaurar el contenido del sitio (textos de los 5 idiomas y proyectos).
               </p>
               <textarea
                 value={importText}
                 onChange={e => setImportText(e.target.value)}
-                placeholder='{"hero.title.line1": "...", ...}'
+                placeholder='{"content": { "hero.title.line1": { "es": "...", "en": "..." } }, "projects": [ ... ]}'
                 rows={14}
                 className="input"
                 style={{ width: '100%', resize: 'vertical', fontFamily: 'monospace', fontSize: 13 }}
@@ -250,7 +287,7 @@ function Admin({ setRoute }) {
                   <Icon.Check size={14}/> Importar y guardar
                 </button>
                 {importStatus === 'success' && <span style={{ color: '#86efac', fontSize: 13 }}>✓ Importado correctamente</span>}
-                {importStatus === 'error' && <span style={{ color: '#fca5a5', fontSize: 13 }}>✗ JSON inválido</span>}
+                {importStatus === 'error' && <span style={{ color: '#fca5a5', fontSize: 13 }}>✗ No se pudo importar (JSON inválido o servidor no disponible)</span>}
               </div>
             </>
           ) : (
@@ -259,26 +296,30 @@ function Admin({ setRoute }) {
                 <SectionIcon size={22} stroke="var(--cyan-bright)"/> {sections[activeSection].label}
               </h1>
               <p style={{ color: 'var(--text-2)', fontSize: 14, margin: '0 0 24px' }}>
-                Edita los textos de esta sección. Los cambios se guardan automáticamente en tu navegador y se reflejan en el sitio al instante.
+                Edita los textos en los 5 idiomas (ES · EN · PT · FR · DE). «Guardar» persiste el campo completo en la base de datos.
               </p>
 
-              <div style={{ display: 'grid', gap: 14 }}>
-                {activeKeys.length === 0 ? (
-                  <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)', fontSize: 14, borderRadius: 16, background: 'var(--card-bg)', border: '1px dashed var(--card-border)' }}>
-                    No hay campos en esta sección.
-                  </div>
-                ) : (
-                  activeKeys.map(key => (
+              {!fullContent ? (
+                <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-3)', fontSize: 14 }}>Cargando contenido…</div>
+              ) : activeKeys.length === 0 ? (
+                <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-3)', fontSize: 14, borderRadius: 16, background: 'var(--card-bg)', border: '1px dashed var(--card-border)' }}>
+                  No hay campos en esta sección.
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gap: 14 }}>
+                  {activeKeys.map(key => (
                     <AdminFieldEditor
                       key={key}
                       fieldKey={key}
-                      value={content[key] || ''}
-                      saved={savedKey === key}
-                      onSave={(v) => handleSave(key, v)}
+                      translations={(fullContent[key] && fullContent[key].translations) || {}}
+                      onSave={(tr) => handleSave(key, tr)}
+                      saveState={saveState[key]}
+                      lastUpdated={lastUpdated[key]}
+                      justSaved={savedKey === key}
                     />
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </main>
@@ -298,111 +339,166 @@ function Admin({ setRoute }) {
   );
 }
 
-function AdminFieldEditor({ fieldKey, value, saved, onSave }) {
-  const [draft, setDraft] = React.useState(value);
-  const [dirty, setDirty] = React.useState(false);
-  React.useEffect(() => { setDraft(value); setDirty(false); }, [value, fieldKey]);
+// Multi-language field editor (all 5 languages per content key).
+function AdminFieldEditor({ fieldKey, translations = {}, onSave, saveState, lastUpdated, justSaved }) {
+  const [draft, setDraft] = React.useState(translations);
+  const [tab, setTab] = React.useState('es');
+  React.useEffect(() => { setDraft(translations); }, [translations, fieldKey]);
 
-  const isLong = (draft || '').length > 80 || (draft || '').includes('\n');
+  const dirty = LANGS.some(l => (draft[l] || '') !== (translations[l] || ''));
+  const val = draft[tab] || '';
+  const isLong = val.length > 80 || val.includes('\n');
+  const status = saveState === 'saving' ? { text: 'Guardando…', color: '#FBBF24', icon: <Icon.Activity size={12}/> }
+    : saveState === 'saved' ? { text: 'Guardado', color: '#86efac', icon: <Icon.Check size={12}/> }
+    : saveState === 'error' ? { text: 'Error al guardar', color: '#fca5a5', icon: <Icon.X size={12}/> }
+    : null;
 
   return (
     <div style={{
       padding: 18, borderRadius: 14,
       background: 'var(--card-bg)',
-      border: `1px solid ${saved ? 'rgba(34,197,94,0.5)' : 'var(--card-border)'}`,
+      border: `1px solid ${saveState === 'saved' || justSaved ? 'rgba(34,197,94,0.5)' : saveState === 'error' ? 'rgba(239,68,68,0.5)' : 'var(--card-border)'}`,
       transition: 'border-color 200ms',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 10, flexWrap: 'wrap' }}>
         <code style={{
           fontSize: 12, color: 'var(--cyan-bright)', fontFamily: 'monospace',
           padding: '3px 8px', borderRadius: 6, background: 'rgba(34,211,238,0.08)',
           border: '1px solid rgba(34,211,238,0.15)',
         }}>{fieldKey}</code>
-        {saved && <span style={{ fontSize: 12, color: '#86efac', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <Icon.Check size={12}/> Guardado
-        </span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {lastUpdated && (
+            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              Actualizado {new Date(lastUpdated).toLocaleDateString()} {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          {status && <span style={{ fontSize: 12, color: status.color, display: 'inline-flex', alignItems: 'center', gap: 4 }}>{status.icon} {status.text}</span>}
+        </div>
       </div>
+
+      <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+        {LANGS.map(l => (
+          <button key={l} onClick={() => setTab(l)} style={{
+            padding: '5px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, letterSpacing: '0.05em',
+            cursor: 'pointer',
+            background: tab === l ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'rgba(255,255,255,0.04)',
+            color: tab === l ? '#fff' : 'var(--text-2)',
+            border: tab === l ? '1px solid transparent' : '1px solid var(--card-border)',
+          }}>
+            {LANG_LABELS[l]}
+            {(draft[l] || '') !== (translations[l] || '') && <span style={{ marginLeft: 4, color: '#FBBF24' }}>•</span>}
+          </button>
+        ))}
+      </div>
+
       {isLong ? (
         <textarea
-          value={draft}
-          onChange={e => { setDraft(e.target.value); setDirty(e.target.value !== value); }}
-          rows={Math.max(3, Math.min(8, (draft.match(/\n/g) || []).length + 2))}
+          value={val}
+          onChange={e => setDraft(d => ({ ...d, [tab]: e.target.value }))}
+          rows={Math.max(3, Math.min(8, (val.match(/\n/g) || []).length + 2))}
           className="input"
-          style={{ resize: 'vertical', fontSize: 14 }}
+          style={{ resize: 'vertical', fontSize: 14, width: '100%' }}
         />
       ) : (
         <input
           type="text"
-          value={draft}
-          onChange={e => { setDraft(e.target.value); setDirty(e.target.value !== value); }}
+          value={val}
+          onChange={e => setDraft(d => ({ ...d, [tab]: e.target.value }))}
           className="input"
+          style={{ width: '100%' }}
         />
       )}
+
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
         {dirty && (
-          <button onClick={() => { setDraft(value); setDirty(false); }} className="btn btn-ghost" style={{ padding: '6px 12px', fontSize: 12 }}>
+          <button onClick={() => { setDraft(translations); }} className="btn btn-ghost" style={{ padding: '6px 12px', fontSize: 12 }}>
             Cancelar
           </button>
         )}
         <button
-          onClick={() => { onSave(draft); setDirty(false); }}
+          onClick={() => { onSave(draft); }}
           className="btn btn-primary"
           style={{ padding: '6px 14px', fontSize: 12, opacity: dirty ? 1 : 0.6 }}
-          disabled={!dirty}
+          disabled={!dirty || saveState === 'saving'}
         >
-          <Icon.Check size={12}/> Guardar
+          <Icon.Check size={12}/> {saveState === 'saving' ? 'Guardando…' : 'Guardar'}
         </button>
       </div>
     </div>
   );
 }
 
-// ProjectsManager — create, edit and delete portfolio projects.
-// Uses the backend API when available (localhost) and keeps a localStorage
-// snapshot so the same edits work on static hosts.
+// ProjectsManager — multi-language CRUD for portfolio projects.
+// All data lives in the database; writes go through the authenticated API.
 function ProjectsManager() {
   const [list, setList] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
-  const [editing, setEditing] = React.useState(null); // project object | 'new'
+  const [editing, setEditing] = React.useState(null); // slug | 'new'
   const [saving, setSaving] = React.useState(false);
   const [status, setStatus] = React.useState('');
-  const [form, setForm] = React.useState({});
+  const [langTab, setLangTab] = React.useState('es');
+  const [form, setForm] = React.useState(null);
 
-  const load = React.useCallback(() => {
+  const load = React.useCallback(async () => {
     setLoading(true);
-    window.fetchProjects().then((data) => {
-      setList(Array.isArray(data) ? data : []);
-      setLoading(false);
-    });
+    const res = await window.fetchAdminProjects('es');
+    setList(res.ok ? res.projects : []);
+    setLoading(false);
+    if (!res.ok && res.status !== 401 && res.status !== 0) {
+      setStatus('error: No se pudieron cargar los proyectos');
+      setTimeout(() => setStatus(''), 3000);
+    }
   }, []);
 
-  React.useEffect(load, [load]);
+  React.useEffect(() => { load(); }, [load]);
+
+  const emptyTranslations = () => ({
+    es: { title: '', tagline: '', desc: '' },
+    en: { title: '', tagline: '', desc: '' },
+    pt: { title: '', tagline: '', desc: '' },
+    fr: { title: '', tagline: '', desc: '' },
+    de: { title: '', tagline: '', desc: '' },
+  });
 
   const startNew = () => {
     setForm({
-      slug: '', industry: '', title: '', client: '', year: String(new Date().getFullYear()),
-      color: '#22D3EE', icon: 'Folder', tagline: '', desc: '',
-      tags: [], metrics: [], featured: false, order: list.length,
+      slug: '', industry: '', client: '', year: String(new Date().getFullYear()),
+      color: '#22D3EE', icon: 'Folder', tags: [], metrics: [],
+      featured: false, active: true, order: list.length, translations: emptyTranslations(),
     });
     setEditing('new');
+    setLangTab('es');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const startEdit = (p) => {
+    const translations = emptyTranslations();
+    for (const l of LANGS) {
+      const tr = p.translations && p.translations[l];
+      translations[l] = {
+        title: (tr && tr.title) || (l === 'es' ? (p.title || '') : ''),
+        tagline: (tr && tr.tagline) || (l === 'es' ? (p.tagline || '') : ''),
+        desc: (tr && tr.desc) || (l === 'es' ? (p.desc || '') : ''),
+      };
+    }
     setForm({
-      slug: p.slug, industry: p.industry, title: p.title, client: p.client || '',
-      year: p.year, color: p.color, icon: p.icon || 'Folder', tagline: p.tagline || '',
-      desc: p.desc || '', tags: p.tags || [], metrics: p.metrics || [],
-      featured: !!p.featured, order: p.order != null ? p.order : 0,
+      slug: p.slug, industry: p.industry || '', client: p.client || '',
+      year: p.year, color: p.color, icon: p.icon || 'Folder',
+      tags: p.tags || [], metrics: p.metrics || [],
+      featured: !!p.featured, active: p.active !== false, order: typeof p.order === 'number' ? p.order : 0,
+      translations,
     });
     setEditing(p.slug);
+    setLangTab('es');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
+  const setTranslation = (lang, field, value) => setForm((f) => ({
+    ...f,
+    translations: { ...f.translations, [lang]: { ...f.translations[lang], [field]: value } },
+  }));
   const setTagsCsv = (csv) => setField('tags', csv.split(',').map((s) => s.trim()).filter(Boolean));
-
   const setMetricsLines = (txt) => {
     const lines = txt.split('\n').map((l) => l.trim()).filter(Boolean);
     setField('metrics', lines.map((l) => {
@@ -411,22 +507,35 @@ function ProjectsManager() {
       return { k: l.slice(0, i).trim(), v: l.slice(i + 1).trim() };
     }));
   };
-
   const metricsText = (m) => (m || []).map((x) => `${x.k} | ${x.v}`).join('\n');
 
   const handleSave = async () => {
-    if (!form.title || !form.industry) {
-      setStatus('error: title e industry son obligatorios');
+    const es = form.translations.es || {};
+    if (!es.title || !form.industry) {
+      setStatus('error: El título (ES) y la industria son obligatorios');
       setTimeout(() => setStatus(''), 3000);
       return;
     }
     setSaving(true);
     try {
-      await window.saveProject(form);
-      setStatus('success');
-      setTimeout(() => setStatus(''), 2500);
-      setEditing(null);
-      load();
+      const payload = {
+        slug: form.slug, industry: form.industry, client: form.client,
+        year: form.year, color: form.color, icon: form.icon,
+        tags: form.tags, metrics: form.metrics,
+        featured: form.featured, active: form.active, order: form.order,
+        title: es.title, tagline: es.tagline, desc: es.desc,
+        translations: form.translations,
+      };
+      const res = await window.saveProject(payload);
+      if (res.ok) {
+        setStatus('success');
+        setTimeout(() => setStatus(''), 2500);
+        setEditing(null);
+        await load();
+      } else {
+        setStatus(res.status === 401 ? 'error: Sesión expirada' : `error: ${res.error || 'No se pudo guardar'}`);
+        setTimeout(() => setStatus(''), 3500);
+      }
     } finally {
       setSaving(false);
     }
@@ -434,8 +543,31 @@ function ProjectsManager() {
 
   const handleDelete = async (p) => {
     if (!window.confirm(`¿Eliminar "${p.title}"? Esta acción no se puede deshacer.`)) return;
-    await window.deleteProject(p.slug);
-    load();
+    const res = await window.deleteProject(p.slug);
+    if (res.ok) await load();
+    else {
+      setStatus('error: No se pudo eliminar');
+      setTimeout(() => setStatus(''), 3000);
+    }
+  };
+
+  const toggleFlag = async (p, flag) => {
+    await window.updateProject(p.slug, { [flag]: !p[flag] });
+    await load();
+  };
+
+  const move = async (idx, dir) => {
+    const j = idx + dir;
+    if (j < 0 || j >= list.length) return;
+    const arr = list.slice();
+    const a = arr[idx];
+    arr[idx] = arr[j];
+    arr[j] = a;
+    arr.forEach((p, i) => { p.order = i; });
+    setList(arr.slice().sort((x, y) => x.order - y.order));
+    await window.updateProject(a.slug, { order: j });
+    await window.updateProject(arr[idx].slug, { order: idx });
+    await load();
   };
 
   const inputStyle = { minHeight: 42 };
@@ -452,7 +584,7 @@ function ProjectsManager() {
       </div>
       <p style={{ color: 'var(--text-2)', fontSize: 14, margin: '0 0 24px' }}>
         Gestiona el portafolio que se muestra en «Una carpeta por sector» y en el carrusel de casos.
-        En localhost se guarda en la base de datos; en sitios estáticos se guarda una copia local del navegador.
+        Cada texto (título, tagline, descripción) se edita en los 5 idiomas. Todo se guarda en la base de datos.
       </p>
 
       {status && (
@@ -466,16 +598,45 @@ function ProjectsManager() {
         </div>
       )}
 
-      {editing && (
+      {editing && form && (
         <div style={{ marginBottom: 28, padding: 22, borderRadius: 16, background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Icon.Edit size={16}/> {editing === 'new' ? 'Nuevo proyecto' : `Editar: ${form.title || editing}`}
+            <Icon.Edit size={16}/> {editing === 'new' ? 'Nuevo proyecto' : `Editar: ${form.translations.es.title || editing}`}
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="pm-grid">
+
+          {/* Language tabs for the localized texts */}
+          <div style={{ marginBottom: 16 }}>
+            <span className="pm-label">Textos localizados</span>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {LANGS.map(l => (
+                <button key={l} onClick={() => setLangTab(l)} style={{
+                  padding: '5px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', cursor: 'pointer',
+                  background: langTab === l ? 'linear-gradient(135deg, #3B82F6, #06B6D4)' : 'rgba(255,255,255,0.04)',
+                  color: langTab === l ? '#fff' : 'var(--text-2)',
+                  border: langTab === l ? '1px solid transparent' : '1px solid var(--card-border)',
+                }}>
+                  {LANG_LABELS[l]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gap: 14, marginBottom: 16 }}>
             <label style={{ display: 'block' }}>
-              <span className="pm-label">Título *</span>
-              <input type="text" value={form.title || ''} onChange={(e) => setField('title', e.target.value)} className="input" style={inputStyle}/>
+              <span className="pm-label">Título ({langTab.toUpperCase()}) *</span>
+              <input type="text" value={form.translations[langTab].title || ''} onChange={(e) => setTranslation(langTab, 'title', e.target.value)} className="input" style={inputStyle}/>
             </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Etiqueta corta / tagline ({langTab.toUpperCase()})</span>
+              <input type="text" value={form.translations[langTab].tagline || ''} onChange={(e) => setTranslation(langTab, 'tagline', e.target.value)} className="input" style={inputStyle}/>
+            </label>
+            <label style={{ display: 'block' }}>
+              <span className="pm-label">Descripción ({langTab.toUpperCase()})</span>
+              <textarea value={form.translations[langTab].desc || ''} onChange={(e) => setTranslation(langTab, 'desc', e.target.value)} rows={3} className="input" style={{ width: '100%', resize: 'vertical' }}/>
+            </label>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="pm-grid">
             <label style={{ display: 'block' }}>
               <span className="pm-label">Sector / industria *</span>
               <input type="text" value={form.industry || ''} onChange={(e) => setField('industry', e.target.value)} className="input" style={inputStyle}/>
@@ -500,14 +661,6 @@ function ProjectsManager() {
               </div>
             </label>
             <label style={{ display: 'block' }}>
-              <span className="pm-label">Etiqueta corta (tagline)</span>
-              <input type="text" value={form.tagline || ''} onChange={(e) => setField('tagline', e.target.value)} className="input" style={inputStyle}/>
-            </label>
-            <label style={{ display: 'block' }}>
-              <span className="pm-label">Orden</span>
-              <input type="number" value={form.order != null ? form.order : 0} onChange={(e) => setField('order', parseInt(e.target.value, 10) || 0)} className="input" style={inputStyle}/>
-            </label>
-            <label style={{ display: 'block' }}>
               <span className="pm-label">Tags (separados por coma)</span>
               <input type="text" value={(form.tags || []).join(', ')} onChange={(e) => setTagsCsv(e.target.value)} className="input" style={inputStyle}/>
             </label>
@@ -515,11 +668,12 @@ function ProjectsManager() {
               <input type="checkbox" checked={!!form.featured} onChange={(e) => setField('featured', e.target.checked)} style={{ width: 18, height: 18, accentColor: '#F59E0B' }}/>
               <span style={{ color: 'var(--text-1)', fontSize: 13, fontWeight: 600 }}>Destacar en carrusel</span>
             </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 22 }}>
+              <input type="checkbox" checked={form.active !== false} onChange={(e) => setField('active', e.target.checked)} style={{ width: 18, height: 18, accentColor: '#10B981' }}/>
+              <span style={{ color: 'var(--text-1)', fontSize: 13, fontWeight: 600 }}>Visible en el sitio</span>
+            </label>
           </div>
-          <label style={{ display: 'block', marginTop: 14 }}>
-            <span className="pm-label">Descripción</span>
-            <textarea value={form.desc || ''} onChange={(e) => setField('desc', e.target.value)} rows={4} className="input" style={{ width: '100%', resize: 'vertical' }}/>
-          </label>
+
           <label style={{ display: 'block', marginTop: 14 }}>
             <span className="pm-label">Métricas (una por línea: «valor | descripción»)</span>
             <textarea value={metricsText(form.metrics)} onChange={(e) => setMetricsLines(e.target.value)} rows={3} className="input" style={{ width: '100%', resize: 'vertical', fontFamily: 'monospace', fontSize: 13 }}/>
@@ -542,19 +696,31 @@ function ProjectsManager() {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
-          {list.map((p) => (
+          {list.map((p, idx) => (
             <div key={p.slug || p.id} style={{
               display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 14,
               background: 'var(--card-bg)', border: '1px solid var(--card-border)',
+              opacity: p.active === false ? 0.6 : 1,
             }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+                <button onClick={() => move(idx, -1)} disabled={idx === 0} title="Mover arriba" style={{ background: 'transparent', border: 'none', color: idx === 0 ? 'var(--text-3)' : 'var(--text-1)', cursor: idx === 0 ? 'default' : 'pointer', padding: 0, lineHeight: 1 }}>▲</button>
+                <button onClick={() => move(idx, 1)} disabled={idx === list.length - 1} title="Mover abajo" style={{ background: 'transparent', border: 'none', color: idx === list.length - 1 ? 'var(--text-3)' : 'var(--text-1)', cursor: idx === list.length - 1 ? 'default' : 'pointer', padding: 0, lineHeight: 1 }}>▼</button>
+              </div>
               <span style={{ width: 12, height: 12, borderRadius: 4, background: p.color, flexShrink: 0 }}/>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {p.title} {p.featured && <span style={{ fontSize: 10, fontWeight: 800, color: '#F59E0B', letterSpacing: '0.08em' }}>★</span>}
+                  {p.active === false && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', marginLeft: 8 }}>OCULTO</span>}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{p.industry} {p.client ? `· ${p.client}` : ''} · {p.year}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{p.industry} {p.client ? `· ${p.client}` : ''} · {p.year} · orden {p.order}</div>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+                <button onClick={() => toggleFlag(p, 'featured')} title={p.featured ? 'Quitar del carrusel' : 'Destacar en carrusel'} className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12, color: p.featured ? '#F59E0B' : 'var(--text-2)' }}>
+                  <Icon.Star size={12}/> {p.featured ? 'Destacado' : 'Destacar'}
+                </button>
+                <button onClick={() => toggleFlag(p, 'active')} title={p.active ? 'Ocultar del sitio' : 'Mostrar en el sitio'} className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12, color: p.active === false ? '#F87171' : 'var(--text-2)' }}>
+                  <Icon.Eye size={12}/> {p.active === false ? 'Oculto' : 'Visible'}
+                </button>
                 <button onClick={() => startEdit(p)} className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12 }}>
                   <Icon.Edit size={12}/> Editar
                 </button>

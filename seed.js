@@ -1,182 +1,153 @@
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Canonical project catalog. `featured: true` -> shows in the Projects carousel.
-const PROJECTS = [
-  {
-    slug: 'vetai', industry: 'VetTech', color: '#06B6D4', icon: 'Stethoscope',
-    title: 'Plataforma de diagnóstico veterinario asistido por IA',
-    client: 'VetAI Diagnóstico', year: '2025',
-    tagline: 'Salud veterinaria · Laboratorios',
-    desc: 'Sistema multi-clínica con triaje inteligente, historia clínica electrónica y módulos de laboratorio. Reduce el tiempo de diagnóstico inicial en un 60%.',
-    tags: ['React', 'Python', 'PostgreSQL', 'OpenAI API'],
-    metrics: [
-      { k: '60%', v: 'menos tiempo de triaje' },
-      { k: '12', v: 'clínicas conectadas' },
-      { k: '4.8/5', v: 'NPS profesional' },
-    ],
-    featured: true, order: 0,
-  },
-  {
-    slug: 'trazacafe', industry: 'CoffeeTech', color: '#A78BFA', icon: 'Coffee',
-    title: 'Trazabilidad de café desde la finca hasta la taza',
-    client: 'TrazaCafé', year: '2025',
-    tagline: 'Agroindustria · Trazabilidad de café',
-    desc: 'App móvil + dashboard que rastrea cada lote desde el cafetal: cosecha, fermentación, secado, exportación. Con QR público que el comprador final escanea.',
-    tags: ['React Native', 'Node.js', 'PostgreSQL', 'AWS S3'],
-    metrics: [
-      { k: '180+', v: 'fincas activas' },
-      { k: '3 países', v: 'Colombia · USA · Japón' },
-      { k: '+22%', v: 'precio FOB promedio' },
-    ],
-    featured: true, order: 1,
-  },
-  {
-    slug: 'modaflow', industry: 'Fashion', color: '#EC4899', icon: 'Star',
-    title: 'Portal B2B de pedidos para marca de moda',
-    client: 'ModaFlow', year: '2025',
-    tagline: 'Moda · Pedidos y catálogo',
-    desc: 'Catálogo con showroom virtual, carrito, gestión de pedidos por temporada, integración con producción y facturación electrónica DIAN.',
-    tags: ['Next.js', '.NET', 'SQL Server', 'Stripe'],
-    metrics: [
-      { k: '+45%', v: 'pedidos online' },
-      { k: '320', v: 'multimarcas activas' },
-      { k: '−70%', v: 'errores de pedido' },
-    ],
-    featured: true, order: 2,
-  },
-  {
-    slug: 'ecommerce', industry: 'E-commerce', color: '#3B82F6', icon: 'ShoppingBag',
-    title: 'Tienda online para retail tecnológico',
-    client: 'TechRetail Store', year: '2025',
-    tagline: 'Retail tecnológico',
-    desc: 'E-commerce de alto rendimiento con catálogo dinámico, pasarela de pagos, búsqueda avanzada y panel de operación para el equipo de ventas.',
-    tags: ['Next.js', 'Node.js', 'PostgreSQL', 'Stripe'],
-    metrics: [
-      { k: '+38%', v: 'conversión de visitas' },
-      { k: '1.2s', v: 'tiempo de carga' },
-      { k: '3.2x', v: 'retorno sobre inversión' },
-    ],
-    featured: false, order: 3,
-  },
-  {
-    slug: 'agrotech', industry: 'AgroTech', color: '#10B981', icon: 'Tractor',
-    title: 'Operación de campo conectada',
-    client: 'AgroCampo Group', year: '2025',
-    tagline: 'Agro · Operación de campo',
-    desc: 'Plataforma que digitaliza la operación de campo: programación de lotes, seguimiento en tiempo real y reportes para toma de decisiones.',
-    tags: ['React Native', 'Python', 'PostgreSQL', 'MQTT'],
-    metrics: [
-      { k: '+31%', v: 'eficiencia de cuadrillas' },
-      { k: '1,200', v: 'hectáreas monitoreadas' },
-      { k: '24/7', v: 'telemetría en vivo' },
-    ],
-    featured: false, order: 4,
-  },
-  {
-    slug: 'fintech', industry: 'FinTech', color: '#F59E0B', icon: 'DollarSign',
-    title: 'Banca digital y pagos',
-    client: 'Andes Digital Bank', year: '2025',
-    tagline: 'Finanzas · Banca digital',
-    desc: 'Solución financiera con cuentas digitales, transferencias y conciliación automatizada con estándares de seguridad de nivel bancario.',
-    tags: ['Angular', 'Go', 'PostgreSQL', 'PCI-DSS'],
-    metrics: [
-      { k: '+52%', v: 'usuarios activos' },
-      { k: '99.98%', v: 'disponibilidad' },
-      { k: '0', v: 'incidentes de seguridad' },
-    ],
-    featured: false, order: 5,
-  },
-  {
-    slug: 'healthtech', industry: 'HealthTech', color: '#EF4444', icon: 'Heart',
-    title: 'Telemedicina y agendamiento',
-    client: 'VitalNet Salud', year: '2025',
-    tagline: 'Salud · Telemedicina',
-    desc: 'Plataforma de telemedicina con videoconsultas, historia clínica digital y agendamiento inteligente para centros de salud.',
-    tags: ['React', 'Node.js', 'MongoDB', 'WebRTC'],
-    metrics: [
-      { k: '+64%', v: 'consultas virtuales' },
-      { k: '4.9/5', v: 'satisfacción paciente' },
-      { k: '−45%', v: 'tiempo de agendamiento' },
-    ],
-    featured: false, order: 6,
-  },
-  {
-    slug: 'edtech', industry: 'EdTech', color: '#8B5CF6', icon: 'Book',
-    title: 'Plataforma e-learning',
-    client: 'Aula Pro', year: '2025',
-    tagline: 'Educación · Plataformas e-learning',
-    desc: 'LMS a medida con cursos, certificación, seguimiento de progreso y reportes de rendimiento para instituciones educativas.',
-    tags: ['React', 'Django', 'PostgreSQL', 'Redis'],
-    metrics: [
-      { k: '15k', v: 'estudiantes activos' },
-      { k: '+28%', v: 'tasa de finalización' },
-      { k: '120', v: 'instituciones aliadas' },
-    ],
-    featured: false, order: 7,
-  },
-  {
-    slug: 'logistics', industry: 'Logistics', color: '#06B6D4', icon: 'Truck',
-    title: 'Ruteo y logística inteligente',
-    client: 'LogiExpress', year: '2025',
-    tagline: 'Logística · Ruteo inteligente',
-    desc: 'Sistema de ruteo inteligente con optimización de entregas, tracking en vivo y visibilidad de flota para operadores logísticos.',
-    tags: ['Flutter', 'Node.js', 'PostgreSQL', 'Google Maps API'],
-    metrics: [
-      { k: '−23%', v: 'combustible por ruta' },
-      { k: '98%', v: 'entregas a tiempo' },
-      { k: '340', v: 'vehículos en flota' },
-    ],
-    featured: false, order: 8,
-  },
-  {
-    slug: 'foodtech', industry: 'FoodTech', color: '#10B981', icon: 'Utensils',
-    title: 'Gestión de restaurantes',
-    client: 'Sabor 360', year: '2025',
-    tagline: 'Alimentos · Gestión de restaurantes',
-    desc: 'Suite de gestión para restaurantes: pedidos, inventario, menú digital y analítica de ventas en tiempo real.',
-    tags: ['Vue.js', 'Node.js', 'MySQL', 'Stripe'],
-    metrics: [
-      { k: '+41%', v: 'ventas por ticket' },
-      { k: '9', v: 'sedes integradas' },
-      { k: '−18%', v: 'desperdicio de inventario' },
-    ],
-    featured: false, order: 9,
-  },
-];
+const { LANGUAGES, CONTENT_DEFAULTS, ALL_KEYS, sectionFor, typeFor, resolveValue, resolveProjectTranslations, PROJECT_SEED } = require('./src/lib/contentSeedData.js');
 
-async function main() {
-  const email = 'admin@desarpro.com';
-  const password = 'Administrador01';
+// Load the real i18n translations (ES/EN/PT/FR/DE) so the DB is seeded with
+// the exact strings the site already uses — nothing invented.
+function loadTranslations() {
+  const file = path.join(__dirname, 'src', 'i18n', 'translations.jsx');
+  const code = fs.readFileSync(file, 'utf8');
+  const sandbox = {};
+  vm.runInNewContext(code, sandbox, { filename: file });
+  return sandbox.__i18nTranslations || {};
+}
+const TRANSLATIONS = loadTranslations();
+
+// Canonical project catalog — centralized in src/lib/contentSeedData.js
+// (PROJECT_SEED) so seed.js and the API reset flow share one source of truth.
+const PROJECTS = PROJECT_SEED;
+
+async function seedAdmin() {
+  const email = (process.env.ADMIN_EMAIL || 'admin@desarpro.com').trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD || 'Administrador01';
+  if (!process.env.ADMIN_PASSWORD) {
+    console.warn('[seed] ADMIN_PASSWORD no está definido: usando la contraseña por defecto (SOLO desarrollo). En producción define ADMIN_EMAIL y ADMIN_PASSWORD.');
+  }
   const existing = await prisma.user.findUnique({ where: { email } });
+  const passwordHash = await bcrypt.hash(password, 10);
   if (existing) {
-    console.log('Usuario admin ya existe');
+    // Solo re-seteamos la contraseña si se configuró explícitamente por env;
+    // así un password custom que exista en la BD no se pierde con cada seed.
+    if (process.env.ADMIN_PASSWORD) {
+      await prisma.user.update({ where: { id: existing.id }, data: { passwordHash } });
+      console.log('Usuario admin actualizado:', email);
+    } else {
+      console.log('Usuario admin ya existe:', email);
+    }
   } else {
-    const passwordHash = await bcrypt.hash(password, 10);
     await prisma.user.create({ data: { email, passwordHash, role: 'admin' } });
     console.log('Usuario admin creado:', email);
   }
+}
 
+async function seedContent() {
+  let createdKeys = 0;
+  let createdTr = 0;
+  let updatedTr = 0;
+
+  for (const key of ALL_KEYS) {
+    const section = sectionFor(key);
+    const type = typeFor(key);
+    const order = ALL_KEYS.indexOf(key);
+
+    const existingKey = await prisma.contentKey.findUnique({ where: { key } });
+    let contentKey;
+    if (existingKey) {
+      contentKey = await prisma.contentKey.update({
+        where: { key },
+        data: { section, type, order },
+      });
+    } else {
+      contentKey = await prisma.contentKey.create({
+        data: { key, section, type, order },
+      });
+      createdKeys += 1;
+    }
+
+    for (const lang of LANGUAGES) {
+      const value = resolveValue(TRANSLATIONS, lang, key);
+      const existing = await prisma.contentTranslation.findUnique({
+        where: { contentKeyId_lang: { contentKeyId: contentKey.id, lang } },
+      });
+      if (existing) {
+        if (existing.value !== value) {
+          await prisma.contentTranslation.update({
+            where: { contentKeyId_lang: { contentKeyId: contentKey.id, lang } },
+            data: { value },
+          });
+          updatedTr += 1;
+        }
+      } else {
+        await prisma.contentTranslation.create({
+          data: { contentKeyId: contentKey.id, lang, value },
+        });
+        createdTr += 1;
+      }
+    }
+  }
+  console.log(`Contenido: ${createdKeys} claves creadas · ${createdTr} traducciones creadas · ${updatedTr} actualizadas (${ALL_KEYS.length} claves x ${LANGUAGES.length} idiomas)`);
+}
+
+async function seedProjects() {
   let created = 0;
   let updated = 0;
+  let createdTr = 0;
+  let updatedTr = 0;
+
   for (const p of PROJECTS) {
     const { tags, metrics, ...rest } = p;
     const data = {
       ...rest,
+      active: true,
       tags: JSON.stringify(tags || []),
       metrics: JSON.stringify(metrics || []),
     };
     const existingProject = await prisma.project.findUnique({ where: { slug: p.slug } });
+    let project;
     if (existingProject) {
-      await prisma.project.update({ where: { slug: p.slug }, data });
+      project = await prisma.project.update({ where: { slug: p.slug }, data });
       updated += 1;
     } else {
-      await prisma.project.create({ data: { slug: p.slug, ...data } });
+      project = await prisma.project.create({ data: { slug: p.slug, ...data } });
       created += 1;
     }
+
+    // Seed translations for all 5 languages. ES canonical values come from the
+    // project row itself; the others from PROJECT_TRANSLATIONS (fallback: ES).
+    for (const lang of LANGUAGES) {
+      const tr = lang === 'es' ? p : (resolveProjectTranslations(p.slug, lang) || p);
+      const existing = await prisma.projectTranslation.findUnique({
+        where: { projectId_lang: { projectId: project.id, lang } },
+      });
+      if (existing) {
+        if (existing.title !== tr.title || existing.tagline !== tr.tagline || existing.desc !== tr.desc) {
+          await prisma.projectTranslation.update({
+            where: { projectId_lang: { projectId: project.id, lang } },
+            data: { title: tr.title, tagline: tr.tagline, desc: tr.desc },
+          });
+          updatedTr += 1;
+        }
+      } else {
+        await prisma.projectTranslation.create({
+          data: { projectId: project.id, lang, title: tr.title, tagline: tr.tagline, desc: tr.desc },
+        });
+        createdTr += 1;
+      }
+    }
   }
-  console.log(`Proyectos sincronizados: ${created} creados / ${updated} actualizados (total ${PROJECTS.length})`);
+  console.log(`Proyectos: ${created} creados / ${updated} actualizados · traducciones ${createdTr} creadas / ${updatedTr} actualizadas (${PROJECTS.length} x ${LANGUAGES.length} idiomas)`);
+}
+
+async function main() {
+  await seedAdmin();
+  await seedContent();
+  await seedProjects();
+  console.log('Seed completado. El contenido ahora vive en la base de datos (SQLite).');
 }
 
 main().catch((e) => {

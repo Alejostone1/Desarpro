@@ -1,147 +1,230 @@
-// CMS / Admin system — content is keyed by string IDs, stored in localStorage.
-// Admin login is gated by a password (default: Administrador01).
-// <Editable id="hero.title" defaultValue="..." /> renders the latest value
-// and shows inline editing when admin mode is active.
+// CMS / Admin system — the database is the source of truth.
+// Admin login is gated by the backend (bcrypt user + API session token).
+// <Editable id="hero.title.line1" defaultValue="..." /> renders the latest
+// value for the current language and shows inline editing in admin mode.
+//
+// localStorage is used ONLY for session/preferences (admin session, token,
+// language, theme) — never as the content source of truth.
 
-const ADMIN_PASSWORD = 'Administrador01';
-const STORAGE_KEY = 'desarpro:cms:v1';
 const SESSION_KEY = 'desarpro:admin:session';
-// API base URL — configurable via window global; falls back to local dev server.
-// In production (Vercel), the backend is not available; the login function
-// gracefully falls back to the local password check below.
-const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) || 'http://localhost:3001';
+const TOKEN_KEY = 'desarpro:admin:token';
+const USER_KEY = 'desarpro:admin:user';
 
-// === Default content registry ===
-// All editable strings live here. Any code that wants to render
-// an editable value uses <Editable id="..."/> or useContent('...').
-const DEFAULT_CONTENT = {
-  // ===== Home — Hero =====
+function getApiBase() {
+  if (typeof window === 'undefined') return 'http://localhost:3001';
+  if (window.__DESARPRO_API_BASE) return window.__DESARPRO_API_BASE;
+  const h = window.location.hostname;
+  if (h === 'localhost' || h === '127.0.0.1' || h === '::1') return 'http://localhost:3001';
+  return null; // deployed without a configured backend -> read-only defaults
+}
+const API_BASE = getApiBase();
+
+function readToken() {
+  try { return sessionStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
+}
+function writeToken(t) {
+  try {
+    if (t) sessionStorage.setItem(TOKEN_KEY, t);
+    else sessionStorage.removeItem(TOKEN_KEY);
+  } catch (e) {}
+}
+function readAdminFlag() {
+  try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) { return false; }
+}
+
+// ES defaults (ultimate fallback so the site never breaks offline).
+const DEFAULT_CONTENT = (typeof window !== 'undefined' && window.__CONTENT_SEED && window.__CONTENT_SEED.CONTENT_DEFAULTS) || {
   'hero.badge': 'Aceptando proyectos para 2026',
   'hero.title.line1': 'Tecnología que',
   'hero.title.highlight': 'transforma',
   'hero.title.line2': 'tu negocio',
-  'hero.subtitle': 'Desarrollamos software a medida, apps móviles, plataformas SaaS y soluciones de IA, ciberseguridad e infraestructura para empresas que quieren crecer con base sólida en Colombia y Latinoamérica.',
-  'hero.cta.primary': 'Cotizar mi proyecto',
-  'hero.cta.secondary': 'Ver casos reales',
-
-  // ===== Home — Stats =====
-  'stats.1.value': '12',
-  'stats.1.label': 'Servicios tecnológicos',
-  'stats.2.value': '11',
-  'stats.2.label': 'Paquetes estratégicos',
-  'stats.3.value': '24h',
-  'stats.3.label': 'Tiempo de respuesta',
-  'stats.4.value': '100%',
-  'stats.4.label': 'Soluciones a medida',
-
-  // ===== Home — Services preview =====
-  'services.eyebrow': 'Lo que hacemos',
-  'services.title.pre': 'Construimos soluciones que',
-  'services.title.highlight': 'funcionan',
-  'services.subtitle': 'Cada servicio sigue un proceso probado: diagnóstico, diseño, desarrollo, despliegue y soporte. Sin atajos, sin promesas vacías.',
-
-  // ===== Home — Tech =====
-  'tech.eyebrow': 'Stack moderno',
-  'tech.title': 'Tecnologías con las que trabajamos',
-
-  // ===== Home — Process =====
-  'process.eyebrow': 'Proceso',
-  'process.title': 'Cómo trabajamos contigo',
-  'process.1.title': 'Diagnóstico',
-  'process.1.desc': 'Entendemos tu negocio, procesos y dolor real antes de proponer.',
-  'process.2.title': 'Diseño',
-  'process.2.desc': 'UX, arquitectura y prototipo. Validamos antes de codificar.',
-  'process.3.title': 'Desarrollo',
-  'process.3.desc': 'Sprints cortos, demos cada 2 semanas, código revisado.',
-  'process.4.title': 'Continuidad',
-  'process.4.desc': 'Despliegue, capacitación y soporte continuo post-lanzamiento.',
-
-  // ===== Home — CTA =====
-  'cta.title': '¿Listos para construir algo serio?',
-  'cta.subtitle': 'Te respondemos en menos de 24 horas con un diagnóstico inicial gratuito.',
-  'cta.primary': 'Empezar conversación',
-  'cta.secondary': 'Ver paquetes',
-
-  // ===== Contact =====
-  'contact.eyebrow': 'Contacto',
-  'contact.title.pre': 'Hagamos algo',
-  'contact.title.highlight': 'juntos',
-  'contact.subtitle': 'Escríbenos sobre tu proyecto. Te responderemos en menos de 24 horas hábiles con un primer diagnóstico.',
-  'contact.form.title': 'Cuéntanos sobre tu proyecto',
-  'contact.success.title': '¡Mensaje recibido!',
-  'contact.success.subtitle': 'Te respondemos en menos de 24 horas hábiles.',
-  'contact.info.email.title': 'Email',
-  'contact.email': 'info@desarpro.com',
-  'contact.info.email.sub': 'Respuesta en 24h',
-  'contact.info.wa.title': 'WhatsApp',
-  'contact.whatsapp': '+57 300 000 0000',
-  'contact.info.wa.sub': 'Lun-Vie 8am-6pm',
-  'contact.info.loc.title': 'Oficina',
-  'contact.location': 'Pereira, Colombia',
-  'contact.info.loc.sub': 'Trabajamos remoto LATAM',
-
-  // ===== Login =====
-  'login.title.pre': 'Bienvenido a tu',
-  'login.title.highlight': 'portal cliente',
-  'login.subtitle': 'Accede al estado de tus proyectos, tickets de soporte, facturación y reportes en tiempo real. Todo lo que necesitas para mantener tu operación bajo control.',
-  'login.feature.1': 'Estado de proyectos en vivo',
-  'login.feature.2': 'Soporte técnico 24/7',
-  'login.feature.3': 'Métricas y reportes ejecutivos',
-
-  // ===== Footer =====
-  'footer.tagline': 'Desarrollo de software profesional para empresas que quieren crecer.',
-  'footer.copyright': '© 2026 DesarPro. Todos los derechos reservados.',
-
-  // ===== About =====
-  'about.title.pre': 'Construimos software con',
-  'about.title.highlight': 'propósito',
-  'about.subtitle': 'DesarPro nació en Pereira con una idea simple: que cualquier empresa, sin importar su tamaño, pueda acceder a tecnología enterprise diseñada con criterio.',
 };
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const token = readToken();
+  if (token) headers['x-admin-token'] = token;
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: opts.method || 'GET',
+      headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) {}
+    return { status: res.status, ok: res.ok, data };
+  } catch (e) {
+    return { status: 0, ok: false, data: null };
+  }
+}
 
 const AdminContext = React.createContext({
   isAdmin: false,
   editMode: false,
-  content: DEFAULT_CONTENT,
-  login: () => false,
+  content: {},
+  fullContent: null,
+  serverUp: null,
+  loadingContent: false,
+  saveState: {},
+  lastUpdated: {},
+  login: async () => ({ ok: false, error: 'server' }),
   logout: () => {},
   setEditMode: () => {},
   get: (k) => DEFAULT_CONTENT[k] || '',
-  set: (k, v) => {},
-  reset: () => {},
-  exportData: () => '{}',
-  importData: () => {},
+  set: async () => {},
+  setAll: async () => {},
+  reset: async () => {},
+  exportData: async () => '{}',
+  importData: async () => ({ ok: false }),
+  refreshContent: async () => {},
 });
 
 function AdminProvider({ children }) {
-  const [isAdmin, setIsAdmin] = React.useState(() => {
-    try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) { return false; }
-  });
+  const { language } = useI18n();
+  const [isAdmin, setIsAdmin] = React.useState(readAdminFlag);
   const [editMode, setEditMode] = React.useState(false);
-  const [overrides, setOverrides] = React.useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch (e) { return {}; }
-  });
+  const [content, setContent] = React.useState({}); // flat map for current language
+  const [fullContent, setFullContent] = React.useState(null); // key -> { translations, type, updatedAt }
+  const [serverUp, setServerUp] = React.useState(null);
+  const [loadingContent, setLoadingContent] = React.useState(true);
+  const [saveState, setSaveState] = React.useState({});
+  const [lastUpdated, setLastUpdated] = React.useState({});
+  const [authError, setAuthError] = React.useState(''); // '' | 'expired'
 
-  const content = React.useMemo(() => ({ ...DEFAULT_CONTENT, ...overrides }), [overrides]);
+  // Load public content for the active language from the DB/API.
+  const loadContent = React.useCallback(async (lang, silent) => {
+    if (!silent) setLoadingContent(true);
+    const res = await api(`/api/content?lang=${encodeURIComponent(lang)}`);
+    if (res.ok && res.data && res.data.content) {
+      setContent(res.data.content);
+      setServerUp(true);
+    } else {
+      setServerUp(false);
+      if (res.status === 401) {
+        // Token gone bad while loading public content — ignore, public route.
+      }
+    }
+    setLoadingContent(false);
+  }, []);
+
+  // Load the full multi-language view for the admin panel.
+  const loadFullContent = React.useCallback(async () => {
+    const res = await api('/api/admin/content');
+    if (res.ok && res.data && Array.isArray(res.data.content)) {
+      const map = {};
+      const updated = {};
+      for (const c of res.data.content) {
+        map[c.key] = { translations: c.translations || {}, type: c.type || 'text', section: c.section, order: typeof c.order === 'number' ? c.order : 999 };
+        if (c.updatedAt) updated[c.key] = c.updatedAt;
+      }
+      setFullContent(map);
+      setLastUpdated(updated);
+      setServerUp(true);
+      return true;
+    }
+    if (res.status === 401) {
+      setAuthError('expired');
+      setServerUp(true);
+      logout();
+    } else {
+      setServerUp(false);
+    }
+    return false;
+  }, []);
+
+  React.useEffect(() => {
+    loadContent(language);
+  }, [language, loadContent]);
+
+  React.useEffect(() => {
+    if (isAdmin) {
+      loadFullContent();
+    }
+  }, [isAdmin, loadFullContent]);
 
   const get = React.useCallback((key) => {
-    return overrides[key] != null ? overrides[key] : (DEFAULT_CONTENT[key] || '');
-  }, [overrides]);
+    const v = content[key];
+    if (v != null && String(v).length) return v;
+    return DEFAULT_CONTENT[key] || '';
+  }, [content]);
 
-  const set = React.useCallback((key, value) => {
-    setOverrides(prev => {
-      const next = { ...prev, [key]: value };
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch (e) {}
-      return next;
+  const markSaved = React.useCallback((key) => {
+    setSaveState((s) => ({ ...s, [key]: 'saved' }));
+    setTimeout(() => {
+      setSaveState((s) => (s[key] === 'saved' ? { ...s, [key]: undefined } : s));
+    }, 1500);
+  }, []);
+
+  const handleUnauthorized = React.useCallback(() => {
+    setAuthError('expired');
+    logout();
+  }, []);
+
+  // Save a single translation for the CURRENT language.
+  const set = React.useCallback(async (key, value) => {
+    const lang = language;
+    const prev = content[key];
+    setSaveState((s) => ({ ...s, [key]: 'saving' }));
+    // Optimistic update (do not blank the UI while waiting).
+    setContent((prevContent) => ({ ...prevContent, [key]: value }));
+    setFullContent((prevFull) => {
+      if (!prevFull || !prevFull[key]) return prevFull;
+      return {
+        ...prevFull,
+        [key]: { ...prevFull[key], translations: { ...prevFull[key].translations, [lang]: value } },
+      };
     });
-  }, []);
+    const res = await api(`/api/admin/content/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      body: { lang, value },
+    });
+    if (res.ok && res.data && res.data.ok) {
+      if (res.data.updatedAt) setLastUpdated((u) => ({ ...u, [key]: res.data.updatedAt }));
+      markSaved(key);
+      return { ok: true };
+    }
+    // Revert the optimistic value so we never show unsaved content as saved.
+    setContent((prevContent) => ({ ...prevContent, [key]: prev }));
+    setFullContent((prevFull) => {
+      if (!prevFull || !prevFull[key]) return prevFull;
+      return {
+        ...prevFull,
+        [key]: { ...prevFull[key], translations: { ...prevFull[key].translations, [lang]: prev } },
+      };
+    });
+    setSaveState((s) => ({ ...s, [key]: 'error' }));
+    setTimeout(() => setSaveState((s) => (s[key] === 'error' ? { ...s, [key]: undefined } : s)), 3000);
+    if (res.status === 401) handleUnauthorized();
+    return { ok: false, status: res.status };
+  }, [language, content, markSaved, handleUnauthorized]);
 
-  const reset = React.useCallback(() => {
-    setOverrides({});
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-  }, []);
+  // Save several languages of one key at once (admin panel multi-language editor).
+  const setAll = React.useCallback(async (key, translations) => {
+    setSaveState((s) => ({ ...s, [key]: 'saving' }));
+    const res = await api(`/api/admin/content`, {
+      method: 'PUT',
+      body: { key, translations },
+    });
+    if (res.ok && res.data && res.data.ok) {
+      setFullContent((prevFull) => {
+        if (!prevFull) return prevFull;
+        const cur = prevFull[key] || { translations: {}, type: 'text' };
+        return { ...prevFull, [key]: { ...cur, translations: { ...cur.translations, ...translations } } };
+      });
+      // Refresh the public map for the current language too.
+      const lang = language;
+      if (translations[lang] !== undefined) {
+        setContent((c) => ({ ...c, [key]: translations[lang] }));
+      }
+      if (res.data.updatedAt) setLastUpdated((u) => ({ ...u, [key]: res.data.updatedAt }));
+      markSaved(key);
+      return { ok: true };
+    }
+    setSaveState((s) => ({ ...s, [key]: 'error' }));
+    setTimeout(() => setSaveState((s) => (s[key] === 'error' ? { ...s, [key]: undefined } : s)), 3000);
+    if (res.status === 401) handleUnauthorized();
+    return { ok: false, status: res.status };
+  }, [language, markSaved, handleUnauthorized]);
 
   const login = React.useCallback(async (password) => {
     try {
@@ -151,55 +234,101 @@ function AdminProvider({ children }) {
         body: JSON.stringify({ email: 'admin@desarpro.com', password }),
       });
       const data = await res.json();
-      if (data && data.ok) {
+      if (res.ok && data && data.ok && data.token) {
+        writeToken(data.token);
         setIsAdmin(true);
         try {
           sessionStorage.setItem(SESSION_KEY, '1');
-          localStorage.setItem('desarpro:admin:user', JSON.stringify(data.user));
+          localStorage.setItem(USER_KEY, JSON.stringify(data.user || { email: 'admin@desarpro.com', role: 'admin' }));
         } catch (e) {}
-        return true;
+        setAuthError('');
+        await loadFullContent();
+        return { ok: true };
       }
-    } catch (e) {}
-
-    if (password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      try {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        localStorage.setItem('desarpro:admin:user', JSON.stringify({ email: 'admin@desarpro.com', role: 'admin' }));
-      } catch (e) {}
-      return true;
+      return { ok: false, error: 'bad' };
+    } catch (e) {
+      return { ok: false, error: 'server' };
     }
-    return false;
-  }, []);
+  }, [loadFullContent]);
 
   const logout = React.useCallback(() => {
+    const token = readToken();
+    if (token) {
+      fetch(`${API_BASE}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'x-admin-token': token },
+      }).catch(() => {});
+    }
     setIsAdmin(false);
     setEditMode(false);
+    setFullContent(null);
+    writeToken(null);
     try {
       sessionStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem('desarpro:admin:user');
+      localStorage.removeItem(USER_KEY);
     } catch (e) {}
   }, []);
 
-  const exportData = React.useCallback(() => JSON.stringify(overrides, null, 2), [overrides]);
+  const reset = React.useCallback(async () => {
+    const res = await api('/api/admin/content/reset', { method: 'POST' });
+    if (res.ok && res.data && res.data.ok) {
+      await loadContent(language, true);
+      if (isAdmin) await loadFullContent();
+      return { ok: true };
+    }
+    if (res.status === 401) handleUnauthorized();
+    return { ok: false, status: res.status };
+  }, [language, isAdmin, loadContent, loadFullContent, handleUnauthorized]);
 
-  const importData = React.useCallback((json) => {
-    try {
-      const parsed = JSON.parse(json);
-      if (typeof parsed === 'object' && parsed) {
-        setOverrides(parsed);
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch (e) {}
-        return true;
-      }
-    } catch (e) {}
-    return false;
+  const exportData = React.useCallback(async () => {
+    const res = await api('/api/admin/content/export');
+    if (res.ok && res.data) return JSON.stringify(res.data, null, 2);
+    return null;
   }, []);
+
+  const importData = React.useCallback(async (json) => {
+    let parsed;
+    try { parsed = JSON.parse(json); } catch (e) { return { ok: false, error: 'JSON inválido' }; }
+    const res = await api('/api/admin/content/import', { method: 'POST', body: parsed });
+    if (res.ok && res.data && res.data.ok) {
+      await loadContent(language, true);
+      if (isAdmin) await loadFullContent();
+      return { ok: true, imported: res.data.imported };
+    }
+    if (res.status === 401) handleUnauthorized();
+    return { ok: false, error: (res.data && res.data.error) || 'No se pudo importar' };
+  }, [language, isAdmin, loadContent, loadFullContent, handleUnauthorized]);
+
+  const refreshContent = React.useCallback(async () => {
+    await loadContent(language, true);
+    if (isAdmin) await loadFullContent();
+  }, [language, isAdmin, loadContent, loadFullContent]);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-edit-mode', editMode ? 'true' : 'false');
   }, [editMode]);
 
-  const value = { isAdmin, editMode, setEditMode, content, get, set, reset, login, logout, exportData, importData };
+  const value = {
+    isAdmin,
+    editMode,
+    setEditMode,
+    content,
+    fullContent,
+    serverUp,
+    loadingContent,
+    saveState,
+    lastUpdated,
+    authError,
+    login,
+    logout,
+    get,
+    set,
+    setAll,
+    reset,
+    exportData,
+    importData,
+    refreshContent,
+  };
   return React.createElement(AdminContext.Provider, { value }, children);
 }
 
@@ -350,4 +479,4 @@ function AdminFab({ setRoute }) {
   );
 }
 
-Object.assign(window, { AdminProvider, useAdmin, Editable, AdminFab, ADMIN_PASSWORD, DEFAULT_CONTENT });
+Object.assign(window, { AdminProvider, useAdmin, Editable, AdminFab, API_BASE, DEFAULT_CONTENT });

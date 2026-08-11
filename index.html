@@ -21,6 +21,14 @@
   <meta name="twitter:description" content="Desarrollo de software profesional. Web, móvil, software a medida, IA, ciberseguridad e infraestructura para empresas que quieren crecer." />
 
   <title>DesarPro · Tecnología que transforma tu negocio</title>
+  <!--
+    Backend API base.
+    - Dev local: se auto-detecta (http://localhost:3001). Deja sin definir.
+    - Deploy estático con backend remoto: define VITE_API_URL antes de `vite build`
+      (p. ej. VITE_API_URL="https://api.desarpro.co") y el placeholder %VITE_API_URL%
+      se reemplaza aquí automáticamente.
+  -->
+  <meta name="desarpro:api" content="%VITE_API_URL%" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -33,6 +41,25 @@
         var t = localStorage.getItem('desarpro:theme');
         if (t === 'light' || t === 'dark') {
           document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+    // Resolve the backend API base (used by admin.jsx and projectData.jsx).
+    (function() {
+      try {
+        var meta = document.querySelector('meta[name="desarpro:api"]');
+        var base = meta && meta.getAttribute('content');
+        // "%VITE_API_URL%" es el placeholder de Vite sin reemplazar (VITE_API_URL no
+        // definida en el build): se trata como si estuviera vacío (auto-detección).
+        if (base && base.indexOf('%VITE_') === 0) base = '';
+        if (!base) {
+          var h = window.location.hostname;
+          if (h === 'localhost' || h === '127.0.0.1' || h === '::1') {
+            base = 'http://localhost:3001';
+          }
+        }
+        if (base) {
+          window.__DESARPRO_API_BASE = base.replace(/\/+$/, '');
         }
       } catch (e) {}
     })();
@@ -49,6 +76,7 @@
   <script type="text/babel" data-presets="env,react" src="src/lib/icons.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/lib/anim.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/lib/theme.jsx"></script>
+  <script type="text/babel" data-presets="env,react" src="src/lib/contentSeedData.js"></script>
   <script type="text/babel" data-presets="env,react" src="src/lib/admin.jsx"></script>
   <script type="text/babel" data-presets="env,react" src="src/lib/techLogos.jsx"></script>
 

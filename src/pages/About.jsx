@@ -1,6 +1,7 @@
 // About — mission, vision, values, timeline 2025.
 
 function About({ setRoute }) {
+  const t = useTranslations();
   return (
     <div className="page" style={{ paddingTop: 110 }}>
       <section style={{ position: 'relative', padding: '60px 0 40px', overflow: 'hidden' }}>
@@ -9,15 +10,15 @@ function About({ setRoute }) {
         </div>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 30%, transparent, var(--bg-0) 70%)', pointerEvents: 'none' }}/>
         <div className="container" style={{ position: 'relative', textAlign: 'center' }}>
-          <Reveal><span className="section-eyebrow">Sobre nosotros</span></Reveal>
+          <Reveal><span className="section-eyebrow">{t('about.eyebrow')}</span></Reveal>
           <Reveal delay={100}>
             <h1 className="section-h2" style={{ marginTop: 16, fontSize: 'clamp(48px, 7vw, 88px)' }}>
-              Somos un equipo que <span className="text-grad-violet">construye</span>
+              {t('about.titlePre')} <span className="text-grad-violet">{t('about.titleHighlight')}</span>
             </h1>
           </Reveal>
           <Reveal delay={200}>
             <p className="section-sub" style={{ margin: '24px auto 0' }}>
-              DesarPro nació en Pereira, Colombia, con una idea simple: las empresas no necesitan más promesas tecnológicas, necesitan sistemas que funcionen. Nos especializamos en software a medida con base sólida.
+              {t('about.intro')}
             </p>
           </Reveal>
         </div>
@@ -33,9 +34,9 @@ function About({ setRoute }) {
                 <span style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(34,211,238,0.12)', color: '#22D3EE', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(34,211,238,0.3)', position: 'relative' }}>
                   <Icon.Target size={26}/>
                 </span>
-                <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#22D3EE', margin: '20px 0 12px', position: 'relative' }}>Misión</h3>
+                <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#22D3EE', margin: '20px 0 12px', position: 'relative' }}>{t('about.missionLabel')}</h3>
                 <p style={{ fontSize: 18, color: 'var(--text-0)', lineHeight: 1.55, margin: 0, fontWeight: 500, position: 'relative' }}>
-                  Construir tecnología que resuelva problemas reales de negocio para empresas en Colombia y Latinoamérica, con foco en operación, control y crecimiento medible.
+                  {t('about.mission')}
                 </p>
               </div>
             </Reveal>
@@ -45,9 +46,9 @@ function About({ setRoute }) {
                 <span style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(167,139,250,0.12)', color: '#A78BFA', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(167,139,250,0.3)', position: 'relative' }}>
                   <Icon.Telescope size={26}/>
                 </span>
-                <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#A78BFA', margin: '20px 0 12px', position: 'relative' }}>Visión</h3>
+                <h3 style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#A78BFA', margin: '20px 0 12px', position: 'relative' }}>{t('about.visionLabel')}</h3>
                 <p style={{ fontSize: 18, color: 'var(--text-0)', lineHeight: 1.55, margin: 0, fontWeight: 500, position: 'relative' }}>
-                  Ser para 2030 el aliado tecnológico de referencia para PYMEs y startups en LATAM que quieran escalar con software propio, datos confiables e inteligencia aplicada.
+                  {t('about.vision')}
                 </p>
               </div>
             </Reveal>
@@ -60,15 +61,15 @@ function About({ setRoute }) {
       <section style={{ padding: '80px 0' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <Reveal><span className="section-eyebrow">Valores</span></Reveal>
-            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12 }}>Cómo decidimos cada día</h2></Reveal>
+            <Reveal><span className="section-eyebrow">{t('about.valuesEyebrow')}</span></Reveal>
+            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12 }}>{t('about.valuesTitle')}</h2></Reveal>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }} className="val-grid">
             {[
-              { icon: 'Lightbulb', name: 'Claridad', d: 'Decimos lo que sabemos hacer y lo que no. Sin venta inflada.', c: '#F59E0B' },
-              { icon: 'Heart', name: 'Compromiso', d: 'Nos hacemos cargo de lo que entregamos, antes y después.', c: '#EC4899' },
-              { icon: 'Award', name: 'Calidad', d: 'Código revisado, testeado y documentado. No "funciona en mi máquina".', c: '#22D3EE' },
-              { icon: 'Handshake', name: 'Cercanía', d: 'Hablas con quien construye. No hay capas que te alejen del equipo.', c: '#10B981' },
+              { icon: 'Lightbulb', name: t('about.values.1.name'), d: t('about.values.1.desc'), c: '#F59E0B' },
+              { icon: 'Heart', name: t('about.values.2.name'), d: t('about.values.2.desc'), c: '#EC4899' },
+              { icon: 'Award', name: t('about.values.3.name'), d: t('about.values.3.desc'), c: '#22D3EE' },
+              { icon: 'Handshake', name: t('about.values.4.name'), d: t('about.values.4.desc'), c: '#10B981' },
             ].map((v, i) => {
               const I = Icon[v.icon];
               return (
@@ -86,21 +87,53 @@ function About({ setRoute }) {
         <style>{`@media (max-width: 980px) { .val-grid { grid-template-columns: repeat(2, 1fr) !important; } } @media (max-width: 580px) { .val-grid { grid-template-columns: 1fr !important; } }`}</style>
       </section>
 
+      {/* FOUNDERS */}
+      <section style={{ padding: '80px 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <Reveal><span className="section-eyebrow" style={{ color: '#F59E0B' }}>{t('about.foundersEyebrow')}</span></Reveal>
+            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12 }}>{t('about.foundersTitle')}</h2></Reveal>
+            <Reveal delay={150}>
+              <p className="section-sub" style={{ margin: '16px auto 0', maxWidth: 680 }}>{t('about.foundersDesc')}</p>
+            </Reveal>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, maxWidth: 820, margin: '0 auto' }} className="fd-grid">
+            {['1', '2'].map((k, i) => (
+              <Reveal key={k} delay={i * 100}>
+                <div className="glass" style={{ borderRadius: 16, padding: 28, textAlign: 'center', height: '100%' }}>
+                  <span style={{
+                    width: 56, height: 56, borderRadius: 999, marginBottom: 14,
+                    background: i === 0 ? 'rgba(59,130,246,0.12)' : 'rgba(167,139,250,0.12)',
+                    color: i === 0 ? '#3B82F6' : '#A78BFA', border: `1px solid ${i === 0 ? '#3B82F6' : '#A78BFA'}40`,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {i === 0 ? <Icon.Code size={24}/> : <Icon.Users size={24}/>}
+                  </span>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-0)', margin: 0 }}>{t(`about.founders.${k}.name`)}</h3>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+        <style>{`@media (max-width: 640px) { .fd-grid { grid-template-columns: 1fr !important; } }`}</style>
+      </section>
+
       {/* TIMELINE 2025 */}
       <section style={{ padding: '80px 0' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <Reveal><span className="section-eyebrow">Timeline 2025</span></Reveal>
-            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12 }}>Nuestro primer año</h2></Reveal>
+            <Reveal><span className="section-eyebrow">{t('about.timeline.eyebrow')}</span></Reveal>
+            <Reveal delay={100}><h2 className="section-h2" style={{ marginTop: 12 }}>{t('about.timeline.title')}</h2></Reveal>
           </div>
           <div style={{ position: 'relative', maxWidth: 900, margin: '0 auto' }}>
             <div style={{ position: 'absolute', left: 'clamp(20px, 4vw, 30px)', top: 12, bottom: 12, width: 2, background: 'linear-gradient(180deg, #22D3EE, #A78BFA, #EC4899)', borderRadius: 2 }}/>
             {[
-              { mo: 'Ene 2025', t: 'Fundación', d: 'DesarPro nace en Pereira con un equipo de 3 desarrolladores y la convicción de hacer las cosas bien.', c: '#22D3EE' },
-              { mo: 'Mar 2025', t: 'Primer cliente enterprise', d: 'Lanzamos la primera plataforma SaaS multi-tenant para una marca de moda colombiana.', c: '#3B82F6' },
-              { mo: 'Jun 2025', t: 'Vertical VetTech', d: 'Iniciamos especialización en salud veterinaria con la primera versión de VetAI.', c: '#A78BFA' },
-              { mo: 'Sep 2025', t: 'Internacionalización', d: 'Primer cliente fuera de Colombia: trazabilidad de café para cooperativa exportadora.', c: '#EC4899' },
-              { mo: 'Dic 2025', t: '11 paquetes definidos', d: 'Estructuramos nuestra oferta en 11 paquetes especializados que cubren todo el ciclo de vida.', c: '#F59E0B' },
+              { mo: t('about.timeline.items.1.mo'), t: t('about.timeline.items.1.t'), d: t('about.timeline.items.1.d'), c: '#22D3EE' },
+              { mo: t('about.timeline.items.2.mo'), t: t('about.timeline.items.2.t'), d: t('about.timeline.items.2.d'), c: '#3B82F6' },
+              { mo: t('about.timeline.items.3.mo'), t: t('about.timeline.items.3.t'), d: t('about.timeline.items.3.d'), c: '#A78BFA' },
+              { mo: t('about.timeline.items.4.mo'), t: t('about.timeline.items.4.t'), d: t('about.timeline.items.4.d'), c: '#EC4899' },
+              { mo: t('about.timeline.items.5.mo'), t: t('about.timeline.items.5.t'), d: t('about.timeline.items.5.d'), c: '#F59E0B' },
+              { mo: t('about.timeline.items.6.mo'), t: t('about.timeline.items.6.t'), d: t('about.timeline.items.6.d'), c: '#22D3EE' },
             ].map((m, i) => (
               <Reveal key={i} delay={i * 100}>
                 <div style={{ display: 'flex', gap: 'clamp(16px, 3vw, 24px)', paddingLeft: 4, paddingBottom: 36, position: 'relative' }}>
@@ -128,11 +161,11 @@ function About({ setRoute }) {
         <div className="container">
           <div className="glass-2" style={{ borderRadius: 24, padding: 48, textAlign: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(167,139,250,0.12))' }}>
             <Icon.Users size={32} stroke="#22D3EE" style={{ marginBottom: 12 }}/>
-            <h3 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px' }}>¿Quieres trabajar con nosotros?</h3>
+            <h3 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 12px' }}>{t('about.teamCtaTitle')}</h3>
             <p style={{ fontSize: 16, color: 'var(--text-1)', maxWidth: 500, margin: '0 auto 24px' }}>
-              Estamos creciendo. Si te apasiona construir software con propósito, conversemos.
+              {t('about.teamCtaDesc')}
             </p>
-            <button onClick={() => setRoute('contacto')} className="btn btn-primary">Hablemos <Icon.ArrowRight size={14}/></button>
+            <button onClick={() => setRoute('contacto')} className="btn btn-primary">{t('about.teamCtaBtn')} <Icon.ArrowRight size={14}/></button>
           </div>
         </div>
       </section>
