@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { useAdmin } from '../lib/admin.jsx';
-import { useTheme } from '../lib/theme.jsx';
+import { useTheme, ThemeToggle } from '../lib/theme.jsx';
 import Icon from '../lib/icons.jsx';
+import Logo from '../components/Logo.jsx';
+import NeuralNet from '../components/NeuralNet.jsx';
 import { fetchAdminProjects, saveProject, deleteProject, updateProject } from '../lib/projectData.jsx';
 import { DashboardView, LeadsManager, ServicesManager, TechManager, SeoManager, ConfigManager } from './AdminViews.jsx';
 
@@ -185,7 +187,7 @@ function Admin({ setRoute }) {
     : { text: 'API en línea', color: '#34D399' };
 
   return (
-    <div className="page" style={{ minHeight: '100vh', background: 'var(--bg-0)' }}>
+    <div className="page admin-shell" style={{ minHeight: '100vh', background: 'var(--bg-0)', paddingTop: 0 }}>
       {/* Top bar */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
@@ -220,13 +222,9 @@ function Admin({ setRoute }) {
       </header>
 
       {/* Body — sidebar + main */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 260px) minmax(0, 1fr)', minHeight: 'calc(100vh - 70px)' }} className="admin-layout">
+      <div className="admin-layout">
         {/* Sidebar */}
-        <aside style={{
-          padding: 20,
-          borderRight: '1px solid var(--card-border)',
-          background: 'var(--bg-1)',
-        }} className="admin-sidebar">
+        <aside className="admin-sidebar">
           <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, padding: '4px 12px', marginBottom: 8 }}>
             Secciones
           </div>
@@ -269,7 +267,7 @@ function Admin({ setRoute }) {
         </aside>
 
         {/* Main panel */}
-        <main style={{ padding: 32, maxWidth: 980, width: '100%' }} className="admin-main">
+        <main className="admin-main">
           {authError === 'expired' && (
             <div style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 12, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', color: '#FBBF24', fontSize: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
               <Icon.Lock size={15}/> Sesión expirada. Tus cambios se seguirán mostrando, pero necesitas volver a iniciar sesión para guardar.
@@ -351,9 +349,44 @@ function Admin({ setRoute }) {
       </div>
 
       <style>{`
+        .admin-shell.page { padding-top: 0 !important; overflow-x: hidden; }
+        .admin-layout {
+          display: grid;
+          grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+          min-height: calc(100vh - 70px);
+          width: 100%;
+        }
+        .admin-sidebar {
+          padding: 20px;
+          border-right: 1px solid var(--card-border);
+          background: var(--bg-1);
+          overflow-y: auto;
+          max-height: calc(100vh - 70px);
+          position: sticky;
+          top: 70px;
+          align-self: start;
+        }
+        .admin-main {
+          padding: clamp(16px, 2.5vw, 32px);
+          width: 100%;
+          min-width: 0;
+          max-width: none;
+        }
+        @media (max-width: 1100px) {
+          .admin-layout { grid-template-columns: minmax(200px, 240px) minmax(0, 1fr); }
+        }
         @media (max-width: 880px) {
           .admin-layout { grid-template-columns: 1fr !important; }
-          .admin-sidebar { border-right: none !important; border-bottom: 1px solid var(--card-border) !important; padding: 16px !important; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px; }
+          .admin-sidebar {
+            border-right: none !important;
+            border-bottom: 1px solid var(--card-border) !important;
+            padding: 16px !important;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 6px;
+            max-height: none;
+            position: static;
+          }
           .admin-main { padding: 20px !important; }
         }
         @media (max-width: 480px) {
@@ -722,8 +755,8 @@ function ProjectsManager() {
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
           {list.map((p, idx) => (
-            <div key={p.slug || p.id} style={{
-              display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 14,
+            <div key={p.slug || p.id} className="pm-row" style={{
+              padding: '12px 16px', borderRadius: 14,
               background: 'var(--card-bg)', border: '1px solid var(--card-border)',
               opacity: p.active === false ? 0.6 : 1,
             }}>
@@ -739,7 +772,7 @@ function ProjectsManager() {
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{p.industry} {p.client ? `· ${p.client}` : ''} · {p.year} · orden {p.order}</div>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+              <div className="pm-row-actions">
                 <button onClick={() => toggleFlag(p, 'featured')} title={p.featured ? 'Quitar del carrusel' : 'Destacar en carrusel'} className="btn btn-ghost" style={{ padding: '7px 12px', fontSize: 12, color: p.featured ? '#F59E0B' : 'var(--text-2)' }}>
                   <Icon.Star size={12}/> {p.featured ? 'Destacado' : 'Destacar'}
                 </button>
@@ -760,6 +793,22 @@ function ProjectsManager() {
 
       <style>{`
         .pm-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+        .pm-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .pm-row-actions {
+          display: flex;
+          gap: 8px;
+          flex-shrink: 0;
+          flex-wrap: wrap;
+        }
+        @media (max-width: 900px) {
+          .pm-row { align-items: flex-start; }
+          .pm-row-actions { width: 100%; }
+        }
         @media (max-width: 640px) {
           .pm-grid { grid-template-columns: 1fr !important; }
         }

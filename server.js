@@ -1399,8 +1399,9 @@ app.post('/api/admin/content/reset', requireAuth, requireAdminRole, async (_req,
   }
 });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor de auth listo en http://localhost:${PORT}`);
+  console.log(`  Red local: http://<tu-ip-lan>:${PORT}`);
 });
 
 server.on('error', (err) => {

@@ -258,22 +258,41 @@ El frontend está preparado para Vite y debe publicar **`dist/`**, no `src/`.
    - **Build Command:** `npm run build`
    - **Output Directory:** `dist`
    - **Node.js:** 18 o superior
-3. Si hay una API remota, crear `VITE_API_URL` en las variables de entorno de Vercel con su URL pública, sin barra final.
-4. Desplegar desde `main`; las ramas y pull requests pueden generar previews.
+3. Después de desplegar el backend (ver abajo), crear **`BACKEND_URL`** en Vercel con la URL HTTPS pública de la API, **sin barra final** (p. ej. `https://desarpro-api.up.railway.app`).
+4. Redesplegar el frontend. El sitio usará el proxy `/api/*` del mismo dominio (`desarpro.vercel.app/api/...`), así login y CMS funcionan desde cualquier red sin CORS.
+5. *(Opcional)* Si prefieres llamar al backend directamente, define `VITE_API_URL` en el build y configura `CORS_ORIGIN` en el backend.
 
-`vercel.json` define cabeceras de seguridad y caché prolongada para `media/`. Las rutas por hash no requieren rewrites de SPA.
+`vercel.json` define cabeceras de seguridad y caché prolongada para `media/`. La carpeta `api/` incluye un proxy serverless hacia `BACKEND_URL`.
 
-### API y base de datos en producción
+### API y base de datos en producción (Railway recomendado)
 
-El CMS requiere una API Express disponible públicamente y una base de datos persistente. Vercel está configurado aquí como hospedaje del frontend estático; despliegue la API en un entorno Node persistente o adapte el backend a funciones serverless.
+El CMS requiere una API Express disponible públicamente y una base de datos persistente. **Vercel solo sirve el frontend**; el backend va en un servicio Node con disco persistente.
 
-Para la configuración actual con SQLite:
+#### Railway (Express + SQLite)
 
-1. Hospedar `server.js`, Prisma y el archivo de base de datos en un servicio con almacenamiento persistente.
-2. Definir `DATABASE_URL`, `PORT`, `CORS_ORIGIN`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` y, si se desea, `SESSION_TTL_MS`.
-3. Ejecutar `npm run db:push` y `npm run db:seed` durante la preparación controlada del entorno.
-4. Configurar `VITE_API_URL` en el build del frontend con la URL HTTPS de esa API.
-5. Restringir `CORS_ORIGIN` al dominio real del frontend; no usar `*` en producción.
+1. Crear proyecto en [Railway](https://railway.app) conectado a este repositorio.
+2. Añadir un **volumen** montado en `/data`.
+3. Variables de entorno en Railway:
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | `file:/data/prod.db` |
+| `CORS_ORIGIN` | `https://desarpro.vercel.app` (y tu dominio custom si aplica) |
+| `ADMIN_EMAIL` | tu correo admin |
+| `ADMIN_PASSWORD` | contraseña segura |
+| `PORT` | `3001` (Railway inyecta su propio puerto; opcional) |
+
+4. Railway usará `railway.toml` → `npm run start:api` (Prisma push + seed + Express).
+5. Generar dominio público en Railway (Settings → Networking → Generate Domain).
+6. Copiar esa URL a **`BACKEND_URL`** en Vercel y redesplegar el frontend.
+
+#### Verificar acceso remoto
+
+- Salud API: `https://TU-BACKEND/api/health`
+- Login: `https://desarpro.vercel.app/#/login`
+- Admin: `https://desarpro.vercel.app/#/admin`
+
+Desde móvil o cualquier red, las peticiones van a `desarpro.vercel.app/api/*` → proxy → tu backend.
 
 > SQLite en un sistema de archivos efímero de serverless no garantiza persistencia. Para crecer, planifique una base de datos gestionada y la migración correspondiente de Prisma.
 

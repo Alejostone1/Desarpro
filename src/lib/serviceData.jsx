@@ -6,6 +6,7 @@
 // Follows the same conventions as src/lib/projectData.jsx.
 
 import React from 'react';
+import { resolveApiBase } from './apiBase.js';
 
 const TOKEN_KEY = 'desarpro:admin:token';
 
@@ -13,12 +14,7 @@ function readToken() {
   try { return sessionStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
 }
 
-function isLocalHost() {
-  if (typeof window === 'undefined') return true;
-  const h = window.location.hostname;
-  return h === 'localhost' || h === '127.0.0.1' || h === '::1';
-}
-const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) || (isLocalHost() ? 'http://localhost:3001' : null);
+const API_BASE = resolveApiBase();
 
 function readLang() {
   if (typeof window === 'undefined') return 'es';
@@ -83,7 +79,7 @@ function normalizeService(s) {
 // Public localized services (DB) with bundled catalog fallback.
 async function fetchServices(lang) {
   const l = (lang && ['es', 'en', 'pt', 'fr', 'de'].includes(lang)) ? lang : readLang();
-  if (!API_BASE) return SERVICE_CATALOG.map(normalizeService);
+  if (API_BASE == null) return SERVICE_CATALOG.map(normalizeService);
   try {
     const res = await apiReq(`/api/services?lang=${encodeURIComponent(l)}`);
     if (res.ok && res.data && Array.isArray(res.data.services) && res.data.services.length) {
@@ -96,7 +92,7 @@ async function fetchServices(lang) {
 }
 
 async function fetchAdminServices() {
-  if (!API_BASE) return { ok: false, status: 0, services: [] };
+  if (API_BASE == null) return { ok: false, status: 0, services: [] };
   const res = await apiReq('/api/admin/services');
   if (res.ok && res.data && Array.isArray(res.data.services)) {
     return { ok: true, status: res.status, services: res.data.services.map(normalizeService) };
@@ -105,7 +101,7 @@ async function fetchAdminServices() {
 }
 
 async function saveService(service) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq('/api/services', { method: 'POST', body: service });
   if (res.ok && res.data && res.data.ok && res.data.service) {
     return { ok: true, status: res.status, service: normalizeService(res.data.service) };
@@ -114,7 +110,7 @@ async function saveService(service) {
 }
 
 async function updateService(slug, patch) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/services/${encodeURIComponent(slug)}`, { method: 'PUT', body: patch });
   if (res.ok && res.data && res.data.ok && res.data.service) {
     return { ok: true, status: res.status, service: normalizeService(res.data.service) };
@@ -123,7 +119,7 @@ async function updateService(slug, patch) {
 }
 
 async function deleteService(slug) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/services/${encodeURIComponent(slug)}`, { method: 'DELETE' });
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
@@ -142,7 +138,7 @@ function normalizeTechnology(t) {
 }
 
 async function fetchTechnologies() {
-  if (!API_BASE) return [];
+  if (API_BASE == null) return [];
   try {
     const res = await apiReq('/api/technologies');
     if (res.ok && res.data && Array.isArray(res.data.technologies)) {
@@ -153,7 +149,7 @@ async function fetchTechnologies() {
 }
 
 async function fetchAdminTechnologies() {
-  if (!API_BASE) return { ok: false, status: 0, technologies: [] };
+  if (API_BASE == null) return { ok: false, status: 0, technologies: [] };
   const res = await apiReq('/api/admin/technologies');
   if (res.ok && res.data && Array.isArray(res.data.technologies)) {
     return { ok: true, status: res.status, technologies: res.data.technologies.map(normalizeTechnology) };
@@ -162,7 +158,7 @@ async function fetchAdminTechnologies() {
 }
 
 async function saveTechnology(tech) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq('/api/technologies', { method: 'POST', body: tech });
   if (res.ok && res.data && res.data.ok && res.data.technology) {
     return { ok: true, status: res.status, technology: normalizeTechnology(res.data.technology) };
@@ -171,7 +167,7 @@ async function saveTechnology(tech) {
 }
 
 async function deleteTechnology(id) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/technologies/${id}`, { method: 'DELETE' });
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
@@ -185,7 +181,7 @@ const SITE_CONFIG_DEFAULTS = {
 };
 
 async function fetchSiteConfig() {
-  if (!API_BASE) return SITE_CONFIG_DEFAULTS;
+  if (API_BASE == null) return SITE_CONFIG_DEFAULTS;
   try {
     const res = await apiReq('/api/site-config');
     if (res.ok && res.data && res.data.config) return { ...SITE_CONFIG_DEFAULTS, ...res.data.config };
@@ -194,7 +190,7 @@ async function fetchSiteConfig() {
 }
 
 async function saveSiteConfig(key, value) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq('/api/admin/site-config', { method: 'PUT', body: { key, value } });
   return { ok: res.ok && res.data && res.data.ok, status: res.status, config: res.data && res.data.config };
 }
@@ -202,7 +198,7 @@ async function saveSiteConfig(key, value) {
 // ---------- SEO ----------
 async function fetchSeo(lang) {
   const l = (lang && ['es', 'en', 'pt', 'fr', 'de'].includes(lang)) ? lang : readLang();
-  if (!API_BASE) return null;
+  if (API_BASE == null) return null;
   try {
     const res = await apiReq(`/api/seo?lang=${encodeURIComponent(l)}`);
     if (res.ok && res.data && res.data.seo) return res.data.seo;
@@ -211,20 +207,20 @@ async function fetchSeo(lang) {
 }
 
 async function fetchAdminSeo() {
-  if (!API_BASE) return { ok: false, status: 0, seo: [] };
+  if (API_BASE == null) return { ok: false, status: 0, seo: [] };
   const res = await apiReq('/api/admin/seo');
   if (res.ok && res.data && Array.isArray(res.data.seo)) return { ok: true, status: res.status, seo: res.data.seo };
   return { ok: false, status: res.status, seo: [] };
 }
 
 async function saveSeo(entry) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq('/api/admin/seo', { method: 'POST', body: entry });
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
 
 async function deleteSeo(route, lang) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const q = lang ? `?lang=${encodeURIComponent(lang)}` : '';
   const res = await apiReq(`/api/admin/seo/${encodeURIComponent(route)}${q}`, { method: 'DELETE' });
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
@@ -232,13 +228,13 @@ async function deleteSeo(route, lang) {
 
 // ---------- Leads ----------
 async function submitContact(payload) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq('/api/contact', { method: 'POST', body: payload });
   return { ok: res.ok && res.data && res.data.ok, status: res.status, data: res.data };
 }
 
 async function fetchAdminLeads(status = 'all', q = '') {
-  if (!API_BASE) return { ok: false, status: 0, leads: [], counts: {} };
+  if (API_BASE == null) return { ok: false, status: 0, leads: [], counts: {} };
   const params = new URLSearchParams();
   if (status && status !== 'all') params.set('status', status);
   if (q) params.set('q', q);
@@ -250,20 +246,20 @@ async function fetchAdminLeads(status = 'all', q = '') {
 }
 
 async function updateLead(id, patch) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/admin/leads/${id}`, { method: 'PUT', body: patch });
   return { ok: res.ok && res.data && res.data.ok, status: res.status, lead: res.data && res.data.lead };
 }
 
 async function deleteLead(id) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/admin/leads/${id}`, { method: 'DELETE' });
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
 
 // ---------- Dashboard ----------
 async function fetchDashboard() {
-  if (!API_BASE) return { ok: false, status: 0, dashboard: null };
+  if (API_BASE == null) return { ok: false, status: 0, dashboard: null };
   const res = await apiReq('/api/admin/dashboard');
   if (res.ok && res.data && res.data.dashboard) return { ok: true, status: res.status, dashboard: res.data.dashboard };
   return { ok: false, status: res.status, dashboard: null };

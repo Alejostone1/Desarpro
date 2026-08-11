@@ -8,17 +8,14 @@
 
 import React from 'react';
 import { useI18n } from '../i18n/index.jsx';
+import { resolveApiBase } from './apiBase.js';
 
 const SESSION_KEY = 'desarpro:admin:session';
 const TOKEN_KEY = 'desarpro:admin:token';
 const USER_KEY = 'desarpro:admin:user';
 
 function getApiBase() {
-  if (typeof window === 'undefined') return 'http://localhost:3001';
-  if (window.__DESARPRO_API_BASE) return window.__DESARPRO_API_BASE;
-  const h = window.location.hostname;
-  if (h === 'localhost' || h === '127.0.0.1' || h === '::1') return 'http://localhost:3001';
-  return null; // deployed without a configured backend -> read-only defaults
+  return resolveApiBase();
 }
 const API_BASE = getApiBase();
 

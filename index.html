@@ -49,18 +49,19 @@
       try {
         var meta = document.querySelector('meta[name="desarpro:api"]');
         var base = meta && meta.getAttribute('content');
-        // "%VITE_API_URL%" es el placeholder de Vite sin reemplazar (VITE_API_URL no
-        // definida en el build): se trata como si estuviera vacío (auto-detección).
+        // "%VITE_API_URL%" = placeholder sin reemplazar en el build → auto-detectar.
         if (base && base.indexOf('%VITE_') === 0) base = '';
         if (!base) {
           var h = window.location.hostname;
-          if (h === 'localhost' || h === '127.0.0.1' || h === '::1') {
-            base = 'http://localhost:3001';
+          var port = window.location.port;
+          if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || port === '3000' || port === '5173') {
+            base = window.location.protocol + '//' + h + ':3001';
+          } else {
+            // Vercel / producción: /api/* proxy en el mismo dominio
+            base = '';
           }
         }
-        if (base) {
-          window.__DESARPRO_API_BASE = base.replace(/\/+$/, '');
-        }
+        window.__DESARPRO_API_BASE = (base || '').replace(/\/+$/, '');
       } catch (e) {}
     })();
   </script>

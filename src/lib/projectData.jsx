@@ -9,21 +9,15 @@
 // No localStorage snapshots: static-host fallback only shows the bundled ES catalog
 // when the API is unreachable (offline / no backend deployed).
 
+import { resolveApiBase } from './apiBase.js';
+
 const TOKEN_KEY = 'desarpro:admin:token';
 
 function readToken() {
   try { return sessionStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
 }
 
-// Only query the backend when the site can reach one. Auto-detect localhost dev;
-// on deployed static hosts (Vercel) with no configured backend we render the
-// bundled catalog with no artificial loading delay.
-function isLocalHost() {
-  if (typeof window === 'undefined') return true;
-  const h = window.location.hostname;
-  return h === 'localhost' || h === '127.0.0.1' || h === '::1';
-}
-const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) || (isLocalHost() ? 'http://localhost:3001' : null);
+const API_BASE = resolveApiBase();
 
 function readLang() {
   if (typeof window === 'undefined') return 'es';
@@ -220,7 +214,7 @@ function normalizeProject(p) {
 // Public list — localized active projects, or the bundled ES catalog when the API is down.
 async function fetchProjects(lang) {
   const l = (lang && ['es', 'en', 'pt', 'fr', 'de'].includes(lang)) ? lang : readLang();
-  if (!API_BASE) return LOCAL_PROJECTS.map(normalizeProject);
+  if (API_BASE == null) return LOCAL_PROJECTS.map(normalizeProject);
   try {
     const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = ctrl ? setTimeout(() => ctrl.abort(), 2500) : null;
@@ -241,7 +235,7 @@ async function fetchProjects(lang) {
 
 // Admin list — all projects (incl. inactive) with full translations.
 async function fetchAdminProjects(lang) {
-  if (!API_BASE) return { ok: false, status: 0, projects: [] };
+  if (API_BASE == null) return { ok: false, status: 0, projects: [] };
   const l = (lang && ['es', 'en', 'pt', 'fr', 'de'].includes(lang)) ? lang : 'es';
   const res = await apiReq(`/api/admin/projects?lang=${encodeURIComponent(l)}`);
   if (res.ok && res.data && Array.isArray(res.data.projects)) {
@@ -253,7 +247,7 @@ async function fetchAdminProjects(lang) {
 // Create or update a project (upsert by slug). Expects a payload with base fields
 // plus `translations: { es: { title, tagline, desc }, en: {...}, ... }`.
 async function saveProject(project) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const payload = Object.assign({}, project);
   const res = await apiReq('/api/projects', { method: 'POST', body: payload });
   if (res.ok && res.data && res.data.ok && res.data.project) {
@@ -264,7 +258,7 @@ async function saveProject(project) {
 
 // Partial update of an existing project.
 async function updateProject(slug, patch) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/projects/${encodeURIComponent(slug)}`, { method: 'PUT', body: patch });
   if (res.ok && res.data && res.data.ok && res.data.project) {
     return { ok: true, status: res.status, project: normalizeProject(res.data.project) };
@@ -273,7 +267,7 @@ async function updateProject(slug, patch) {
 }
 
 async function deleteProject(slug) {
-  if (!API_BASE) return { ok: false, status: 0 };
+  if (API_BASE == null) return { ok: false, status: 0 };
   const res = await apiReq(`/api/projects/${encodeURIComponent(slug)}`, { method: 'DELETE' });
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
