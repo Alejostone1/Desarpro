@@ -300,7 +300,7 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
               <span style={{ display: 'block', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.14em', color: p.color, textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {p.industry} · {p.year}
               </span>
-              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-0)', lineHeight: 1.3, marginTop: 3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <span style={{ display: '-webkit-box', fontSize: 13, fontWeight: 600, color: 'var(--text-0)', lineHeight: 1.3, marginTop: 3, WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {p.title}
               </span>
             </span>
