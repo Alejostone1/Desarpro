@@ -21,9 +21,13 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
   }, [n]);
 
   // Controlled mode: parent changes activeId (e.g. industry card clicked) →
-  // move the panel to that project.
+  // move the panel to that project. Only reacts to a REAL external change, so
+  // local navigation (next/prev/dots/thumbnails) is never overridden.
+  const prevActiveIdRef = React.useRef(activeId);
   React.useEffect(() => {
     if (activeId == null || n === 0) return;
+    if (activeId === prevActiveIdRef.current) return;
+    prevActiveIdRef.current = activeId;
     const idx = projects.findIndex((p) => p.id === activeId);
     if (idx >= 0 && idx !== active) setActive(idx);
   }, [activeId, projects, active, n]);
