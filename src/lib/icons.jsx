@@ -1,6 +1,8 @@
 // Minimal Lucide-style icon set, drawn inline so it ships without deps.
 // All icons are 24×24 stroke-1.6 line caps round.
 
+import React from 'react';
+
 const I = ({ children, size = 20, stroke = 'currentColor', sw = 1.7, fill = 'none', ...rest }) => (
   <svg
     width={size}
@@ -92,4 +94,5 @@ const Icon = {
   Refresh: (p) => <I {...p}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15 a9 9 0 1 1 -2.12 -9.36 L23 10"/></I>,
 };
 
-window.Icon = Icon;
+export { Icon };
+export default Icon;

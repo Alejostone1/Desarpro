@@ -1,6 +1,8 @@
 // ContactScene — animated illustrated character at a desk with laptop.
 // 100% inline SVG + state-driven CSS animations. Form is rendered on top of the laptop screen.
 
+import React from 'react';
+
 function ContactScene({ formState }) {
   // formState: 'idle' | 'focused' | 'submitting' | 'success'
   const focused = formState === 'focused' || formState === 'submitting';
@@ -148,4 +150,4 @@ function ContactScene({ formState }) {
   );
 }
 
-window.ContactScene = ContactScene;
+export default ContactScene;

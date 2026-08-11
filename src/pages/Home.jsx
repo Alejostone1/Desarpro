@@ -1,6 +1,17 @@
 // Home page — hero with branded Earth video, services preview, tech loop, process, CTA.
 // All user-facing text is wrapped in <Editable id="..."/> so the admin panel can rewrite it.
 
+import React from 'react';
+import { useAdmin, Editable } from '../lib/admin.jsx';
+import { useI18n } from '../i18n/index.jsx';
+import { useServices, useSiteConfig, mergeServices } from '../lib/serviceData.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import HeroVideoBg from '../components/HeroVideoBg.jsx';
+import NeuralNet from '../components/NeuralNet.jsx';
+import TechLoop from '../components/TechLoop.jsx';
+import { TECH_LOGOS } from '../lib/techLogos.jsx';
+
 function Home({ setRoute }) {
   const { content } = useAdmin();
   const { language } = useI18n();
@@ -28,7 +39,7 @@ function Home({ setRoute }) {
       tagline: 'Crecimiento orgánico medible',
       bullets: ['SEO técnico', 'Content strategy', 'Tracking y analítica', 'Core Web Vitals'] },
   ];
-  const serviceList = window.mergeServices(services, dbServices).filter((s) => s.active !== false).slice(0, 6);
+  const serviceList = mergeServices(services, dbServices).filter((s) => s.active !== false).slice(0, 6);
 
   return (
     <div className="page">
@@ -269,4 +280,5 @@ function Home({ setRoute }) {
   );
 }
 
-window.Home = Home;
+export default Home;
+export { Home };

@@ -5,6 +5,8 @@
 // a bundled ES fallback so the site never breaks when the API is unreachable.
 // Follows the same conventions as src/lib/projectData.jsx.
 
+import React from 'react';
+
 const TOKEN_KEY = 'desarpro:admin:token';
 
 function readToken() {
@@ -20,7 +22,7 @@ const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) |
 
 function readLang() {
   if (typeof window === 'undefined') return 'es';
-  try { return window.__CURRENT_LANG || localStorage.getItem('desarpro:language') || 'es'; } catch (e) { return 'es'; }
+  try { return localStorage.getItem('desarpro:language') || 'es'; } catch (e) { return 'es'; }
 }
 
 async function apiReq(path, opts = {}) {
@@ -328,7 +330,7 @@ function mergeServices(catalog, dbServices) {
   });
 }
 
-Object.assign(window, {
+export {
   API_BASE,
   SERVICE_CATALOG,
   SITE_CONFIG_DEFAULTS,
@@ -356,4 +358,4 @@ Object.assign(window, {
   useTechnologies,
   useSiteConfig,
   mergeServices,
-});
+};

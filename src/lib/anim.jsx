@@ -1,6 +1,8 @@
 // Animation utilities — a tiny, dependency-free version of useInView and stagger
 // helpers so we don't have to ship Framer Motion through CDN.
 
+import React from 'react';
+
 const { useEffect, useRef, useState, useCallback } = React;
 
 // Reveal on scroll
@@ -135,4 +137,4 @@ function useTilt(strength = 8) {
   return ref;
 }
 
-Object.assign(window, { useInView, Reveal, Stagger, DecryptedText, CountUp, useTilt });
+export { useInView, Reveal, Stagger, DecryptedText, CountUp, useTilt };

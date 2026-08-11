@@ -1,6 +1,9 @@
 // HoloAssistant — a holographic AI avatar (geometric humanoid) rendered with animated
 // SVG + canvas particle system. Stands beside the form, reacts to form state.
 
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+
 function HoloAssistant({
   formState = 'idle',
   assistantState = 'idle',
@@ -364,4 +367,4 @@ function HoloAssistant({
   );
 }
 
-window.HoloAssistant = HoloAssistant;
+export default HoloAssistant;

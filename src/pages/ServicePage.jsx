@@ -1,10 +1,17 @@
 // ServicePage — generic detail page for any service id.
 
+import React from 'react';
+import { useTranslations, useI18n } from '../i18n/index.jsx';
+import { useServices, mergeServices } from '../lib/serviceData.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import { ALL_SERVICES } from './ServicesHub.jsx';
+
 function ServicePage({ id, setRoute }) {
   const t = useTranslations();
   const { language } = useI18n();
   const { services: dbServices } = useServices(language);
-  const svc = window.mergeServices(window.ALL_SERVICES || [], dbServices).find(s => s.id === id);
+  const svc = mergeServices(ALL_SERVICES, dbServices).find(s => s.id === id);
   if (!svc) {
     return (
       <div className="page" style={{ paddingTop: 200, textAlign: 'center' }}>
@@ -240,5 +247,5 @@ const SERVICE_DETAILS = {
   },
 };
 
-window.ServicePage = ServicePage;
-window.SERVICE_DETAILS = SERVICE_DETAILS;
+export default ServicePage;
+export { ServicePage, SERVICE_DETAILS };

@@ -1,6 +1,9 @@
 // Theme system — dark/light with localStorage persistence.
 // Sets data-theme on documentElement, exposes useTheme() and ThemeToggle component.
 
+import React from 'react';
+import { useI18n } from '../i18n/index.jsx';
+
 const ThemeContext = React.createContext({ theme: 'dark', toggle: () => {}, setTheme: () => {} });
 
 function ThemeProvider({ children }) {
@@ -90,6 +93,4 @@ function ThemeToggle({ size = 38, style = {} }) {
   );
 }
 
-window.ThemeProvider = ThemeProvider;
-window.useTheme = useTheme;
-window.ThemeToggle = ThemeToggle;
+export { ThemeProvider, useTheme, ThemeToggle };

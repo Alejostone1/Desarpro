@@ -1,5 +1,24 @@
 // App — root component. Routes via hash. Wraps app in Theme + Admin providers.
 
+import React from 'react';
+import { useI18n } from './i18n/index.jsx';
+import { fetchSeo } from './lib/serviceData.jsx';
+import { AdminProvider, AdminFab } from './lib/admin.jsx';
+import { ThemeProvider } from './lib/theme.jsx';
+import { I18nProvider } from './i18n/index.jsx';
+import { ToastProvider } from './components/Toasts.jsx';
+import { Navbar } from './components/Navbar.jsx';
+import { Footer } from './components/Footer.jsx';
+import { Home } from './pages/Home.jsx';
+import { Projects } from './pages/Projects.jsx';
+import { About } from './pages/About.jsx';
+import { Contact } from './pages/Contact.jsx';
+import { Login } from './pages/Login.jsx';
+import { Admin } from './pages/Admin.jsx';
+import { ServicesHub } from './pages/ServicesHub.jsx';
+import { ServicePage } from './pages/ServicePage.jsx';
+import { NotFound } from './pages/NotFound.jsx';
+
 const SEO_FALLBACK_TITLES = {
   home: 'DesarPro · Tecnología que transforma tu negocio',
   servicios: 'Servicios · DesarPro',
@@ -110,5 +129,4 @@ function Root() {
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<Root/>);
+export { App, Root };

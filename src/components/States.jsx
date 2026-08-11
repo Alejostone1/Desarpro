@@ -1,5 +1,8 @@
 // States — reusable Loading / Error / Empty / Skeleton UI states (Fase G).
 
+import React from 'react';
+import Icon from '../lib/icons.jsx';
+
 function Spinner({ size = 20, color = '#22D3EE', sw = 2.5 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ animation: 'spinner-rot 0.8s linear infinite' }}>
@@ -84,9 +87,4 @@ function SkeletonList({ rows = 4, height = 14 }) {
   );
 }
 
-window.LoadingState = LoadingState;
-window.ErrorState = ErrorState;
-window.EmptyState = EmptyState;
-window.Skeleton = Skeleton;
-window.SkeletonList = SkeletonList;
-window.Spinner = Spinner;
+export { LoadingState, ErrorState, EmptyState, Skeleton, SkeletonList, Spinner };

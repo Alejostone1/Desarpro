@@ -1,6 +1,9 @@
 // i18n system — context and hook for language management
 // Manages language state, localStorage persistence, translations
 
+import React from 'react';
+import { __i18nTranslations } from './translations.jsx';
+
 const I18nContext = React.createContext();
 
 function I18nProvider({ children }) {
@@ -29,7 +32,6 @@ function I18nProvider({ children }) {
   // Expose the current language globally so data libs (projects, admin content)
   // can localize their fetches without importing React context.
   React.useEffect(() => {
-    try { window.__CURRENT_LANG = language; } catch (e) {}
   }, [language]);
 
   const t = React.useCallback((key) => {    const keys = key.split('.');
@@ -82,6 +84,4 @@ function useTranslations() {
   return t;
 }
 
-window.I18nProvider = I18nProvider;
-window.useI18n = useI18n;
-window.useTranslations = useTranslations;
+export { I18nProvider, useI18n, useTranslations };

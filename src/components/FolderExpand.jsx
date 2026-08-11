@@ -2,6 +2,9 @@
 // real tagline, project count. No big icon chips, no tech labels — a clean,
 // human, portfolio feel. Each card routes to its project in the carousel.
 
+import React from 'react';
+import Icon from '../lib/icons.jsx';
+
 function FolderExpand({ projects = [], onPickIndustry }) {
   const counts = projects.reduce((acc, p) => {
     acc[p.industry] = (acc[p.industry] || 0) + 1;
@@ -158,4 +161,4 @@ function FolderExpand({ projects = [], onPickIndustry }) {
   );
 }
 
-window.FolderExpand = FolderExpand;
+export default FolderExpand;

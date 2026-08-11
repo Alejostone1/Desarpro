@@ -1,6 +1,10 @@
 // PackageCarousel — interactive selector for the 11 DesarPro packages.
 // Layout: large active card on left, scrollable rail of all packages on right.
 
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+import Icon from '../lib/icons.jsx';
+
 const PACKAGES = [
   { id: 'start', name: 'START', tag: 'Presencia y Validación', icon: 'Rocket', color: '#22D3EE',
     headline: 'Lanza tu idea con base sólida',
@@ -133,5 +137,5 @@ function PackageCarousel({ onCTA }) {
   );
 }
 
-window.PackageCarousel = PackageCarousel;
-window.PACKAGES = PACKAGES;
+export default PackageCarousel;
+export { PACKAGES };

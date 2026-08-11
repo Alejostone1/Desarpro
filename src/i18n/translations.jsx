@@ -2004,4 +2004,3 @@ var __i18nTranslations = {
     },
   },
 };
-// expose for i18n context (no ES modules in Babel standalone)

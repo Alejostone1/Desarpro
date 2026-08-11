@@ -1,5 +1,8 @@
 // TechLoop — horizontal infinite marquee with real official-style tech logos.
 
+import React from 'react';
+import { TECH_LOGOS } from '../lib/techLogos.jsx';
+
 function TechLoop({ list = TECH_LOGOS, speed = 50, height = 72, reverse = false }) {
   const items = [...list, ...list];
   return (
@@ -52,5 +55,5 @@ function TechLoop({ list = TECH_LOGOS, speed = 50, height = 72, reverse = false 
 // Legacy TECH_LIST shape kept for backward compat (some pages may import it).
 const TECH_LIST = TECH_LOGOS;
 
-window.TechLoop = TechLoop;
-window.TECH_LIST = TECH_LIST;
+export default TechLoop;
+export { TECH_LIST };

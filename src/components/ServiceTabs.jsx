@@ -1,5 +1,8 @@
 // ServiceTabs — accordion / tabs for service offerings.
 
+import React from 'react';
+import Icon from '../lib/icons.jsx';
+
 function ServiceTabs({ items, color = '#3B82F6' }) {
   const [open, setOpen] = React.useState(0);
   return (
@@ -52,4 +55,4 @@ function ServiceTabs({ items, color = '#3B82F6' }) {
   );
 }
 
-window.ServiceTabs = ServiceTabs;
+export default ServiceTabs;

@@ -1,5 +1,12 @@
 // ServicesHub — overview of all services, with grid of 12 cards (6 core + 6 specialized).
 
+import React from 'react';
+import { useTranslations, useI18n } from '../i18n/index.jsx';
+import { useServices, mergeServices } from '../lib/serviceData.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import NeuralNet from '../components/NeuralNet.jsx';
+
 const ALL_SERVICES = [
   { id: 'svc-web', k: 'web', name: 'Desarrollo Web', icon: 'Globe', color: '#3B82F6', tagline: 'Sitios, portales y plataformas modernas', bullets: ['Landing pages de alta conversión', 'Portales corporativos', 'Progressive Web Apps', 'Headless CMS'] },
   { id: 'svc-mobile', k: 'mobile', name: 'Aplicaciones Móviles', icon: 'Smartphone', color: '#8B5CF6', tagline: 'Apps nativas y multiplataforma', bullets: ['iOS y Android nativo', 'React Native · Flutter', 'Push notifications', 'Offline-first'] },
@@ -19,7 +26,7 @@ function ServicesHub({ setRoute }) {
   const t = useTranslations();
   const { language } = useI18n();
   const { services: dbServices } = useServices(language);
-  const merged = window.mergeServices(ALL_SERVICES, dbServices);
+  const merged = mergeServices(ALL_SERVICES, dbServices);
   const visible = merged.filter((s) => s.active !== false);
   const core = dbServices && dbServices.length ? visible.filter((s) => s.featured) : visible.slice(0, 6);
   const specialized = dbServices && dbServices.length ? visible.filter((s) => !s.featured) : visible.slice(6);
@@ -132,5 +139,5 @@ function ServiceCard({ svc, onClick, large = false }) {
   );
 }
 
-window.ServicesHub = ServicesHub;
-window.ALL_SERVICES = ALL_SERVICES;
+export default ServicesHub;
+export { ServicesHub, ALL_SERVICES };

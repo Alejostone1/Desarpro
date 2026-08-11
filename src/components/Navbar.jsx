@@ -2,6 +2,13 @@
 // Always has gray glass background (logo readable on light/dark).
 // Now with full i18n support
 
+import React from 'react';
+import { useI18n } from '../i18n/index.jsx';
+import { useTheme, ThemeToggle } from '../lib/theme.jsx';
+import { useSiteConfig } from '../lib/serviceData.jsx';
+import Icon from '../lib/icons.jsx';
+import Logo from './Logo.jsx';
+
 const LANGUAGE_FLAGS = {
   es: '🇪🇸',
   en: '🇺🇸',
@@ -485,4 +492,5 @@ function Navbar({ route, setRoute }) {
   );
 }
 
-window.Navbar = Navbar;
+export default Navbar;
+export { Navbar };

@@ -1,4 +1,7 @@
 // EvilEye effect — favorite of the client. Concentric pulsing eye/iris pattern.
+
+import React from 'react';
+
 function EvilEye({ color = '#14B8A6', intensity = 0.7 }) {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
@@ -149,4 +152,4 @@ function CodeRain({ color = '#3B82F6' }) {
   return <canvas ref={ref} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.5 }}/>;
 }
 
-Object.assign(window, { EvilEye, LightRays, GridScan, Radar, CodeRain });
+export { EvilEye, LightRays, GridScan, Radar, CodeRain };

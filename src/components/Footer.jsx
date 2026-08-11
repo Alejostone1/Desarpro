@@ -1,3 +1,8 @@
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+import Icon from '../lib/icons.jsx';
+import Logo from './Logo.jsx';
+
 function Footer({ setRoute }) {
   const t = useTranslations();
   const go = (r) => setRoute(r);
@@ -73,4 +78,5 @@ function Footer({ setRoute }) {
   );
 }
 
-window.Footer = Footer;
+export default Footer;
+export { Footer };

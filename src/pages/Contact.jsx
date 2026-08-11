@@ -1,5 +1,15 @@
 // Contact — holographic AI assistant scene + native form with Editable fields.
 
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+import { submitContact } from '../lib/serviceData.jsx';
+import { Editable } from '../lib/admin.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import NeuralNet from '../components/NeuralNet.jsx';
+import HoloAssistant from '../components/HoloAssistant.jsx';
+import { desarproToast } from '../components/Toasts.jsx';
+
 function ContactFormField({ label, error, children }) {
   return (
     <label style={{ display: 'block' }}>
@@ -347,5 +357,5 @@ function Contact() {
   );
 }
 
-window.Contact = Contact;
-window.ContactFormField = ContactFormField;
+export default Contact;
+export { Contact, ContactFormField };

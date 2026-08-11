@@ -1,5 +1,11 @@
 // NotFound — 404 page (Fase H). Reuses the site's visual language.
 
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import NeuralNet from '../components/NeuralNet.jsx';
+
 function NotFound({ setRoute }) {
   const t = useTranslations();
   return (
@@ -52,4 +58,5 @@ function NotFound({ setRoute }) {
   );
 }
 
-window.NotFound = NotFound;
+export default NotFound;
+export { NotFound };

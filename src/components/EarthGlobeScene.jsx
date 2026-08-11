@@ -3,6 +3,9 @@
 //
 // The scene combines:
 //   - rotating wireframe sphere (latitude/longitude lines)
+
+import React from 'react';
+import Logo from './Logo.jsx';
 //   - continent dot-clusters that light up
 //   - arc-based data pulses traveling between continents
 //   - subtle neural network background nodes
@@ -419,4 +422,4 @@ function EarthGlobeScene() {
   );
 }
 
-window.EarthGlobeScene = EarthGlobeScene;
+export default EarthGlobeScene;

@@ -1,5 +1,8 @@
 // Tweaks panel — quick visual tweaks for hero background and accent.
 
+import React from 'react';
+import Icon from '../lib/icons.jsx';
+
 function Tweaks({ tweaks, setTweak }) {
   const [open, setOpen] = React.useState(false);
 
@@ -80,4 +83,4 @@ function Tweaks({ tweaks, setTweak }) {
   );
 }
 
-window.Tweaks = Tweaks;
+export default Tweaks;

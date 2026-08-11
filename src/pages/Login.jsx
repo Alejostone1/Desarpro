@@ -1,5 +1,13 @@
 // Login — rotating Earth globe scene + form panel. Includes admin login mode.
 
+import React from 'react';
+import { useAdmin, Editable } from '../lib/admin.jsx';
+import { useTranslations } from '../i18n/index.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import Logo from '../components/Logo.jsx';
+import EarthGlobeScene from '../components/EarthGlobeScene.jsx';
+
 function FormField({ label, children }) {
   return (
     <label style={{ display: 'block' }}>
@@ -218,5 +226,5 @@ function Login({ setRoute }) {
   );
 }
 
-window.Login = Login;
-window.FormField = FormField;
+export default Login;
+export { Login, FormField };

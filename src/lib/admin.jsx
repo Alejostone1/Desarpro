@@ -6,6 +6,9 @@
 // localStorage is used ONLY for session/preferences (admin session, token,
 // language, theme) — never as the content source of truth.
 
+import React from 'react';
+import { useI18n } from '../i18n/index.jsx';
+
 const SESSION_KEY = 'desarpro:admin:session';
 const TOKEN_KEY = 'desarpro:admin:token';
 const USER_KEY = 'desarpro:admin:user';
@@ -479,4 +482,4 @@ function AdminFab({ setRoute }) {
   );
 }
 
-Object.assign(window, { AdminProvider, useAdmin, Editable, AdminFab, API_BASE, DEFAULT_CONTENT });
+export { AdminProvider, useAdmin, Editable, AdminFab, API_BASE, DEFAULT_CONTENT };

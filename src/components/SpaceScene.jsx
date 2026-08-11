@@ -1,6 +1,8 @@
 // SpaceScene — animated SVG: rotating Earth, orbiting Moon, satellite carrying DesarPro logo,
 // twinkling stars, data lines connecting satellite ↔ Earth.
 
+import React from 'react';
+
 function SpaceScene() {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
@@ -128,4 +130,4 @@ function SpaceScene() {
   );
 }
 
-window.SpaceScene = SpaceScene;
+export default SpaceScene;

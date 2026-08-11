@@ -28,7 +28,7 @@ const API_BASE = (typeof window !== 'undefined' && window.__DESARPRO_API_BASE) |
 function readLang() {
   if (typeof window === 'undefined') return 'es';
   try {
-    return window.__CURRENT_LANG || localStorage.getItem('desarpro:language') || 'es';
+    return localStorage.getItem('desarpro:language') || 'es';
   } catch (e) { return 'es'; }
 }
 
@@ -278,7 +278,7 @@ async function deleteProject(slug) {
   return { ok: res.ok && res.data && res.data.ok, status: res.status };
 }
 
-Object.assign(window, {
+export {
   fetchProjects,
   fetchAdminProjects,
   saveProject,
@@ -286,4 +286,4 @@ Object.assign(window, {
   deleteProject,
   LOCAL_PROJECTS,
   LOCAL_FEATURED,
-});
+};

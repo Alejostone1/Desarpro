@@ -1,6 +1,8 @@
 // Neural network background — canvas with nodes that connect by proximity.
 // Cursor becomes an attractor node.
 
+import React from 'react';
+
 function NeuralNet({ density = 90, color = '#3B82F6', accent = '#22D3EE', linkDist = 140, speed = 0.25, opacity = 0.55 }) {
   const ref = React.useRef(null);
   const mouse = React.useRef({ x: -9999, y: -9999, active: false });
@@ -146,4 +148,4 @@ function NeuralNet({ density = 90, color = '#3B82F6', accent = '#22D3EE', linkDi
   );
 }
 
-window.NeuralNet = NeuralNet;
+export default NeuralNet;

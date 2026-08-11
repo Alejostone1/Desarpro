@@ -1,5 +1,11 @@
 // About — mission, vision, values, timeline 2025.
 
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import Icon from '../lib/icons.jsx';
+import NeuralNet from '../components/NeuralNet.jsx';
+
 function About({ setRoute }) {
   const t = useTranslations();
   return (
@@ -173,4 +179,5 @@ function About({ setRoute }) {
   );
 }
 
-window.About = About;
+export default About;
+export { About };

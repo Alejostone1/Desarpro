@@ -5,6 +5,13 @@
 // backend login). Every save persists to the database through the API.
 // Export / Import / Reset are async and talk to the backend.
 
+import React from 'react';
+import { useAdmin } from '../lib/admin.jsx';
+import { useTheme } from '../lib/theme.jsx';
+import Icon from '../lib/icons.jsx';
+import { fetchAdminProjects, saveProject, deleteProject, updateProject } from '../lib/projectData.jsx';
+import { DashboardView, LeadsManager, ServicesManager, TechManager, SeoManager, ConfigManager } from './AdminViews.jsx';
+
 const LANGS = ['es', 'en', 'pt', 'fr', 'de'];
 const LANG_LABELS = { es: 'ES', en: 'EN', pt: 'PT', fr: 'FR', de: 'DE' };
 
@@ -459,7 +466,7 @@ function ProjectsManager() {
 
   const load = React.useCallback(async () => {
     setLoading(true);
-    const res = await window.fetchAdminProjects('es');
+    const res = await fetchAdminProjects('es');
     setList(res.ok ? res.projects : []);
     setLoading(false);
     if (!res.ok && res.status !== 401 && res.status !== 0) {
@@ -544,7 +551,7 @@ function ProjectsManager() {
         title: es.title, tagline: es.tagline, desc: es.desc,
         translations: form.translations,
       };
-      const res = await window.saveProject(payload);
+      const res = await saveProject(payload);
       if (res.ok) {
         setStatus('success');
         setTimeout(() => setStatus(''), 2500);
@@ -561,7 +568,7 @@ function ProjectsManager() {
 
   const handleDelete = async (p) => {
     if (!window.confirm(`¿Eliminar "${p.title}"? Esta acción no se puede deshacer.`)) return;
-    const res = await window.deleteProject(p.slug);
+    const res = await deleteProject(p.slug);
     if (res.ok) await load();
     else {
       setStatus('error: No se pudo eliminar');
@@ -570,7 +577,7 @@ function ProjectsManager() {
   };
 
   const toggleFlag = async (p, flag) => {
-    await window.updateProject(p.slug, { [flag]: !p[flag] });
+    await updateProject(p.slug, { [flag]: !p[flag] });
     await load();
   };
 
@@ -583,8 +590,8 @@ function ProjectsManager() {
     arr[j] = a;
     arr.forEach((p, i) => { p.order = i; });
     setList(arr.slice().sort((x, y) => x.order - y.order));
-    await window.updateProject(a.slug, { order: j });
-    await window.updateProject(arr[idx].slug, { order: idx });
+    await updateProject(a.slug, { order: j });
+    await updateProject(arr[idx].slug, { order: idx });
     await load();
   };
 
@@ -761,4 +768,5 @@ function ProjectsManager() {
   );
 }
 
-window.Admin = Admin;
+export { Admin };
+export default Admin;

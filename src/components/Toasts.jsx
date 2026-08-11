@@ -1,6 +1,9 @@
 // Toasts — global notification system (Fase I). Works inside React (useToast)
 // and outside it (window.desarproToast) so any code can notify the user.
 
+import React from 'react';
+import Icon from '../lib/icons.jsx';
+
 const TOAST_EVENT = 'desarpro:toast';
 
 function makeId() {
@@ -111,6 +114,4 @@ function useToast() {
   return React.useContext(ToastContext);
 }
 
-window.ToastProvider = ToastProvider;
-window.useToast = useToast;
-window.desarproToast = desarproToast;
+export { ToastProvider, useToast, desarproToast };

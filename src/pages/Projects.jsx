@@ -1,6 +1,14 @@
 // Projects page — folder-expand industries + featured cases + 11-package selector.
 // Projects are fetched from the backend API with a local fallback (see projectData).
 
+import React from 'react';
+import { useI18n, useTranslations } from '../i18n/index.jsx';
+import { LOCAL_PROJECTS, fetchProjects } from '../lib/projectData.jsx';
+import { Reveal } from '../lib/anim.jsx';
+import FolderExpand from '../components/FolderExpand.jsx';
+import ProjectCarousel from '../components/ProjectCarousel.jsx';
+import PackageCarousel from '../components/PackageCarousel.jsx';
+
 function Projects({ setRoute }) {
   const { language } = useI18n();
   const t = useTranslations();
@@ -11,7 +19,7 @@ function Projects({ setRoute }) {
   // Load from backend (localized by language; falls back to the local catalog).
   React.useEffect(() => {
     let live = true;
-    window.fetchProjects(language).then((data) => {
+    fetchProjects(language).then((data) => {
       if (!live) return;
       const list = Array.isArray(data) && data.length ? data : (LOCAL_PROJECTS || []);
       setProjects(list);
@@ -92,4 +100,5 @@ function Projects({ setRoute }) {
   );
 }
 
-window.Projects = Projects;
+export default Projects;
+export { Projects };

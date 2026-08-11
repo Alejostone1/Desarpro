@@ -3,6 +3,8 @@
 // composited in) and a softer overlay so the embedded brand stays visible.
 // If autoplay is blocked, falls back to an animated GIF, then a still poster.
 
+import React from 'react';
+
 function HeroVideoBg({
   poster = './media/earth-still.jpg',
   src = './media/earth-night.mp4',
@@ -112,4 +114,4 @@ function HeroVideoBg({
   );
 }
 
-window.HeroVideoBg = HeroVideoBg;
+export default HeroVideoBg;

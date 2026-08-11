@@ -1,5 +1,14 @@
-// AdminViews — new admin managers: Dashboard, Leads, Services, Technologies,
-// SEO and Site Config (Fases A–F). Loaded BEFORE Admin.jsx; exposes globals.
+// AdminViews — CMS managers for dashboard, leads, services, technologies, SEO
+// and site configuration.
+import React from 'react';
+import Icon from '../lib/icons.jsx';
+import { desarproToast } from '../components/Toasts.jsx';
+import {
+  deleteLead, deleteSeo, deleteService, deleteTechnology, fetchAdminLeads,
+  fetchAdminSeo, fetchAdminServices, fetchAdminTechnologies, fetchDashboard,
+  fetchServices, fetchSiteConfig, saveSeo, saveService, saveSiteConfig,
+  saveTechnology, updateLead, updateService,
+} from '../lib/serviceData.jsx';
 
 const ADMIN_LANGS = ['es', 'en', 'pt', 'fr', 'de'];
 const ADMIN_LANG_LABELS = { es: 'ES', en: 'EN', pt: 'PT', fr: 'FR', de: 'DE' };
@@ -1093,9 +1102,4 @@ function ConfigManager() {
   );
 }
 
-window.DashboardView = DashboardView;
-window.LeadsManager = LeadsManager;
-window.ServicesManager = ServicesManager;
-window.TechManager = TechManager;
-window.SeoManager = SeoManager;
-window.ConfigManager = ConfigManager;
+export { DashboardView, LeadsManager, ServicesManager, TechManager, SeoManager, ConfigManager };

@@ -1,6 +1,8 @@
 // Real tech logos — official-style SVG paths for each technology.
 // Stylized to be recognizable but not infringing; uses each brand's signature shape and color.
 
+import React from 'react';
+
 const TECH_LOGOS = [
   {
     name: 'React',
@@ -289,4 +291,4 @@ const TECH_LOGOS = [
   },
 ];
 
-window.TECH_LOGOS = TECH_LOGOS;
+export { TECH_LOGOS };

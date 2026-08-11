@@ -1,6 +1,8 @@
 // DesarPro Logo — premium metallic SVG inspired by the brand identity.
 // Cyclical arrow ring + </> code mark + branded wordmark.
 
+import React from 'react';
+
 function Logo({
   size = 48,
   withWordmark = true,
@@ -122,4 +124,4 @@ function Logo({
   );
 }
 
-window.Logo = Logo;
+export default Logo;

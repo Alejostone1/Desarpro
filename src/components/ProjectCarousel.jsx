@@ -3,6 +3,10 @@
 // thumbnails below navigates between projects. No 3D, no icon gimmicks, no
 // tech-stack tags. Autoplay pauses on hover/touch and respects reduced motion.
 
+import React from 'react';
+import { useTranslations } from '../i18n/index.jsx';
+import Icon from '../lib/icons.jsx';
+
 function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
   const t = useTranslations();
   const n = projects && projects.length ? projects.length : 0;
@@ -318,4 +322,4 @@ function ProjectCarousel({ projects, onCTA, activeId, onChange }) {
   );
 }
 
-window.ProjectCarousel = ProjectCarousel;
+export default ProjectCarousel;

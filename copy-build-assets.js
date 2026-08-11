@@ -7,8 +7,8 @@ if (!fs.existsSync(dist)) {
   fs.mkdirSync(dist, { recursive: true });
 }
 
-// Copy static folders and files needed by in-browser Babel/JSX
-const itemsToCopy = ['src', 'media', 'tokens.css', 'robots.txt'];
+// Copy static folders and files needed by the built app
+const itemsToCopy = ['media', 'tokens.css', 'robots.txt'];
 
 for (const item of itemsToCopy) {
   const srcPath = path.join(__dirname, item);
