@@ -32,11 +32,11 @@ function ServicesHub({ setRoute }) {
   const specialized = dbServices && dbServices.length ? visible.filter((s) => !s.featured) : visible.slice(6);
   return (
     <div className="page" style={{ paddingTop: 110 }}>
-      <section style={{ position: 'relative', padding: '60px 0 40px', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.4 }}>
+      <section className="services-hero" style={{ position: 'relative', padding: '60px 0 40px', overflow: 'hidden' }}>
+        <div className="services-hero-net" style={{ position: 'absolute', inset: 0, opacity: 0.4 }}>
           <NeuralNet density={60} color="#3B82F6" accent="#22D3EE" linkDist={150} opacity={0.5}/>
         </div>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 30%, transparent, rgba(5,6,10,0.85) 70%)' }}/>
+        <div className="services-hero-vignette"/>
         <div className="container" style={{ position: 'relative', textAlign: 'center' }}>
           <Reveal><span className="section-eyebrow">{t('services_hub.eyebrow')}</span></Reveal>
           <Reveal delay={100}>

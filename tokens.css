@@ -163,7 +163,7 @@ html, body {
   color: transparent;
 }
 .text-grad-violet {
-  background: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -204,6 +204,23 @@ html, body {
   backdrop-filter: blur(8px);
 }
 .btn-ghost:hover:not(:disabled) { background: var(--glass-bg-3); border-color: var(--glass-border-3); }
+
+/* Hero secondary CTA — always on dark video, independent of theme toggle */
+.btn-hero-secondary {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.24);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+}
+.btn-hero-secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.38);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.24);
+}
 
 .btn-outline {
   background: transparent;
@@ -320,11 +337,126 @@ select.input option { background: var(--bg-2); color: var(--text-0); }
 /* Light mode adjustments for specific elements */
 [data-theme="light"] .section-eyebrow { color: #0891B2; }
 [data-theme="light"] .text-grad-blue { background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+[data-theme="light"] .text-grad-violet { background: linear-gradient(135deg, #2563EB 0%, #0891B2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 [data-theme="light"] .btn-ghost { color: var(--text-0); }
 
 /* Force light text on top of always-dark backgrounds (hero video, login globe) */
 .on-dark-bg { color: #fff !important; }
 .on-dark-bg-muted { color: rgba(255,255,255,0.75) !important; }
+
+/* Hero badge — plain text on dark video, no pill/dot */
+.hero-badge {
+  font-size: clamp(12px, 1.1vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.88);
+}
+
+/* Hero stats — always dark-glass on video background (both themes) */
+.hero-stat-card {
+  border-radius: 16px;
+  padding: 16px 12px;
+  text-align: center;
+  background: rgba(8, 12, 24, 0.52);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+}
+.hero-stat-value {
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+}
+.hero-stat-label {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.78);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Contact info cards — readable in light and dark */
+.info-card {
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out);
+}
+.info-card:hover {
+  border-color: var(--card-border-hover);
+}
+.info-card-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--cyan-bright) 12%, transparent);
+  color: var(--cyan-bright);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--cyan-bright) 28%, transparent);
+}
+.info-card-label {
+  font-size: 11px;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+.info-card-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-0);
+  margin-top: 2px;
+}
+.info-card-sub {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 2px;
+}
+
+/* Contact hero — theme-aware background */
+.contact-hero-section {
+  background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+}
+[data-theme="dark"] .contact-hero-section {
+  background: linear-gradient(180deg, var(--bg-0) 0%, rgba(15,23,42,0.85) 100%);
+}
+[data-theme="light"] .contact-hero-section .section-eyebrow { color: #0891B2; }
+[data-theme="light"] .contact-hero-section .section-h2 { color: var(--text-0); }
+[data-theme="light"] .contact-hero-section .section-sub { color: var(--text-2); }
+.contact-hero-vignette {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.08) 100%);
+}
+[data-theme="dark"] .contact-hero-vignette {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+}
+
+/* Services hub banner — theme-aware */
+.services-hero-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 20%, transparent 0%, var(--bg-0) 72%);
+}
+[data-theme="dark"] .services-hero-vignette {
+  background: radial-gradient(ellipse at 50% 30%, transparent 0%, rgba(5,6,10,0.88) 70%);
+}
+[data-theme="light"] .services-hero .services-hero-net { opacity: 0.22; }
+[data-theme="light"] .services-hero .section-eyebrow { color: #0891B2; }
+[data-theme="light"] .services-hero .section-h2 { color: var(--text-0); }
+[data-theme="light"] .services-hero .section-sub { color: var(--text-2); }
 
 /* Editable highlight (visible only when admin mode is on) */
 [data-edit-mode="true"] .editable {

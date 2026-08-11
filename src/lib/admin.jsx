@@ -145,10 +145,12 @@ function AdminProvider({ children }) {
     }
   }, [isAdmin, loadFullContent]);
 
+  // Return only CMS content for the active language — never Spanish DEFAULT_CONTENT here.
+  // Editable resolves: CMS → defaultValue (i18n) → DEFAULT_CONTENT (ES last resort).
   const get = React.useCallback((key) => {
     const v = content[key];
     if (v != null && String(v).length) return v;
-    return DEFAULT_CONTENT[key] || '';
+    return '';
   }, [content]);
 
   const markSaved = React.useCallback((key) => {
@@ -343,7 +345,7 @@ function useAdmin() {
 function Editable({ id, defaultValue, multiline = false, as: Tag = 'span', style = {}, className = '', textOnly = false }) {
   const { get, set, editMode, isAdmin } = useAdmin();
   const [editing, setEditing] = React.useState(false);
-  const value = get(id) || defaultValue || '';
+  const value = get(id) || defaultValue || DEFAULT_CONTENT[id] || '';
 
   if (textOnly) return value;
 

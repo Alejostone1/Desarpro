@@ -134,6 +134,25 @@ var __i18nTranslations = {
       response: 'Tiempo de respuesta',
       solutions: 'Soluciones a medida',
     },
+    home_sections: {
+      tech: { eyebrow: 'Stack moderno', title: 'Tecnologías con las que trabajamos', ariaLabel: 'Tecnologías con las que trabajamos' },
+      process: {
+        eyebrow: 'Proceso', title: 'Cómo trabajamos contigo',
+        steps: [
+          { title: 'Diagnóstico', desc: 'Entendemos tu negocio, procesos y dolor real antes de proponer.' },
+          { title: 'Diseño', desc: 'UX, arquitectura y prototipo. Validamos antes de codificar.' },
+          { title: 'Desarrollo', desc: 'Sprints cortos, demos cada 2 semanas, código revisado.' },
+          { title: 'Continuidad', desc: 'Despliegue, capacitación y soporte continuo post-lanzamiento.' },
+        ],
+      },
+      cta: {
+        kicker: 'Tecnología → Proceso → Resultado',
+        title: '¿Listos para construir algo serio?',
+        subtitle: 'Te respondemos en menos de 24 horas con un diagnóstico inicial gratuito.',
+        primary: 'Empezar conversación',
+        secondary: 'Ver paquetes',
+      },
+    },
     // Services Section
     services_section: {
       eyebrow: 'Lo que hacemos',
@@ -159,6 +178,7 @@ var __i18nTranslations = {
     // Contact Form
     contact: {
       eyebrow: 'Contacto',
+      hero: { pre: 'Hagamos algo', highlight: 'juntos' },
       title: 'Cuéntanos sobre tu proyecto',
       subtitle: 'Escríbenos sobre tu proyecto. Te responderemos en menos de 24 horas hábiles con un primer diagnóstico.',
       form: {
@@ -541,6 +561,25 @@ var __i18nTranslations = {
       response: 'Response time',
       solutions: 'Custom solutions',
     },
+    home_sections: {
+      tech: { eyebrow: 'Modern stack', title: 'Technologies we work with', ariaLabel: 'Technologies we work with' },
+      process: {
+        eyebrow: 'Process', title: 'How we work with you',
+        steps: [
+          { title: 'Discovery', desc: 'We understand your business, processes and real pain points before proposing.' },
+          { title: 'Design', desc: 'UX, architecture and prototype. We validate before coding.' },
+          { title: 'Development', desc: 'Short sprints, demos every two weeks and reviewed code.' },
+          { title: 'Continuity', desc: 'Deployment, training and ongoing post-launch support.' },
+        ],
+      },
+      cta: {
+        kicker: 'Technology → Process → Outcome',
+        title: 'Ready to build something meaningful?',
+        subtitle: 'We will reply within 24 hours with a complimentary initial assessment.',
+        primary: 'Start a conversation',
+        secondary: 'View packages',
+      },
+    },
     services_section: {
       eyebrow: 'What we do',
       title: {
@@ -564,6 +603,7 @@ var __i18nTranslations = {
     },
     contact: {
       eyebrow: 'Contact',
+      hero: { pre: "Let's do something", highlight: 'together' },
       title: 'Tell us about your project',
       subtitle: 'Write to us about your project. We will respond within 24 business hours with an initial diagnosis.',
       form: {
@@ -939,6 +979,25 @@ var __i18nTranslations = {
       response: 'Tempo de resposta',
       solutions: 'Soluções personalizadas',
     },
+    home_sections: {
+      tech: { eyebrow: 'Stack moderno', title: 'Tecnologias com as quais trabalhamos', ariaLabel: 'Tecnologias com as quais trabalhamos' },
+      process: {
+        eyebrow: 'Processo', title: 'Como trabalhamos com você',
+        steps: [
+          { title: 'Diagnóstico', desc: 'Entendemos seu negócio, processos e dor real antes de propor.' },
+          { title: 'Design', desc: 'UX, arquitetura e protótipo. Validamos antes de programar.' },
+          { title: 'Desenvolvimento', desc: 'Sprints curtos, demos a cada duas semanas e código revisado.' },
+          { title: 'Continuidade', desc: 'Implantação, treinamento e suporte contínuo pós-lançamento.' },
+        ],
+      },
+      cta: {
+        kicker: 'Tecnologia → Processo → Resultado',
+        title: 'Pronto para construir algo relevante?',
+        subtitle: 'Responderemos em até 24 horas com um diagnóstico inicial gratuito.',
+        primary: 'Iniciar uma conversa',
+        secondary: 'Ver pacotes',
+      },
+    },
     services_section: {
       eyebrow: 'O que fazemos',
       title: {
@@ -962,6 +1021,7 @@ var __i18nTranslations = {
     },
     contact: {
       eyebrow: 'Contato',
+      hero: { pre: 'Vamos fazer algo', highlight: 'juntos' },
       title: 'Conte-nos sobre seu projeto',
       subtitle: 'Escreva-nos sobre seu projeto. Responderemos em menos de 24 horas úteis com um diagnóstico inicial.',
       form: {
@@ -1336,6 +1396,25 @@ var __i18nTranslations = {
       response: 'Temps de réponse',
       solutions: 'Solutions personnalisées',
     },
+    home_sections: {
+      tech: { eyebrow: 'Stack moderne', title: 'Les technologies avec lesquelles nous travaillons', ariaLabel: 'Les technologies avec lesquelles nous travaillons' },
+      process: {
+        eyebrow: 'Processus', title: 'Comment nous travaillons avec vous',
+        steps: [
+          { title: 'Diagnostic', desc: 'Nous comprenons votre entreprise, vos processus et vos vrais enjeux avant de proposer.' },
+          { title: 'Conception', desc: 'UX, architecture et prototype. Nous validons avant de coder.' },
+          { title: 'Développement', desc: 'Sprints courts, démos toutes les deux semaines et code revu.' },
+          { title: 'Continuité', desc: 'Déploiement, formation et support continu après le lancement.' },
+        ],
+      },
+      cta: {
+        kicker: 'Technologie → Processus → Résultat',
+        title: 'Prêt à construire quelque chose de solide ?',
+        subtitle: 'Nous vous répondrons sous 24 heures avec un diagnostic initial gratuit.',
+        primary: 'Démarrer une conversation',
+        secondary: 'Voir les forfaits',
+      },
+    },
     services_section: {
       eyebrow: 'Ce que nous faisons',
       title: {
@@ -1359,6 +1438,7 @@ var __i18nTranslations = {
     },
     contact: {
       eyebrow: 'Contact',
+      hero: { pre: 'Faisons quelque chose', highlight: 'ensemble' },
       title: 'Parlez-nous de votre projet',
       subtitle: 'Écrivez-nous sur votre projet. Nous répondrons dans les 24 heures ouvrables avec un diagnostic initial.',
       form: {
@@ -1734,6 +1814,25 @@ var __i18nTranslations = {
       response: 'Reaktionszeit',
       solutions: 'Maßgeschneiderte Lösungen',
     },
+    home_sections: {
+      tech: { eyebrow: 'Moderner Stack', title: 'Technologien, mit denen wir arbeiten', ariaLabel: 'Technologien, mit denen wir arbeiten' },
+      process: {
+        eyebrow: 'Prozess', title: 'So arbeiten wir mit Ihnen',
+        steps: [
+          { title: 'Analyse', desc: 'Wir verstehen Ihr Unternehmen, Ihre Prozesse und die tatsächlichen Herausforderungen, bevor wir etwas vorschlagen.' },
+          { title: 'Design', desc: 'UX, Architektur und Prototyp. Wir validieren vor der Entwicklung.' },
+          { title: 'Entwicklung', desc: 'Kurze Sprints, Demos alle zwei Wochen und geprüfter Code.' },
+          { title: 'Kontinuität', desc: 'Deployment, Schulung und kontinuierlicher Support nach dem Launch.' },
+        ],
+      },
+      cta: {
+        kicker: 'Technologie → Prozess → Ergebnis',
+        title: 'Bereit, etwas Substanzielles zu entwickeln?',
+        subtitle: 'Wir antworten innerhalb von 24 Stunden mit einer kostenlosen Ersteinschätzung.',
+        primary: 'Gespräch starten',
+        secondary: 'Pakete ansehen',
+      },
+    },
     services_section: {
       eyebrow: 'Was wir tun',
       title: {
@@ -1757,6 +1856,7 @@ var __i18nTranslations = {
     },
     contact: {
       eyebrow: 'Kontakt',
+      hero: { pre: 'Lassen Sie uns etwas', highlight: 'gemeinsam schaffen' },
       title: 'Erzählen Sie uns von Ihrem Projekt',
       subtitle: 'Schreiben Sie uns über Ihr Projekt. Wir antworten innerhalb von 24 Geschäftstagen mit einer ersten Diagnose.',
       form: {

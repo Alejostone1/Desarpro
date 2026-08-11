@@ -50,7 +50,7 @@ function Projects({ setRoute }) {
       <section style={{ position: 'relative', padding: '60px 0 40px' }}>
         <div className="container" style={{ textAlign: 'center', position: 'relative' }}>
           <Reveal><span className="section-eyebrow">{t('projects.eyebrow')}</span></Reveal>
-          <Reveal delay={100}><h1 className="section-h2" style={{ marginTop: 16, fontSize: 'clamp(48px, 7vw, 88px)' }}>{t('projects.title')} <span className="text-grad-violet">{t('projects.titleHighlight')}</span></h1></Reveal>
+          <Reveal delay={100}><h1 className="section-h2" style={{ marginTop: 16, fontSize: 'clamp(48px, 7vw, 88px)' }}>{t('projects.title')} <span className="text-grad-blue">{t('projects.titleHighlight')}</span></h1></Reveal>
           <Reveal delay={200}><p className="section-sub" style={{ margin: '24px auto 0' }}>{t('projects.subtitle')}</p></Reveal>
         </div>
       </section>

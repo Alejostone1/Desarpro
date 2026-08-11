@@ -168,7 +168,7 @@ function Contact() {
 
   return (
     <div className="page" style={{ paddingTop: 110 }}>
-      <section ref={sectionRef} onMouseMove={handleMouseMove} onMouseLeave={() => setMousePosition({ x: 0.5, y: 0.45 })} style={{ position: 'relative', padding: '40px 0 80px', overflow: 'hidden', background: 'linear-gradient(180deg, var(--bg-0) 0%, rgba(15,23,42,0.8) 100%)' }}>
+      <section ref={sectionRef} onMouseMove={handleMouseMove} onMouseLeave={() => setMousePosition({ x: 0.5, y: 0.45 })} className="contact-hero-section" style={{ position: 'relative', padding: '40px 0 80px', overflow: 'hidden' }}>
         {/* Animated background layers */}
         <div style={{ position: 'absolute', inset: 0, opacity: 0.4 }}>
           <NeuralNet density={45} color="#22D3EE" accent="#A78BFA" linkDist={140} opacity={0.4}/>
@@ -205,20 +205,20 @@ function Contact() {
         </div>
 
         {/* Vignette overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.4) 100%)', pointerEvents: 'none' }}/>
+        <div className="contact-hero-vignette" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}/>
 
         <div className="container" style={{ position: 'relative', transform: `perspective(1200px) rotateX(${interactionTiltY * 0.18}deg) rotateY(${interactionTiltX * 0.2}deg)`, transition: 'transform 220ms ease-out' }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <Reveal><span className="section-eyebrow"><Editable id="contact.eyebrow" defaultValue="Contacto"/></span></Reveal>
+            <Reveal><span className="section-eyebrow"><Editable id="contact.eyebrow" defaultValue={t('contact.eyebrow')}/></span></Reveal>
             <Reveal delay={100}>
               <h1 className="section-h2" style={{ marginTop: 16, fontSize: 'clamp(40px, 6vw, 76px)' }}>
-                <Editable id="contact.title.pre" defaultValue="Hagamos algo"/>{' '}
-                <span className="text-grad-blue"><Editable id="contact.title.highlight" defaultValue="juntos"/></span>
+                <Editable id="contact.title.pre" defaultValue={t('contact.hero.pre')}/>{' '}
+                <span className="text-grad-blue"><Editable id="contact.title.highlight" defaultValue={t('contact.hero.highlight')}/></span>
               </h1>
             </Reveal>
             <Reveal delay={200}>
               <p className="section-sub" style={{ margin: '20px auto 0' }}>
-                <Editable id="contact.subtitle" multiline defaultValue="Escríbenos sobre tu proyecto. Te responderemos en menos de 24 horas hábiles con un primer diagnóstico."/>
+                <Editable id="contact.subtitle" multiline defaultValue={t('contact.subtitle')}/>
               </p>
             </Reveal>
           </div>
@@ -246,10 +246,10 @@ function Contact() {
                       <Icon.Check size={32} sw={3}/>
                     </div>
                     <h3 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px' }}>
-                      <Editable id="contact.success.title" defaultValue="¡Mensaje recibido!"/>
+                      <Editable id="contact.success.title" defaultValue={t('contact.success.title')}/>
                     </h3>
                     <p style={{ fontSize: 15, color: 'var(--text-2)', margin: '0 0 24px' }}>
-                      <Editable id="contact.success.subtitle" defaultValue="Te respondemos en menos de 24 horas hábiles."/>
+                      <Editable id="contact.success.subtitle" defaultValue={t('contact.success.message')}/>
                     </p>
                     <button onClick={() => { setStatus('idle'); setAssistantState('idle'); setHudMessage(t('assistant.name')); setTyping(false); setActiveField(null); setState({ name: '', email: '', company: '', service: 'svc-software', budget: '$5k–$15k', msg: '' }); if (resetTimerRef.current) clearTimeout(resetTimerRef.current); }} className="btn btn-ghost" style={{ minHeight: 44 }}>{t('contact.form.anotherMessage')}</button>
                   </div>
@@ -257,7 +257,7 @@ function Contact() {
                   <form onSubmit={submit}>
                     <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Icon.Send size={16} stroke="#22D3EE"/>
-                      <Editable id="contact.form.title" defaultValue="Cuéntanos sobre tu proyecto"/>
+                      <Editable id="contact.form.title" defaultValue={t('contact.title')}/>
                     </h3>
                     <div style={{ display: 'grid', gap: 14 }}>
                       <ContactFormField label={t('contact.form.name')} error={errors.name}>
@@ -317,16 +317,16 @@ function Contact() {
               ].map((c, i) => {
                 const I = Icon[c.icon];
                 return (
-                  <div key={i} className="glass" style={{ borderRadius: 16, padding: 24, display: 'flex', gap: 16, alignItems: 'center', transform: `perspective(900px) rotateX(${interactionTiltY * 0.12}deg) rotateY(${interactionTiltX * 0.14}deg)`, transition: 'transform 220ms ease-out' }}>
-                    <span style={{ width: 44, height: 44, flexShrink: 0, borderRadius: 12, background: 'rgba(34,211,238,0.15)', color: '#22D3EE', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(34,211,238,0.3)' }}><I size={20}/></span>
+                  <div key={i} className="info-card">
+                    <span className="info-card-icon"><I size={20}/></span>
                     <div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>
+                      <div className="info-card-label">
                         <Editable id={c.titleK} defaultValue={c.titleD}/>
                       </div>
-                      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-0)', marginTop: 2 }}>
+                      <div className="info-card-value">
                         <Editable id={c.valK} defaultValue={c.valD}/>
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
+                      <div className="info-card-sub">
                         <Editable id={c.subK} defaultValue={c.subD}/>
                       </div>
                     </div>

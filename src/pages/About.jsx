@@ -19,7 +19,7 @@ function About({ setRoute }) {
           <Reveal><span className="section-eyebrow">{t('about.eyebrow')}</span></Reveal>
           <Reveal delay={100}>
             <h1 className="section-h2" style={{ marginTop: 16, fontSize: 'clamp(48px, 7vw, 88px)' }}>
-              {t('about.titlePre')} <span className="text-grad-violet">{t('about.titleHighlight')}</span>
+              {t('about.titlePre')} <span className="text-grad-blue">{t('about.titleHighlight')}</span>
             </h1>
           </Reveal>
           <Reveal delay={200}>

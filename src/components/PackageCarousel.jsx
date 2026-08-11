@@ -54,84 +54,229 @@ const PACKAGES = [
 
 function PackageCarousel({ onCTA }) {
   const t = useTranslations();
-  const [active, setActive] = React.useState(1); // BUSINESS by default
+  const [active, setActive] = React.useState(1);
   const pkg = PACKAGES[active];
   const I = Icon[pkg.icon];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32, alignItems: 'stretch' }} className="pkg-grid">
-      {/* Active card */}
-      <div className="glass-2" style={{
-        position: 'relative', borderRadius: 24, padding: 'clamp(20px, 4vw, 40px)',
-        background: `linear-gradient(135deg, ${pkg.color}18 0%, rgba(255,255,255,0.03) 60%)`,
-        border: `1px solid ${pkg.color}40`,
-        overflow: 'hidden', minHeight: 480,
-      }}>
-        <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%',
-          background: `radial-gradient(circle, ${pkg.color}40, transparent 70%)`, filter: 'blur(40px)' }}/>
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-            <span style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: `${pkg.color}28`, color: pkg.color,
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              border: `1px solid ${pkg.color}40`, flexShrink: 0,
-            }}><I size={28}/></span>
-            <div>
-              <div style={{ fontSize: 11, letterSpacing: '0.18em', color: pkg.color, textTransform: 'uppercase', fontWeight: 700 }}>{t('packages.label')} {String(active + 1).padStart(2, '0')} / 11</div>
-              <h3 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', margin: '4px 0 0', letterSpacing: '-0.02em' }}>{pkg.name}</h3>
+    <div className="pkg-carousel">
+      <div className="pkg-grid">
+        <div className="pkg-card glass-2" style={{ '--pkg-color': pkg.color }}>
+          <div className="pkg-card-glow" aria-hidden="true" />
+          <div className="pkg-card-inner">
+            <div className="pkg-card-header">
+              <span className="pkg-card-icon"><I size={28}/></span>
+              <div>
+                <div className="pkg-card-label">{t('packages.label')} {String(active + 1).padStart(2, '0')} / 11</div>
+                <h3 className="pkg-card-name">{pkg.name}</h3>
+              </div>
+            </div>
+            <div className="pkg-card-tag">{t(`packages_data.${pkg.id}.tag`)}</div>
+            <p className="pkg-card-headline">{t(`packages_data.${pkg.id}.headline`)}</p>
+            <div className="pkg-card-includes">
+              <div className="pkg-card-section-label">{t('packages.includes')}</div>
+              <ul className="pkg-card-list">
+                {t(`packages_data.${pkg.id}.includes`).map((it, i) => (
+                  <li key={i} style={{ animationDelay: `${i * 50}ms` }}>
+                    <Icon.Check size={14} stroke={pkg.color} sw={2.4}/> <span>{it}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="pkg-card-footer">
+              <div className="pkg-card-section-label">{t('packages.idealFor')}</div>
+              <div className="pkg-card-ideal">{t(`packages_data.${pkg.id}.ideal`)}</div>
+              <button type="button" onClick={onCTA} className="btn btn-primary pkg-card-cta" style={{ '--pkg-color': pkg.color }}>
+                {t('packages.talkCta')} <Icon.ArrowRight size={14}/>
+              </button>
             </div>
           </div>
-          <div style={{ fontSize: 17, color: '#E5E7EB', fontWeight: 600, marginBottom: 8 }}>{t(`packages_data.${pkg.id}.tag`)}</div>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', marginBottom: 24, lineHeight: 1.6 }}>{t(`packages_data.${pkg.id}.headline`)}</p>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{t('packages.includes')}</div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px 20px' }}>
-              {t(`packages_data.${pkg.id}.includes`).map((it, i) => (
-                <li key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13.5, color: '#E5E7EB',
-                  animation: `pkg-item-in 400ms ${i * 50}ms both var(--ease-out)` }}>
-                  <Icon.Check size={14} stroke={pkg.color} sw={2.4}/> <span>{it}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div style={{ paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>{t('packages.idealFor')}</div>
-            <div style={{ fontSize: 14, color: '#fff', marginBottom: 20 }}>{t(`packages_data.${pkg.id}.ideal`)}</div>
-            <button onClick={onCTA} className="btn btn-primary" style={{ background: `linear-gradient(135deg, ${pkg.color} 0%, ${pkg.color}cc 100%)`, boxShadow: `0 8px 30px ${pkg.color}60` }}>
-              {t('packages.talkCta')} <Icon.ArrowRight size={14}/>
-            </button>
-          </div>
+        </div>
+
+        <div className="pkg-rail">
+          {PACKAGES.map((p, i) => {
+            const PI = Icon[p.icon];
+            const isActive = i === active;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setActive(i)}
+                className={`pkg-tile${isActive ? ' is-active' : ''}`}
+                style={{ '--pkg-color': p.color }}
+              >
+                <span className="pkg-tile-icon"><PI size={16}/></span>
+                <div className="pkg-tile-name">{p.name}</div>
+                <div className="pkg-tile-tag">{t(`packages_data.${p.id}.tag`)}</div>
+              </button>
+            );
+          })}
         </div>
       </div>
-
-      {/* Rail */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignContent: 'start' }}>
-        {PACKAGES.map((p, i) => {
-          const PI = Icon[p.icon];
-          const isActive = i === active;
-          return (
-            <button key={p.id} onClick={() => setActive(i)} className="pkg-tile" style={{
-              padding: 18, borderRadius: 14, textAlign: 'left',
-              background: isActive ? `linear-gradient(135deg, ${p.color}22, transparent)` : 'rgba(255,255,255,0.025)',
-              border: `1px solid ${isActive ? p.color + '60' : 'rgba(255,255,255,0.08)'}`,
-              cursor: 'pointer', transition: 'all 220ms var(--ease-out)',
-              transform: isActive ? 'scale(1.02)' : 'scale(1)',
-            }}>
-              <span style={{
-                width: 32, height: 32, borderRadius: 8,
-                background: `${p.color}22`, color: p.color,
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10,
-              }}><PI size={16}/></span>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', letterSpacing: '0.02em' }}>{p.name}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>{t(`packages_data.${p.id}.tag`)}</div>
-            </button>
-          );
-        })}
-      </div>
       <style>{`
-        @keyframes pkg-item-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
-        @media (max-width: 980px) { .pkg-grid { grid-template-columns: 1fr !important; } }
+        .pkg-carousel { width: 100%; }
+        .pkg-grid {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 32px;
+          align-items: stretch;
+        }
+        .pkg-card {
+          position: relative;
+          border-radius: 24px;
+          padding: clamp(20px, 4vw, 40px);
+          background: linear-gradient(135deg, color-mix(in srgb, var(--pkg-color) 12%, var(--card-bg)), var(--card-bg));
+          border: 1px solid color-mix(in srgb, var(--pkg-color) 35%, var(--card-border));
+          overflow: hidden;
+          min-height: 480px;
+        }
+        .pkg-card-glow {
+          position: absolute;
+          top: -80px;
+          right: -80px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          background: radial-gradient(circle, color-mix(in srgb, var(--pkg-color) 28%, transparent), transparent 70%);
+          filter: blur(40px);
+          pointer-events: none;
+        }
+        .pkg-card-inner { position: relative; }
+        .pkg-card-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        .pkg-card-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 16px;
+          background: color-mix(in srgb, var(--pkg-color) 16%, transparent);
+          color: var(--pkg-color);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid color-mix(in srgb, var(--pkg-color) 30%, transparent);
+          flex-shrink: 0;
+        }
+        .pkg-card-label {
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          color: var(--pkg-color);
+          text-transform: uppercase;
+          font-weight: 700;
+        }
+        .pkg-card-name {
+          font-size: clamp(28px, 4vw, 40px);
+          font-weight: 800;
+          color: var(--text-0);
+          margin: 4px 0 0;
+          letter-spacing: -0.02em;
+        }
+        .pkg-card-tag {
+          font-size: 17px;
+          color: var(--text-1);
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        .pkg-card-headline {
+          font-size: 15px;
+          color: var(--text-2);
+          margin: 0 0 24px;
+          line-height: 1.6;
+        }
+        .pkg-card-section-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--text-3);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 12px;
+        }
+        .pkg-card-list {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 24px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 8px 20px;
+        }
+        .pkg-card-list li {
+          display: flex;
+          gap: 8px;
+          align-items: flex-start;
+          font-size: 13.5px;
+          color: var(--text-1);
+          animation: pkg-item-in 400ms both var(--ease-out);
+        }
+        .pkg-card-footer {
+          padding-top: 16px;
+          border-top: 1px solid var(--card-border);
+        }
+        .pkg-card-ideal {
+          font-size: 14px;
+          color: var(--text-0);
+          margin-bottom: 20px;
+        }
+        .pkg-card-cta {
+          background: linear-gradient(135deg, var(--pkg-color) 0%, color-mix(in srgb, var(--pkg-color) 80%, #000) 100%) !important;
+          box-shadow: 0 8px 24px color-mix(in srgb, var(--pkg-color) 35%, transparent) !important;
+        }
+        .pkg-rail {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          align-content: start;
+        }
+        .pkg-tile {
+          padding: 18px;
+          border-radius: 14px;
+          text-align: left;
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
+          cursor: pointer;
+          transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), background 220ms var(--ease-out);
+        }
+        .pkg-tile.is-active {
+          background: linear-gradient(135deg, color-mix(in srgb, var(--pkg-color) 14%, var(--card-bg)), var(--card-bg));
+          border-color: color-mix(in srgb, var(--pkg-color) 45%, var(--card-border));
+          transform: scale(1.02);
+        }
+        .pkg-tile:hover:not(.is-active) {
+          border-color: var(--card-border-hover);
+          background: var(--card-bg-hover);
+        }
+        .pkg-tile-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: color-mix(in srgb, var(--pkg-color) 14%, transparent);
+          color: var(--pkg-color);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 10px;
+        }
+        .pkg-tile-name {
+          font-size: 13px;
+          font-weight: 800;
+          color: var(--text-0);
+          letter-spacing: 0.02em;
+        }
+        .pkg-tile-tag {
+          font-size: 11px;
+          color: var(--text-2);
+          margin-top: 2px;
+          line-height: 1.35;
+        }
+        @keyframes pkg-item-in {
+          from { opacity: 0; transform: translateX(-8px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @media (max-width: 980px) {
+          .pkg-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
     </div>
   );

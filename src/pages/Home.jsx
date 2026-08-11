@@ -2,19 +2,19 @@
 // All user-facing text is wrapped in <Editable id="..."/> so the admin panel can rewrite it.
 
 import React from 'react';
-import { useAdmin, Editable } from '../lib/admin.jsx';
+import { Editable } from '../lib/admin.jsx';
 import { useI18n } from '../i18n/index.jsx';
 import { useServices, useSiteConfig, mergeServices } from '../lib/serviceData.jsx';
 import { Reveal } from '../lib/anim.jsx';
 import Icon from '../lib/icons.jsx';
 import HeroVideoBg from '../components/HeroVideoBg.jsx';
-import NeuralNet from '../components/NeuralNet.jsx';
 import TechLoop from '../components/TechLoop.jsx';
+import ProcessTimeline from '../components/ProcessTimeline.jsx';
+import HomeCta from '../components/HomeCta.jsx';
 import { TECH_LOGOS } from '../lib/techLogos.jsx';
 
 function Home({ setRoute }) {
-  const { content } = useAdmin();
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   const { services: dbServices } = useServices(language);
   const { config: siteConfig } = useSiteConfig();
   const sec = siteConfig.sections || {};
@@ -58,8 +58,8 @@ function Home({ setRoute }) {
 
         <div className="container" style={{ position: 'relative', zIndex: 2, textAlign: 'center', paddingTop: 60, paddingBottom: 80 }}>
           <Reveal y={20}>
-            <span className="pill on-dark-bg" style={{ marginBottom: 28 }}>
-              <span className="dot"/> <Editable id="hero.badge" defaultValue="Aceptando proyectos para 2026"/>
+            <span className="hero-badge on-dark-bg" style={{ marginBottom: 28, display: 'block' }}>
+              <Editable id="hero.badge" defaultValue="Aceptando proyectos para 2026"/>
             </span>
           </Reveal>
           <Reveal delay={120} y={28}>
@@ -83,7 +83,7 @@ function Home({ setRoute }) {
               <button onClick={() => setRoute('contacto')} className="btn btn-primary" style={{ padding: '16px 28px', fontSize: 15 }}>
                 <Editable id="hero.cta.primary" defaultValue="Cotizar mi proyecto"/> <Icon.ArrowRight size={16}/>
               </button>
-              <button onClick={() => setRoute('proyectos')} className="btn btn-ghost on-dark-bg" style={{ padding: '16px 28px', fontSize: 15 }}>
+              <button onClick={() => setRoute('proyectos')} className="btn btn-hero-secondary" style={{ padding: '16px 28px', fontSize: 15 }}>
                 <Editable id="hero.cta.secondary" defaultValue="Ver casos reales"/>
               </button>
             </div>
@@ -94,11 +94,11 @@ function Home({ setRoute }) {
           <Reveal delay={520} y={20}>
             <div style={{ marginTop: 80, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 20, maxWidth: 900, margin: '80px auto 0' }} className="stats-grid">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="glass" style={{ borderRadius: 16, padding: '16px 12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
+                <div key={i} className="hero-stat-card">
+                  <div className="hero-stat-value">
                     <Editable id={`stats.${i}.value`} defaultValue={['12', '11', '24h', '100%'][i-1]}/>
                   </div>
-                  <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.65)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em', wordBreak: 'break-word' }}>
+                  <div className="hero-stat-label">
                     <Editable id={`stats.${i}.label`} defaultValue={['Servicios tecnológicos', 'Paquetes estratégicos', 'Tiempo de respuesta', 'Soluciones a medida'][i-1]}/>
                   </div>
                 </div>
@@ -118,9 +118,9 @@ function Home({ setRoute }) {
 
       {/* SERVICES PREVIEW */}
       {sec.services !== false && (
-      <section style={{ position: 'relative', padding: '120px 0', background: 'var(--bg-0)' }}>
+      <section className="home-services" style={{ position: 'relative', padding: '120px 0', background: 'var(--bg-0)' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div className="home-services-heading">
             <Reveal><span className="section-eyebrow"><Editable id="services.eyebrow" defaultValue="Lo que hacemos"/></span></Reveal>
             <Reveal delay={100}>
               <h2 className="section-h2" style={{ marginTop: 16 }}>
@@ -140,14 +140,7 @@ function Home({ setRoute }) {
               const I = Icon[s.icon];
               return (
                 <Reveal key={s.id} delay={i * 80}>
-                  <button onClick={() => setRoute(s.id)} className="svc-card" style={{
-                    width: '100%', textAlign: 'left', padding: 28, borderRadius: 20,
-                    background: 'var(--card-bg)',
-                    border: '1px solid var(--card-border)',
-                    cursor: 'pointer', position: 'relative', overflow: 'hidden',
-                    transition: 'all 320ms var(--ease-out)',
-                    color: 'var(--text-0)',
-                  }}>
+                  <button onClick={() => setRoute(s.id)} className="svc-card">
                     <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', background: `radial-gradient(circle, ${s.color}24, transparent 70%)`, filter: 'blur(20px)', opacity: 0.7 }}/>
                     <span style={{
                       width: 52, height: 52, borderRadius: 14,
@@ -163,7 +156,7 @@ function Home({ setRoute }) {
                         </li>
                       ))}
                     </ul>
-                    <div style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 6, color: s.color, fontSize: 13, fontWeight: 600, position: 'relative' }}>
+                    <div style={{ marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 6, color: s.color, fontSize: 13, fontWeight: 600, position: 'relative' }} className="svc-card-more">
                       Conocer más <Icon.ArrowRight size={14}/>
                     </div>
                   </button>
@@ -173,9 +166,41 @@ function Home({ setRoute }) {
           </div>
         </div>
         <style>{`
+          .home-services-heading { text-align: center; margin-bottom: 64px; }
+          .home-services-heading .section-sub { margin-left: auto; margin-right: auto; }
+          .svc-card {
+            width: 100%;
+            text-align: left;
+            padding: 28px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 320ms var(--ease-out);
+            color: var(--text-0);
+          }
           .svc-card:hover { transform: translateY(-6px); border-color: var(--card-border-hover) !important; background: var(--card-bg-hover) !important; }
           @media (max-width: 980px) { .svc-grid { grid-template-columns: repeat(2, 1fr) !important; } }
-          @media (max-width: 640px) { .svc-grid { grid-template-columns: 1fr !important; } }
+          @media (max-width: 640px) {
+            .home-services { padding: 80px 0 !important; }
+            .home-services-heading { margin-bottom: 40px; padding: 0 4px; }
+            .svc-grid {
+              grid-template-columns: 1fr !important;
+              max-width: 420px;
+              margin: 0 auto;
+              gap: 16px;
+            }
+            .svc-card {
+              text-align: center;
+              padding: 24px 20px;
+            }
+            .svc-card > span:first-of-type { margin: 0 auto; display: flex !important; }
+            .svc-card ul { justify-items: center; }
+            .svc-card ul li { justify-content: center; text-align: center; }
+            .svc-card-more { margin-left: auto; margin-right: auto; }
+          }
           @media (max-width: 440px) { .stats-grid { grid-template-columns: 1fr !important; gap: 12px !important; } }
           @keyframes orb-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px, -30px) scale(1.1); } }
           @keyframes fade-pulse { from { opacity: 0.3; } to { opacity: 1; } }
@@ -183,23 +208,23 @@ function Home({ setRoute }) {
       </section>
       )}
 
-      {/* TECH LOOP */}
+      {/* TECH STREAM */}
       {sec.tech !== false && (
-      <section style={{ position: 'relative', padding: '60px 0 120px', background: 'var(--bg-0)' }}>
-        <div className="container" style={{ marginBottom: 40, textAlign: 'center' }}>
-          <Reveal><span className="section-eyebrow"><Editable id="tech.eyebrow" defaultValue="Stack moderno"/></span></Reveal>
+      <section className="home-tech" style={{ position: 'relative', padding: '72px 0 132px', background: 'var(--bg-0)', overflow: 'hidden' }}>
+        <div className="container" style={{ marginBottom: 44, textAlign: 'center' }}>
+          <Reveal><span className="section-eyebrow"><Editable id="tech.eyebrow" defaultValue={t('home_sections.tech.eyebrow')}/></span></Reveal>
           <Reveal delay={100}>
             <h2 className="section-h2" style={{ marginTop: 16, fontSize: 'clamp(28px, 4vw, 48px)' }}>
-              <Editable id="tech.title" defaultValue="Tecnologías con las que trabajamos"/>
+              <Editable id="tech.title" defaultValue={t('home_sections.tech.title')}/>
             </h2>
           </Reveal>
         </div>
         <Reveal delay={200}>
-          <TechLoop list={TECH_LOGOS.slice(0, 12)} speed={50}/>
+          <TechLoop list={TECH_LOGOS.slice(0, 12)} speed={48} ariaLabel={t('home_sections.tech.ariaLabel')}/>
         </Reveal>
-        <Reveal delay={300}>
-          <div style={{ marginTop: 16 }}>
-            <TechLoop list={TECH_LOGOS.slice(12)} speed={60} reverse/>
+        <Reveal delay={280}>
+          <div style={{ marginTop: 14 }}>
+            <TechLoop list={TECH_LOGOS.slice(12)} speed={56} reverse ariaLabel={t('home_sections.tech.ariaLabel')}/>
           </div>
         </Reveal>
       </section>
@@ -207,74 +232,38 @@ function Home({ setRoute }) {
 
       {/* PROCESS */}
       {sec.process !== false && (
-      <section style={{ position: 'relative', padding: '80px 0', background: 'var(--bg-0)' }}>
+      <section className="process-section" style={{ position: 'relative', padding: '40px 0 132px', background: 'var(--bg-0)', overflow: 'hidden' }}>
         <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
-            <Reveal><span className="section-eyebrow"><Editable id="process.eyebrow" defaultValue="Proceso"/></span></Reveal>
+          <div className="process-heading">
+            <Reveal><span className="section-eyebrow"><Editable id="process.eyebrow" defaultValue={t('home_sections.process.eyebrow')}/></span></Reveal>
             <Reveal delay={100}>
               <h2 className="section-h2" style={{ marginTop: 16 }}>
-                <Editable id="process.title" defaultValue="Cómo trabajamos contigo"/>
+                <Editable id="process.title" defaultValue={t('home_sections.process.title')}/>
               </h2>
             </Reveal>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }} className="process-grid">
-            {[
-              { n: '01', tKey: 'process.1.title', dKey: 'process.1.desc', t: 'Diagnóstico', d: 'Entendemos tu negocio, procesos y dolor real antes de proponer.' },
-              { n: '02', tKey: 'process.2.title', dKey: 'process.2.desc', t: 'Diseño', d: 'UX, arquitectura y prototipo. Validamos antes de codificar.' },
-              { n: '03', tKey: 'process.3.title', dKey: 'process.3.desc', t: 'Desarrollo', d: 'Sprints cortos, demos cada 2 semanas, código revisado.' },
-              { n: '04', tKey: 'process.4.title', dKey: 'process.4.desc', t: 'Continuidad', d: 'Despliegue, capacitación y soporte continuo post-lanzamiento.' },
-            ].map((p, i) => (
-              <Reveal key={i} delay={i * 100}>
-                <div className="glass" style={{ borderRadius: 16, padding: 28, height: '100%', position: 'relative' }}>
-                  <div style={{ fontSize: 64, fontWeight: 800, color: 'rgba(34,211,238,0.28)', lineHeight: 1, letterSpacing: '-0.04em' }}>{p.n}</div>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-0)', margin: '12px 0 8px' }}>
-                    <Editable id={p.tKey} defaultValue={p.t}/>
-                  </h3>
-                  <p style={{ color: 'var(--text-2)', fontSize: 14, margin: 0, lineHeight: 1.55 }}>
-                    <Editable id={p.dKey} multiline defaultValue={p.d}/>
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          <ProcessTimeline
+            titleAriaLabel={t('home_sections.process.title')}
+            steps={[
+              { n: '01', icon: 'Search', tKey: 'process.1.title', dKey: 'process.1.desc', title: t('home_sections.process.steps.0.title'), desc: t('home_sections.process.steps.0.desc') },
+              { n: '02', icon: 'Compass', tKey: 'process.2.title', dKey: 'process.2.desc', title: t('home_sections.process.steps.1.title'), desc: t('home_sections.process.steps.1.desc') },
+              { n: '03', icon: 'Code', tKey: 'process.3.title', dKey: 'process.3.desc', title: t('home_sections.process.steps.2.title'), desc: t('home_sections.process.steps.2.desc') },
+              { n: '04', icon: 'Activity', tKey: 'process.4.title', dKey: 'process.4.desc', title: t('home_sections.process.steps.3.title'), desc: t('home_sections.process.steps.3.desc') },
+            ]}
+          />
         </div>
-        <style>{`@media (max-width: 980px) { .process-grid { grid-template-columns: repeat(2, 1fr) !important; } } @media (max-width: 580px) { .process-grid { grid-template-columns: 1fr !important; } }`}</style>
+        <style>{`
+          .process-heading { display: grid; grid-template-columns: minmax(220px, .72fr) minmax(300px, 1.28fr); align-items: end; gap: 32px; margin-bottom: 48px; }
+          .process-heading .section-h2 { max-width: 700px; }
+          @media (max-width: 980px) { .process-heading { grid-template-columns: 1fr; gap: 6px; } }
+          @media (max-width: 580px) { .process-section { padding-bottom: 92px !important; } }
+        `}</style>
       </section>
       )}
 
       {/* CTA */}
       {sec.cta !== false && (
-      <section style={{ position: 'relative', padding: '120px 0', background: 'var(--bg-0)' }}>
-        <div className="container">
-          <div className="glass-2" style={{
-            position: 'relative', borderRadius: 32, padding: 'clamp(40px, 6vw, 80px)',
-            overflow: 'hidden', textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.12) 60%, rgba(34,211,238,0.18))',
-            border: '1px solid rgba(34,211,238,0.3)',
-          }}>
-            <div style={{ position: 'absolute', inset: 0, opacity: 0.5 }}>
-              <NeuralNet density={40} color="#22D3EE" accent="#A78BFA" linkDist={120} opacity={0.4}/>
-            </div>
-            <div style={{ position: 'relative' }}>
-              <Icon.Sparkle size={32} stroke="#22D3EE" style={{ marginBottom: 16 }}/>
-              <h2 className="section-h2" style={{ fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff' }}>
-                <Editable id="cta.title" defaultValue="¿Listos para construir algo serio?"/>
-              </h2>
-              <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.85)', maxWidth: 560, margin: '20px auto 32px' }}>
-                <Editable id="cta.subtitle" multiline defaultValue="Te respondemos en menos de 24 horas con un diagnóstico inicial gratuito."/>
-              </p>
-              <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button onClick={() => setRoute('contacto')} className="btn btn-primary" style={{ padding: '16px 28px' }}>
-                  <Editable id="cta.primary" defaultValue="Empezar conversación"/> <Icon.ArrowRight size={16}/>
-                </button>
-                <button onClick={() => setRoute('servicios')} className="btn btn-ghost on-dark-bg" style={{ padding: '16px 28px' }}>
-                  <Editable id="cta.secondary" defaultValue="Ver paquetes"/>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <HomeCta t={t} setRoute={setRoute}/>
       )}
     </div>
   );

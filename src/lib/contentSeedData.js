@@ -168,7 +168,26 @@
     { key: 'services.title.highlight', path: ['services_section', 'title', 'highlight'] },
     { key: 'services.subtitle', path: ['services_section', 'subtitle'] },
 
+    { key: 'tech.eyebrow', path: ['home_sections', 'tech', 'eyebrow'] },
+    { key: 'tech.title', path: ['home_sections', 'tech', 'title'] },
+    { key: 'process.eyebrow', path: ['home_sections', 'process', 'eyebrow'] },
+    { key: 'process.title', path: ['home_sections', 'process', 'title'] },
+    { key: 'process.1.title', path: ['home_sections', 'process', 'steps', '0', 'title'] },
+    { key: 'process.1.desc', path: ['home_sections', 'process', 'steps', '0', 'desc'] },
+    { key: 'process.2.title', path: ['home_sections', 'process', 'steps', '1', 'title'] },
+    { key: 'process.2.desc', path: ['home_sections', 'process', 'steps', '1', 'desc'] },
+    { key: 'process.3.title', path: ['home_sections', 'process', 'steps', '2', 'title'] },
+    { key: 'process.3.desc', path: ['home_sections', 'process', 'steps', '2', 'desc'] },
+    { key: 'process.4.title', path: ['home_sections', 'process', 'steps', '3', 'title'] },
+    { key: 'process.4.desc', path: ['home_sections', 'process', 'steps', '3', 'desc'] },
+    { key: 'cta.title', path: ['home_sections', 'cta', 'title'] },
+    { key: 'cta.subtitle', path: ['home_sections', 'cta', 'subtitle'] },
+    { key: 'cta.primary', path: ['home_sections', 'cta', 'primary'] },
+    { key: 'cta.secondary', path: ['home_sections', 'cta', 'secondary'] },
+
     { key: 'contact.eyebrow', path: ['contact', 'eyebrow'] },
+    { key: 'contact.title.pre', path: ['contact', 'hero', 'pre'] },
+    { key: 'contact.title.highlight', path: ['contact', 'hero', 'highlight'] },
     { key: 'contact.subtitle', path: ['contact', 'subtitle'] },
     { key: 'contact.form.title', path: ['contact', 'title'] },
     { key: 'contact.success.title', path: ['contact', 'success', 'title'] },
@@ -242,14 +261,13 @@
   // content). The es value is always CONTENT_DEFAULTS[key].
   function resolveValue(translations, lang, key) {
     var t = translations && translations[lang];
-    if (!t) return CONTENT_DEFAULTS[key] || '';
     var entry = MAP_BY_KEY[key];
-    if (entry) {
+    if (t && entry) {
       var v = getPath(t, entry.path);
-      if (v != null) return v;
+      if (v != null && String(v).length) return v;
     }
     if (lang === 'es') return CONTENT_DEFAULTS[key] || '';
-    return CONTENT_DEFAULTS[key] || '';
+    return '';
   }
 
   // Canonical portfolio catalog (ES canonical text + metadata). Used by seed.js
