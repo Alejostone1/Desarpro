@@ -1,5 +1,8 @@
 [build]
-builder = "RAILPACK"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+# Si Railway no usa Dockerfile, evita el build Vite (solo Prisma):
+buildCommand = "npx prisma generate"
 
 [deploy]
 startCommand = "npm run start:api"

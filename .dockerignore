@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.env
+.env.*
+*.md
+api
+.vercel
+.cursor
+prisma/dev.db
+prisma/dev.db-journal
