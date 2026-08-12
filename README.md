@@ -255,14 +255,31 @@ Usuario (browser/movil)
 ### Resolución de API (frontend)
 
 ```mermaid
-flowchart TD
-    A[resolveApiBase] --> B{Dev o LAN}
-    B -->|localhost o red local| C["http hostname puerto 3001"]
-    B -->|Produccion Vercel| D["base vacia usa proxy api"]
-    D --> E[vercel.json rewrite]
-    E --> F[Railway Express]
-    C --> F
+graph TD
+    A[resolveApiBase] --> B[Detectar entorno]
+    B --> C[Dev o LAN]
+    B --> D[Produccion Vercel]
+    C --> E[Express puerto 3001]
+    D --> F[Proxy Vercel rewrite]
+    F --> G[Railway Express]
+    E --> G
 ```
+
+<details>
+<summary>Diagrama ASCII resolveApiBase</summary>
+
+```
+resolveApiBase()
+       |
+       +-- dev/LAN (localhost, 192.168.x.x, :5173)
+       |         -> http://hostname:3001  -> Express local
+       |
+       +-- produccion (desarpro.vercel.app)
+                 -> base vacia ""        -> /api/* same-origin
+                 -> vercel.json rewrite  -> Railway Express
+```
+
+</details>
 
 <details>
 <summary>Tabla resolveApiBase</summary>
