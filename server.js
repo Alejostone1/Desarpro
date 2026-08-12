@@ -56,7 +56,7 @@ app.use((req, res, next) => {
     if (!allowAll) res.header('Vary', 'Origin');
   }
   res.header('Access-Control-Allow-Headers', 'Content-Type, x-admin-token, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
@@ -207,8 +207,24 @@ app.post('/api/auth/logout', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, message: 'API lista' });
+app.get('/api/health', async (_req, res) => {
+  let connected = false;
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    connected = true;
+  } catch (e) {
+    connected = false;
+  }
+  const payload = {
+    ok: connected,
+    message: connected ? 'API lista' : 'Error de conexión a base de datos',
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      connected,
+      provider: 'sqlite',
+    },
+  };
+  res.status(connected ? 200 : 503).json(payload);
 });
 
 // ---------- Public content ----------
@@ -1477,9 +1493,15 @@ registerIntegrationsRoutes(app, { prisma, requireAuth });
 
 initEmail();
 
+const dbUrl = process.env.DATABASE_URL || 'file:./dev.db';
+const dbPath = dbUrl.startsWith('file:') ? dbUrl.replace(/^file:/, '') : '(no-sqlite)';
+const corsInfo = CORS_ORIGINS.includes('*') ? '*' : CORS_ORIGINS.join(', ');
+
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor de auth listo en http://localhost:${PORT}`);
-  console.log(`  Red local: http://<tu-ip-lan>:${PORT}`);
+  console.log(`[startup] DesarPro API · puerto ${PORT} · NODE_ENV=${process.env.NODE_ENV || 'development'}`);
+  console.log(`[startup] SQLite: ${dbPath}`);
+  console.log(`[startup] CORS: ${corsInfo}`);
+  if (process.env.APP_URL) console.log(`[startup] APP_URL: ${process.env.APP_URL}`);
 });
 
 server.on('error', (err) => {

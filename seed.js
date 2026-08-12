@@ -7,8 +7,17 @@ const prisma = new PrismaClient();
 
 const { LANGUAGES, CONTENT_DEFAULTS, ALL_KEYS, sectionFor, typeFor, resolveValue, resolveProjectTranslations, PROJECT_SEED, resolveServiceSeed, TECHNOLOGY_SEED, SEO_DEFAULTS, SITE_CONFIG_DEFAULTS } = require('./src/lib/contentSeedData.js');
 
-// Load the real i18n translations (ES/EN/PT/FR/DE) so the DB is seeded with
-// the exact strings the site already uses — nothing invented.
+// --- Flags de seed (producción segura) ---
+const IS_PROD = process.env.NODE_ENV === 'production';
+const SEED_RESET_PASSWORDS = process.env.SEED_RESET_PASSWORDS === '1';
+const SEED_DEMO_USERS = process.env.SEED_DEMO_USERS !== '0';
+const SEED_UPDATE_CONTENT = process.env.SEED_UPDATE_CONTENT === '1' || !IS_PROD;
+const SEED_UPDATE_CATALOG = process.env.SEED_UPDATE_CATALOG === '1' || !IS_PROD;
+const SEED_UPDATE_SITE_CONFIG = process.env.SEED_UPDATE_SITE_CONFIG === '1';
+const SEED_UPDATE_SEO = process.env.SEED_UPDATE_SEO === '1' || !IS_PROD;
+
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'Android.13';
+
 function loadTranslations() {
   const file = path.join(__dirname, 'src', 'i18n', 'translations.jsx');
   const code = fs.readFileSync(file, 'utf8');
@@ -17,63 +26,85 @@ function loadTranslations() {
   return sandbox.__i18nTranslations || {};
 }
 const TRANSLATIONS = loadTranslations();
-
-// Canonical project catalog — centralized in src/lib/contentSeedData.js
-// (PROJECT_SEED) so seed.js and the API reset flow share one source of truth.
 const PROJECTS = PROJECT_SEED;
 
-const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'Android.13';
+async function hashPassword(raw) {
+  return bcrypt.hash(raw, 10);
+}
 
-async function upsertDemoUser(data) {
-  const { email, role, firstName, lastName, status = 'ACTIVE', company, phone } = data;
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
-  const base = { email, passwordHash, role, status, firstName, lastName };
-  if (company != null) base.company = company;
-  if (phone != null) base.phone = phone;
-  return prisma.user.upsert({
-    where: { email },
-    create: base,
-    update: { passwordHash, role, status, firstName, lastName, ...(company != null ? { company } : {}), ...(phone != null ? { phone } : {}) },
+/** Crea usuario demo si no existe. Usuario existente: no toca password, rol ni datos. */
+async function ensureDemoUser(data) {
+  const { email, role, firstName, lastName, status = 'ACTIVE', company, phone, password } = data;
+  const existing = await prisma.user.findUnique({ where: { email } });
+  const pwd = password || DEMO_PASSWORD;
+
+  if (existing) {
+    if (SEED_RESET_PASSWORDS) {
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { passwordHash: await hashPassword(pwd) },
+      });
+      console.log('[seed] Contraseña actualizada (SEED_RESET_PASSWORDS=1):', email);
+    } else {
+      console.log('[seed] Usuario existente — sin cambios:', email);
+    }
+    return existing;
+  }
+
+  const created = await prisma.user.create({
+    data: {
+      email,
+      passwordHash: await hashPassword(pwd),
+      role,
+      status,
+      firstName,
+      lastName,
+      company: company || '',
+      phone: phone || '',
+    },
   });
+  console.log('[seed] Usuario creado:', email);
+  return created;
 }
 
 async function seedAdmin() {
   const email = (process.env.ADMIN_EMAIL || 'admin@desarpro.com').trim().toLowerCase();
   const password = process.env.ADMIN_PASSWORD || DEMO_PASSWORD;
-  if (!process.env.ADMIN_PASSWORD && email === 'admin@desarpro.com') {
-    console.log('[seed] Usuario demo admin — contraseña:', DEMO_PASSWORD);
-  }
-  const passwordHash = await bcrypt.hash(password, 10);
   const existing = await prisma.user.findUnique({ where: { email } });
+
   if (existing) {
-    await prisma.user.update({
-      where: { id: existing.id },
-      data: { passwordHash, role: email === 'admin@desarpro.com' ? 'admin' : (existing.role || 'admin'), status: 'ACTIVE' },
-    });
-    console.log('Usuario admin actualizado:', email);
-  } else {
-    await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: 'admin',
-        status: 'ACTIVE',
-        firstName: 'Admin',
-        lastName: 'DesarPro',
-      },
-    });
-    console.log('Usuario admin creado:', email);
+    if (SEED_RESET_PASSWORDS) {
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { passwordHash: await hashPassword(password) },
+      });
+      console.log('[seed] Admin contraseña actualizada (SEED_RESET_PASSWORDS=1):', email);
+    } else {
+      console.log('[seed] Admin existente — sin cambios:', email);
+    }
+    return;
   }
+
+  await prisma.user.create({
+    data: {
+      email,
+      passwordHash: await hashPassword(password),
+      role: 'admin',
+      status: 'ACTIVE',
+      firstName: 'Admin',
+      lastName: 'DesarPro',
+    },
+  });
+  console.log('[seed] Admin creado:', email);
 }
 
 async function seedDemoClient() {
-  await upsertDemoUser({
+  await ensureDemoUser({
     email: 'super@desarpro.com',
     role: 'super_admin',
     firstName: 'Super',
     lastName: 'Admin',
   });
-  console.log('Super admin demo: super@desarpro.com');
 
   const clients = [
     { email: 'cliente@demo.com', firstName: 'Juan', lastName: 'Pérez', company: 'Demo Corp', phone: '+34 600 000 001' },
@@ -81,7 +112,7 @@ async function seedDemoClient() {
   ];
 
   for (const c of clients) {
-    const user = await upsertDemoUser({ ...c, role: 'client', status: 'ACTIVE' });
+    const user = await ensureDemoUser({ ...c, role: 'client', status: 'ACTIVE' });
 
     const projects = [
       { title: 'DesarPro Website', description: 'Rediseño corporativo.', status: 'DEVELOPMENT', progress: 65, priority: 'HIGH', clientId: user.id },
@@ -90,8 +121,13 @@ async function seedDemoClient() {
     ];
     for (const p of projects) {
       const existing = await prisma.clientProject.findFirst({ where: { clientId: user.id, title: p.title } });
-      if (existing) await prisma.clientProject.update({ where: { id: existing.id }, data: p });
-      else await prisma.clientProject.create({ data: { ...p, startDate: new Date(), technologies: JSON.stringify(['React', 'Node.js']) } });
+      if (existing) {
+        if (SEED_UPDATE_CATALOG) {
+          await prisma.clientProject.update({ where: { id: existing.id }, data: p });
+        }
+      } else {
+        await prisma.clientProject.create({ data: { ...p, startDate: new Date(), technologies: JSON.stringify(['React', 'Node.js']) } });
+      }
     }
 
     let conv = await prisma.conversation.findFirst({ where: { clientId: user.id, subject: 'Consulta general' } });
@@ -112,7 +148,7 @@ async function seedDemoClient() {
         }
       }
     }
-    console.log('Cliente demo:', c.email);
+    console.log('[seed] Cliente demo verificado:', c.email);
   }
 }
 
@@ -129,14 +165,13 @@ async function seedContent() {
     const existingKey = await prisma.contentKey.findUnique({ where: { key } });
     let contentKey;
     if (existingKey) {
-      contentKey = await prisma.contentKey.update({
-        where: { key },
-        data: { section, type, order },
-      });
+      if (SEED_UPDATE_CONTENT) {
+        contentKey = await prisma.contentKey.update({ where: { key }, data: { section, type, order } });
+      } else {
+        contentKey = existingKey;
+      }
     } else {
-      contentKey = await prisma.contentKey.create({
-        data: { key, section, type, order },
-      });
+      contentKey = await prisma.contentKey.create({ data: { key, section, type, order } });
       createdKeys += 1;
     }
 
@@ -146,7 +181,7 @@ async function seedContent() {
         where: { contentKeyId_lang: { contentKeyId: contentKey.id, lang } },
       });
       if (existing) {
-        if (existing.value !== value) {
+        if (SEED_UPDATE_CONTENT && existing.value !== value) {
           await prisma.contentTranslation.update({
             where: { contentKeyId_lang: { contentKeyId: contentKey.id, lang } },
             data: { value },
@@ -161,7 +196,7 @@ async function seedContent() {
       }
     }
   }
-  console.log(`Contenido: ${createdKeys} claves creadas · ${createdTr} traducciones creadas · ${updatedTr} actualizadas (${ALL_KEYS.length} claves x ${LANGUAGES.length} idiomas)`);
+  console.log(`[seed] Contenido: +${createdKeys} claves · +${createdTr} traducciones · ~${updatedTr} actualizadas (update=${SEED_UPDATE_CONTENT})`);
 }
 
 async function seedProjects() {
@@ -181,22 +216,24 @@ async function seedProjects() {
     const existingProject = await prisma.project.findUnique({ where: { slug: p.slug } });
     let project;
     if (existingProject) {
-      project = await prisma.project.update({ where: { slug: p.slug }, data });
-      updated += 1;
+      if (SEED_UPDATE_CATALOG) {
+        project = await prisma.project.update({ where: { slug: p.slug }, data });
+        updated += 1;
+      } else {
+        project = existingProject;
+      }
     } else {
       project = await prisma.project.create({ data: { slug: p.slug, ...data } });
       created += 1;
     }
 
-    // Seed translations for all 5 languages. ES canonical values come from the
-    // project row itself; the others from PROJECT_TRANSLATIONS (fallback: ES).
     for (const lang of LANGUAGES) {
       const tr = lang === 'es' ? p : (resolveProjectTranslations(p.slug, lang) || p);
       const existing = await prisma.projectTranslation.findUnique({
         where: { projectId_lang: { projectId: project.id, lang } },
       });
       if (existing) {
-        if (existing.title !== tr.title || existing.tagline !== tr.tagline || existing.desc !== tr.desc) {
+        if (SEED_UPDATE_CATALOG && (existing.title !== tr.title || existing.tagline !== tr.tagline || existing.desc !== tr.desc)) {
           await prisma.projectTranslation.update({
             where: { projectId_lang: { projectId: project.id, lang } },
             data: { title: tr.title, tagline: tr.tagline, desc: tr.desc },
@@ -211,7 +248,7 @@ async function seedProjects() {
       }
     }
   }
-  console.log(`Proyectos: ${created} creados / ${updated} actualizados · traducciones ${createdTr} creadas / ${updatedTr} actualizadas (${PROJECTS.length} x ${LANGUAGES.length} idiomas)`);
+  console.log(`[seed] Portafolio: +${created} · ~${updated} actualizados (update=${SEED_UPDATE_CATALOG})`);
 }
 
 async function seedServices() {
@@ -222,11 +259,13 @@ async function seedServices() {
   for (const s of services) {
     const existing = await prisma.service.findUnique({ where: { slug: s.slug } });
     if (existing) {
-      await prisma.service.update({
-        where: { slug: s.slug },
-        data: { kind: s.kind, icon: s.icon, color: s.color, featured: s.featured, active: true, order: s.order },
-      });
-      updated += 1;
+      if (SEED_UPDATE_CATALOG) {
+        await prisma.service.update({
+          where: { slug: s.slug },
+          data: { kind: s.kind, icon: s.icon, color: s.color, featured: s.featured, active: true, order: s.order },
+        });
+        updated += 1;
+      }
     } else {
       await prisma.service.create({
         data: { slug: s.slug, kind: s.kind, icon: s.icon, color: s.color, featured: s.featured, active: true, order: s.order },
@@ -236,27 +275,37 @@ async function seedServices() {
     const row = await prisma.service.findUnique({ where: { slug: s.slug } });
     for (const lang of LANGUAGES) {
       const tr = s.translations[lang];
-      await prisma.serviceTranslation.upsert({
+      const existingTr = await prisma.serviceTranslation.findUnique({
         where: { serviceId_lang: { serviceId: row.id, lang } },
-        update: {
-          name: tr.name, tagline: tr.tagline,
-          bullets: JSON.stringify(tr.bullets || []),
-          overview: tr.overview,
-          deliverables: JSON.stringify(tr.deliverables || []),
-          process: JSON.stringify(tr.process || []),
-        },
-        create: {
-          serviceId: row.id, lang,
-          name: tr.name, tagline: tr.tagline,
-          bullets: JSON.stringify(tr.bullets || []),
-          overview: tr.overview,
-          deliverables: JSON.stringify(tr.deliverables || []),
-          process: JSON.stringify(tr.process || []),
-        },
       });
+      if (existingTr) {
+        if (SEED_UPDATE_CATALOG) {
+          await prisma.serviceTranslation.update({
+            where: { serviceId_lang: { serviceId: row.id, lang } },
+            data: {
+              name: tr.name, tagline: tr.tagline,
+              bullets: JSON.stringify(tr.bullets || []),
+              overview: tr.overview,
+              deliverables: JSON.stringify(tr.deliverables || []),
+              process: JSON.stringify(tr.process || []),
+            },
+          });
+        }
+      } else {
+        await prisma.serviceTranslation.create({
+          data: {
+            serviceId: row.id, lang,
+            name: tr.name, tagline: tr.tagline,
+            bullets: JSON.stringify(tr.bullets || []),
+            overview: tr.overview,
+            deliverables: JSON.stringify(tr.deliverables || []),
+            process: JSON.stringify(tr.process || []),
+          },
+        });
+      }
     }
   }
-  console.log(`Servicios: ${created} creados / ${updated} actualizados (${services.length} x ${LANGUAGES.length} idiomas)`);
+  console.log(`[seed] Servicios: +${created} · ~${updated} (update=${SEED_UPDATE_CATALOG})`);
 }
 
 async function seedTechnologies() {
@@ -266,11 +315,13 @@ async function seedTechnologies() {
     const t = TECHNOLOGY_SEED[i];
     const existing = await prisma.technology.findUnique({ where: { name: t.name } });
     if (existing) {
-      await prisma.technology.update({
-        where: { name: t.name },
-        data: { color: t.color, category: t.category, featured: true, active: true, order: i },
-      });
-      updated += 1;
+      if (SEED_UPDATE_CATALOG) {
+        await prisma.technology.update({
+          where: { name: t.name },
+          data: { color: t.color, category: t.category, featured: true, active: true, order: i },
+        });
+        updated += 1;
+      }
     } else {
       await prisma.technology.create({
         data: { name: t.name, color: t.color, category: t.category, featured: true, active: true, order: i },
@@ -278,7 +329,7 @@ async function seedTechnologies() {
       created += 1;
     }
   }
-  console.log(`Tecnologías: ${created} creadas / ${updated} actualizadas (${TECHNOLOGY_SEED.length})`);
+  console.log(`[seed] Tecnologías: +${created} · ~${updated}`);
 }
 
 async function seedSeo() {
@@ -296,15 +347,17 @@ async function seedSeo() {
       };
       const existing = await prisma.seoEntry.findUnique({ where: { route_lang: { route, lang } } });
       if (existing) {
-        await prisma.seoEntry.update({ where: { route_lang: { route, lang } }, data });
-        updated += 1;
+        if (SEED_UPDATE_SEO) {
+          await prisma.seoEntry.update({ where: { route_lang: { route, lang } }, data });
+          updated += 1;
+        }
       } else {
         await prisma.seoEntry.create({ data: { route, lang, ...data } });
         created += 1;
       }
     }
   }
-  console.log(`SEO: ${created} entradas creadas / ${updated} actualizadas (${Object.keys(SEO_DEFAULTS).length} rutas x ${LANGUAGES.length} idiomas)`);
+  console.log(`[seed] SEO: +${created} · ~${updated} (update=${SEED_UPDATE_SEO})`);
 }
 
 async function seedSiteConfig() {
@@ -314,7 +367,7 @@ async function seedSiteConfig() {
     const value = JSON.stringify(SITE_CONFIG_DEFAULTS[key]);
     const existing = await prisma.siteConfig.findUnique({ where: { key } });
     if (existing) {
-      if (existing.value !== value) {
+      if (SEED_UPDATE_SITE_CONFIG && existing.value !== value) {
         await prisma.siteConfig.update({ where: { key }, data: { value } });
         updated += 1;
       }
@@ -323,23 +376,28 @@ async function seedSiteConfig() {
       created += 1;
     }
   }
-  console.log(`Configuración: ${created} claves creadas / ${updated} actualizadas`);
+  console.log(`[seed] SiteConfig: +${created} · ~${updated}`);
 }
 
 async function main() {
-  await seedAdmin();
-  await seedDemoClient();
+  console.log('[seed] Modo:', IS_PROD ? 'production' : 'development');
+  console.log('[seed] Flags: demo=', SEED_DEMO_USERS, 'resetPwd=', SEED_RESET_PASSWORDS, 'content=', SEED_UPDATE_CONTENT, 'catalog=', SEED_UPDATE_CATALOG);
+
+  if (SEED_DEMO_USERS) {
+    await seedAdmin();
+    await seedDemoClient();
+  }
   await seedContent();
   await seedProjects();
   await seedServices();
   await seedTechnologies();
   await seedSeo();
   await seedSiteConfig();
-  console.log('Seed completado. El contenido ahora vive en la base de datos (SQLite).');
+  console.log('[seed] Completado.');
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error('[seed] Error:', e.message || e);
   process.exit(1);
 }).finally(async () => {
   await prisma.$disconnect();

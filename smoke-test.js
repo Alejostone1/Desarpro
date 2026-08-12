@@ -38,6 +38,8 @@ async function req(path, opts = {}) {
       await sleep(300);
     }
     check('health endpoint', healthy);
+    const healthData = healthy ? await (await fetch(BASE + '/api/health')).json() : null;
+    check('health database sqlite ok', healthData?.database?.provider === 'sqlite' && healthData?.database?.connected === true, healthData?.database);
 
     // Login (wrong password)
     const bad = await req('/api/login', { method: 'POST', body: { email: 'admin@desarpro.com', password: 'wrong' } });
