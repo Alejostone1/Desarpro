@@ -14,7 +14,10 @@ import { Projects } from './pages/Projects.jsx';
 import { About } from './pages/About.jsx';
 import { Contact } from './pages/Contact.jsx';
 import { Login } from './pages/Login.jsx';
+import { ResetPassword } from './pages/ResetPassword.jsx';
 import { Admin } from './pages/Admin.jsx';
+import { ClientApp } from './pages/ClientApp.jsx';
+import { readUser, readToken, isAdminUser, isClientUser } from './lib/authSession.js';
 import { ServicesHub } from './pages/ServicesHub.jsx';
 import { ServicePage } from './pages/ServicePage.jsx';
 import { NotFound } from './pages/NotFound.jsx';
@@ -71,6 +74,7 @@ function useSeo(route) {
 function App() {
   const [route, setRouteRaw] = React.useState(() => {
     const h = (window.location.hash || '').replace(/^#\/?/, '');
+    if (h.startsWith('reset-password')) return 'reset-password';
     return h || 'home';
   });
 
@@ -89,10 +93,22 @@ function App() {
   useSeo(route);
 
   // Full-bleed routes have no Navbar/Footer (immersive)
-  const isFullBleed = route === 'login' || route === 'admin';
+  const isFullBleed = route === 'login' || route === 'reset-password' || route === 'admin' || route === 'client' || (route && route.startsWith('client/'));
 
-  const known = ['home', 'proyectos', 'nosotros', 'contacto', 'login', 'admin', 'servicios'];
-  const isKnown = known.includes(route) || (route && route.startsWith && route.startsWith('svc-'));
+  const known = ['home', 'proyectos', 'nosotros', 'contacto', 'login', 'admin', 'client', 'servicios'];
+  const isKnown = known.includes(route) || (route && route.startsWith && (route.startsWith('svc-') || route.startsWith('client')));
+
+  // Route guards — clients cannot access admin; admins skip client portal via hash
+  React.useEffect(() => {
+    const user = readUser();
+    const token = readToken();
+    if (route === 'admin' && token && user && isClientUser(user) && !isAdminUser(user)) {
+      window.location.hash = 'client';
+    }
+    if ((route === 'client' || (route && route.startsWith('client/'))) && token && user && isAdminUser(user)) {
+      window.location.hash = 'admin';
+    }
+  }, [route]);
 
   let Page = null;
   if (route === 'home') Page = <Home setRoute={setRoute}/>;
@@ -100,7 +116,9 @@ function App() {
   else if (route === 'nosotros') Page = <About setRoute={setRoute}/>;
   else if (route === 'contacto') Page = <Contact setRoute={setRoute}/>;
   else if (route === 'login') Page = <Login setRoute={setRoute}/>;
+  else if (route === 'reset-password') Page = <ResetPassword setRoute={setRoute}/>;
   else if (route === 'admin') Page = <Admin setRoute={setRoute}/>;
+  else if (route === 'client' || (route && route.startsWith('client/'))) Page = <ClientApp setRoute={setRoute} route={route}/>;
   else if (route === 'servicios') Page = <ServicesHub setRoute={setRoute}/>;
   else if (route && route.startsWith && route.startsWith('svc-')) Page = <ServicePage id={route} setRoute={setRoute}/>;
   else Page = <NotFound setRoute={setRoute}/>;

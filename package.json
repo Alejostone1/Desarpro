@@ -12,7 +12,12 @@
     "postinstall": "node scripts/postinstall.js",
     "db:migrate": "prisma migrate dev --name cms",
     "db:push": "prisma db push",
-    "db:seed": "node seed.js"
+    "db:seed": "node seed.js",
+    "test:smoke": "node smoke-test.js",
+    "i18n:check": "node scripts/i18n-parity-check.js",
+    "test:e2e:admin": "node scripts/admin-verify.js",
+    "test:e2e:browser": "node scripts/browser-test.js",
+    "build:local": "node scripts/build-local.js"
   },
   "prisma": {
     "seed": "node seed.js"
@@ -26,6 +31,7 @@
     "body-parser": "^2.3.0",
     "concurrently": "^9.2.4",
     "express": "^5.2.1",
+    "nodemailer": "^6.9.16",
     "prisma": "^5.22.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

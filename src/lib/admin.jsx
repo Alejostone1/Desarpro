@@ -9,25 +9,16 @@
 import React from 'react';
 import { useI18n } from '../i18n/index.jsx';
 import { resolveApiBase } from './apiBase.js';
+import {
+  readToken, writeToken, readUser, writeUser, clearSession, isAdminUser,
+} from './authSession.js';
 
 const SESSION_KEY = 'desarpro:admin:session';
-const TOKEN_KEY = 'desarpro:admin:token';
-const USER_KEY = 'desarpro:admin:user';
 
 function getApiBase() {
   return resolveApiBase();
 }
 const API_BASE = getApiBase();
-
-function readToken() {
-  try { return sessionStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
-}
-function writeToken(t) {
-  try {
-    if (t) sessionStorage.setItem(TOKEN_KEY, t);
-    else sessionStorage.removeItem(TOKEN_KEY);
-  } catch (e) {}
-}
 function readAdminFlag() {
   try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) { return false; }
 }
@@ -228,26 +219,36 @@ function AdminProvider({ children }) {
     return { ok: false, status: res.status };
   }, [language, markSaved, handleUnauthorized]);
 
-  const login = React.useCallback(async (password) => {
+  const login = React.useCallback(async (emailOrPassword, passwordMaybe) => {
+    let email;
+    let password;
+    if (passwordMaybe !== undefined) {
+      email = String(emailOrPassword || '').trim().toLowerCase();
+      password = passwordMaybe;
+    } else {
+      email = 'admin@desarpro.com';
+      password = emailOrPassword;
+    }
     try {
       const res = await fetch(`${API_BASE}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@desarpro.com', password }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
       if (res.ok && data && data.ok && data.token) {
+        if (!isAdminUser(data.user)) {
+          return { ok: false, error: 'forbidden' };
+        }
         writeToken(data.token);
+        writeUser(data.user);
         setIsAdmin(true);
-        try {
-          sessionStorage.setItem(SESSION_KEY, '1');
-          localStorage.setItem(USER_KEY, JSON.stringify(data.user || { email: 'admin@desarpro.com', role: 'admin' }));
-        } catch (e) {}
+        try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) {}
         setAuthError('');
         await loadFullContent();
-        return { ok: true };
+        return { ok: true, user: data.user };
       }
-      return { ok: false, error: 'bad' };
+      return { ok: false, error: res.status === 403 ? 'blocked' : 'bad' };
     } catch (e) {
       return { ok: false, error: 'server' };
     }
@@ -264,11 +265,7 @@ function AdminProvider({ children }) {
     setIsAdmin(false);
     setEditMode(false);
     setFullContent(null);
-    writeToken(null);
-    try {
-      sessionStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(USER_KEY);
-    } catch (e) {}
+    clearSession();
   }, []);
 
   const reset = React.useCallback(async () => {

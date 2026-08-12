@@ -3,6 +3,13 @@
 
 import React from 'react';
 import { __i18nTranslations } from './translations.jsx';
+import { PORTAL_I18N } from './portalTranslations.js';
+
+for (const lang of Object.keys(__i18nTranslations)) {
+  if (PORTAL_I18N[lang]) {
+    Object.assign(__i18nTranslations[lang], PORTAL_I18N[lang]);
+  }
+}
 
 const I18nContext = React.createContext();
 
@@ -41,7 +48,7 @@ function I18nProvider({ children }) {
       if (value && typeof value === 'object' && k in value) {
         value = value[k];
       } else {
-        // Fallback to Spanish if key not found
+        if (key.startsWith('portal.')) return key;
         let fallback = __i18nTranslations.es;
         for (const fk of keys) {
           if (fallback && typeof fallback === 'object' && fk in fallback) {

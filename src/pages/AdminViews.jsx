@@ -2,6 +2,7 @@
 // and site configuration.
 import React from 'react';
 import Icon from '../lib/icons.jsx';
+import { useI18n } from '../i18n/index.jsx';
 import { desarproToast } from '../components/Toasts.jsx';
 import { LoadingState, ErrorState, EmptyState } from '../components/States.jsx';
 import {
@@ -10,6 +11,7 @@ import {
   fetchServices, fetchSiteConfig, saveSeo, saveService, saveSiteConfig,
   saveTechnology, updateLead, updateService,
 } from '../lib/serviceData.jsx';
+import { convertLeadToClient } from '../lib/portalData.jsx';
 
 const ADMIN_LANGS = ['es', 'en', 'pt', 'fr', 'de'];
 const ADMIN_LANG_LABELS = { es: 'ES', en: 'EN', pt: 'PT', fr: 'FR', de: 'DE' };
@@ -21,6 +23,21 @@ const LEAD_STATUSES = [
   { id: 'lost', label: 'Perdido', color: '#EF4444' },
 ];
 const LEAD_STATUS_MAP = LEAD_STATUSES.reduce((a, s) => { a[s.id] = s; return a; }, {});
+
+const ACTIVITY_LABELS = {
+  LOGIN: 'Inicio de sesión',
+  REGISTER: 'Registro',
+  CREATE_USER: 'Usuario creado',
+  UPDATE_USER: 'Usuario actualizado',
+  DELETE_USER: 'Usuario eliminado',
+  CREATE_PROJECT: 'Proyecto creado',
+  UPDATE_PROJECT: 'Proyecto actualizado',
+  DELETE_PROJECT: 'Proyecto eliminado',
+  CREATE_CLIENT: 'Cliente creado',
+  MESSAGE_SENT: 'Mensaje enviado',
+  CONTENT_UPDATED: 'Contenido actualizado',
+  RESET_PASSWORD: 'Contraseña restablecida',
+};
 
 function AdminCard({ icon, label, value, color = '#22D3EE', sub, onClick }) {
   const I = Icon[icon] || Icon.Box;
@@ -47,6 +64,7 @@ function AdminCard({ icon, label, value, color = '#22D3EE', sub, onClick }) {
 
 // ---------------- Dashboard ----------------
 function DashboardView({ goTo }) {
+  const { t } = useI18n();
   const [state, setState] = React.useState({ loading: true, data: null, error: false });
   const load = React.useCallback(() => {
     setState({ loading: true, data: null, error: false });
@@ -62,19 +80,58 @@ function DashboardView({ goTo }) {
       <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
         <Icon.Activity size={22} stroke="var(--cyan-bright)"/> Dashboard
       </h1>
-      <p style={{ color: 'var(--text-2)', fontSize: 14, margin: '0 0 24px' }}>
-        Resumen en vivo del sitio: contenido, portafolio, servicios, tecnologías y leads.
+      <p style={{ color: 'var(--text-2)', fontSize: 14, margin: '0 0 20px' }}>
+        {t('portal.admin.dashboard.subtitle')}
       </p>
 
-      {state.loading ? <LoadingState label="Cargando dashboard…"/> : state.error ? (
+      {!state.loading && !state.error && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+          {[
+            ['client_projects', 'Folder', t('portal.admin.dashboard.newProject')],
+            ['clients', 'Users', t('portal.admin.dashboard.newClient')],
+            ['users', 'Shield', t('portal.admin.dashboard.newUser')],
+            ['leads', 'Mail', t('portal.admin.nav.leads')],
+            ['messages', 'Mail', t('portal.admin.dashboard.viewMessages')],
+          ].map(([id, icon, label]) => {
+            const I = Icon[icon] || Icon.Activity;
+            return (
+              <button key={id} type="button" className="btn btn-ghost" onClick={() => goTo(id)} style={{ fontSize: 12, padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <I size={14}/> {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {state.loading ? <LoadingState label={t('portal.admin.dashboard.loading')}/> : state.error ? (
         <ErrorState message="No se pudo cargar el dashboard" hint="Revisa que la API esté en línea y que la sesión siga activa." onRetry={load}/>
       ) : (
         <div style={{ display: 'grid', gap: 18 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-            <AdminCard icon="Folder" label="Proyectos" value={state.data.projects} sub={`${state.data.activeProjects} visibles`} color="#3B82F6" onClick={() => goTo('projects')}/>
-            <AdminCard icon="Layers" label="Servicios" value={state.data.services} sub={`${state.data.activeServices} activos`} color="#F97316" onClick={() => goTo('services')}/>
-            <AdminCard icon="Cpu" label="Tecnologías" value={state.data.technologies} sub={`${state.data.activeTechnologies} visibles`} color="#8B5CF6" onClick={() => goTo('tech')}/>
-            <AdminCard icon="Mail" label="Leads" value={state.data.leads} sub="contactos recibidos" color="#10B981" onClick={() => goTo('leads')}/>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+            <AdminCard icon="Folder" label={t('portal.admin.clientProjects.title')} value={state.data.clientProjects ?? 0} sub={`${state.data.activeClientProjects ?? 0} activos · ${state.data.completedClientProjects ?? 0} finalizados`} color="#3B82F6" onClick={() => goTo('client_projects')}/>
+            <AdminCard icon="Users" label={t('portal.admin.clients.title')} value={state.data.clients ?? 0} sub={`${state.data.clientsActive ?? 0} activos · ${state.data.clientsPending ?? 0} pendientes`} color="#06B6D4" onClick={() => goTo('clients')}/>
+            <AdminCard icon="Shield" label={t('portal.admin.nav.admins')} value={state.data.admins ?? 0} sub={`${state.data.users ?? 0} ${t('portal.admin.users.title').toLowerCase()}`} color="#8B5CF6" onClick={() => goTo('users')}/>
+            <AdminCard icon="Mail" label={t('portal.admin.nav.leads')} value={state.data.leads} sub={`${state.data.newLeads ?? 0} nuevos`} color="#10B981" onClick={() => goTo('leads')}/>
+            <AdminCard icon="Mail" label={t('portal.admin.nav.conversations')} value={state.data.conversations ?? 0} sub={`${state.data.unreadMessages ?? 0} ${t('portal.admin.messages.unread')}`} color="#F59E0B" onClick={() => goTo('messages')}/>
+            <AdminCard icon="Layers" label={t('portal.client.deliverables')} value={state.data.deliverablesTotal ?? 0} sub={`${state.data.deliverablesRecent ?? 0} ${t('portal.admin.dashboard.recentDeliverables')}`} color="#14B8A6" onClick={() => goTo('client_projects')}/>
+          </div>
+
+          {state.data.alerts && state.data.alerts.length > 0 && (
+            <div style={{ display: 'grid', gap: 8 }}>
+              {state.data.alerts.map((a) => (
+                <div key={a.type} style={{ padding: '12px 16px', borderRadius: 12, background: a.severity === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.08)', border: `1px solid ${a.severity === 'warning' ? 'rgba(245,158,11,0.35)' : 'rgba(59,130,246,0.3)'}`, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+                  <Icon.Activity size={14} stroke={a.severity === 'warning' ? '#F59E0B' : '#3B82F6'}/>
+                  <span style={{ flex: 1, color: 'var(--text-1)' }}>{a.message}</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-0)' }}>{a.count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+            <AdminCard icon="Layers" label={t('portal.admin.nav.portfolio')} value={state.data.projects} sub={`${state.data.activeProjects} visibles`} color="#8B5CF6" onClick={() => goTo('portfolio')}/>
+            <AdminCard icon="Layers" label={t('portal.admin.nav.services')} value={state.data.services} sub={`${state.data.activeServices} activos`} color="#F97316" onClick={() => goTo('services')}/>
+            <AdminCard icon="Cpu" label={t('portal.admin.nav.tech')} value={state.data.technologies} sub={`${state.data.activeTechnologies} visibles`} color="#6366F1" onClick={() => goTo('tech')}/>
+            <AdminCard icon="Search" label={t('portal.admin.nav.seo')} value={state.data.contentKeys} sub="claves CMS" color="#14B8A6" onClick={() => goTo('seo')}/>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr)', gap: 18 }} className="dash-2col">
@@ -133,6 +190,28 @@ function DashboardView({ goTo }) {
             </div>
           </div>
 
+          {state.data.recentActivity && state.data.recentActivity.length > 0 && (
+            <div style={{ padding: 18, borderRadius: 16, background: 'var(--card-bg)', border: '1px solid var(--card-border)' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-0)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon.Activity size={15} stroke="#22D3EE"/> Actividad reciente
+              </div>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {state.data.recentActivity.map((a) => (
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-0)' }}>{ACTIVITY_LABELS[a.action] || a.action}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{a.userEmail || '—'} · {a.entity}{a.entityId ? ` #${a.entityId}` : ''}</div>
+                    </div>
+                    <span style={{ fontSize: 10, color: 'var(--text-3)', flexShrink: 0 }}>{new Date(a.createdAt).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => goTo('activity')} style={{ marginTop: 12, background: 'transparent', border: 'none', color: '#22D3EE', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                Ver actividad completa <Icon.ArrowRight size={12}/>
+              </button>
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
             <div style={{ fontSize: 12, color: 'var(--text-2)' }}>
               <Icon.Box size={12}/> <b>{state.data.contentKeys}</b> campos editables en el CMS
@@ -158,6 +237,7 @@ function DashboardView({ goTo }) {
 
 // ---------------- Leads ----------------
 function LeadsManager() {
+  const { t } = useI18n();
   const [leads, setLeads] = React.useState([]);
   const [counts, setCounts] = React.useState({});
   const [loading, setLoading] = React.useState(true);
@@ -223,6 +303,18 @@ function LeadsManager() {
     a.click();
     URL.revokeObjectURL(url);
     desarproToast({ type: 'success', title: 'CSV exportado', message: `${leads.length} leads descargados.` });
+  };
+
+  const convertToClient = async (lead) => {
+    const pwd = window.prompt(`Contraseña temporal para ${lead.email}:`, 'Android.13');
+    if (!pwd) return;
+    const res = await convertLeadToClient(lead.id, pwd);
+    if (res.ok) {
+      desarproToast({ type: 'success', title: t('portal.admin.clients.convert'), message: lead.email });
+      load();
+    } else {
+      desarproToast({ type: 'error', title: 'No se pudo convertir', message: res.error || 'Error' });
+    }
   };
 
   return (
@@ -337,6 +429,11 @@ function LeadsManager() {
                         </button>
                       )}
                     </div>
+                    {!l.convertedUserId && (
+                      <button onClick={() => convertToClient(l)} className="btn btn-primary" style={{ marginTop: 14, padding: '10px 16px', fontSize: 13 }}>
+                        <Icon.Users size={14}/> {t('portal.admin.clients.convert')}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

@@ -22,26 +22,97 @@ const TRANSLATIONS = loadTranslations();
 // (PROJECT_SEED) so seed.js and the API reset flow share one source of truth.
 const PROJECTS = PROJECT_SEED;
 
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'Android.13';
+
+async function upsertDemoUser(data) {
+  const { email, role, firstName, lastName, status = 'ACTIVE', company, phone } = data;
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+  const base = { email, passwordHash, role, status, firstName, lastName };
+  if (company != null) base.company = company;
+  if (phone != null) base.phone = phone;
+  return prisma.user.upsert({
+    where: { email },
+    create: base,
+    update: { passwordHash, role, status, firstName, lastName, ...(company != null ? { company } : {}), ...(phone != null ? { phone } : {}) },
+  });
+}
+
 async function seedAdmin() {
   const email = (process.env.ADMIN_EMAIL || 'admin@desarpro.com').trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || 'Administrador01';
-  if (!process.env.ADMIN_PASSWORD) {
-    console.warn('[seed] ADMIN_PASSWORD no está definido: usando la contraseña por defecto (SOLO desarrollo). En producción define ADMIN_EMAIL y ADMIN_PASSWORD.');
+  const password = process.env.ADMIN_PASSWORD || DEMO_PASSWORD;
+  if (!process.env.ADMIN_PASSWORD && email === 'admin@desarpro.com') {
+    console.log('[seed] Usuario demo admin — contraseña:', DEMO_PASSWORD);
   }
-  const existing = await prisma.user.findUnique({ where: { email } });
   const passwordHash = await bcrypt.hash(password, 10);
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    // Solo re-seteamos la contraseña si se configuró explícitamente por env;
-    // así un password custom que exista en la BD no se pierde con cada seed.
-    if (process.env.ADMIN_PASSWORD) {
-      await prisma.user.update({ where: { id: existing.id }, data: { passwordHash } });
-      console.log('Usuario admin actualizado:', email);
-    } else {
-      console.log('Usuario admin ya existe:', email);
-    }
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: { passwordHash, role: email === 'admin@desarpro.com' ? 'admin' : (existing.role || 'admin'), status: 'ACTIVE' },
+    });
+    console.log('Usuario admin actualizado:', email);
   } else {
-    await prisma.user.create({ data: { email, passwordHash, role: 'admin' } });
+    await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: 'admin',
+        status: 'ACTIVE',
+        firstName: 'Admin',
+        lastName: 'DesarPro',
+      },
+    });
     console.log('Usuario admin creado:', email);
+  }
+}
+
+async function seedDemoClient() {
+  await upsertDemoUser({
+    email: 'super@desarpro.com',
+    role: 'super_admin',
+    firstName: 'Super',
+    lastName: 'Admin',
+  });
+  console.log('Super admin demo: super@desarpro.com');
+
+  const clients = [
+    { email: 'cliente@demo.com', firstName: 'Juan', lastName: 'Pérez', company: 'Demo Corp', phone: '+34 600 000 001' },
+    { email: 'maria@demo.com', firstName: 'María', lastName: 'García', company: 'Tech Solutions', phone: '+34 600 000 002' },
+  ];
+
+  for (const c of clients) {
+    const user = await upsertDemoUser({ ...c, role: 'client', status: 'ACTIVE' });
+
+    const projects = [
+      { title: 'DesarPro Website', description: 'Rediseño corporativo.', status: 'DEVELOPMENT', progress: 65, priority: 'HIGH', clientId: user.id },
+      { title: 'Sistema Administrativo', description: 'Portal admin + clientes.', status: 'PLANNING', progress: 20, priority: 'MEDIUM', clientId: user.id },
+      { title: 'App Móvil', description: 'Aplicación iOS/Android.', status: 'DESIGN', progress: 40, priority: 'LOW', clientId: user.id },
+    ];
+    for (const p of projects) {
+      const existing = await prisma.clientProject.findFirst({ where: { clientId: user.id, title: p.title } });
+      if (existing) await prisma.clientProject.update({ where: { id: existing.id }, data: p });
+      else await prisma.clientProject.create({ data: { ...p, startDate: new Date(), technologies: JSON.stringify(['React', 'Node.js']) } });
+    }
+
+    let conv = await prisma.conversation.findFirst({ where: { clientId: user.id, subject: 'Consulta general' } });
+    if (!conv) {
+      conv = await prisma.conversation.create({ data: { clientId: user.id, subject: 'Consulta general', lastMessageAt: new Date() } });
+    }
+    const admin = await prisma.user.findFirst({ where: { role: { in: ['admin', 'super_admin'] } } });
+    if (admin) {
+      const msgs = [
+        { senderId: admin.id, content: `Hola ${c.firstName}, bienvenido al portal DesarPro.` },
+        { senderId: user.id, content: 'Gracias, ¿cómo va el desarrollo?' },
+        { senderId: admin.id, content: 'Avanzamos según lo planificado. Te mantendremos informado.' },
+      ];
+      const msgCount = await prisma.message.count({ where: { conversationId: conv.id } });
+      if (msgCount < msgs.length) {
+        for (const m of msgs.slice(msgCount)) {
+          await prisma.message.create({ data: { conversationId: conv.id, ...m } });
+        }
+      }
+    }
+    console.log('Cliente demo:', c.email);
   }
 }
 
@@ -257,6 +328,7 @@ async function seedSiteConfig() {
 
 async function main() {
   await seedAdmin();
+  await seedDemoClient();
   await seedContent();
   await seedProjects();
   await seedServices();

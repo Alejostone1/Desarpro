@@ -8,11 +8,18 @@
 import React from 'react';
 import { useAdmin } from '../lib/admin.jsx';
 import { useTheme, ThemeToggle } from '../lib/theme.jsx';
+import { useI18n } from '../i18n/index.jsx';
+import { ADMIN_NAV } from '../lib/adminNav.jsx';
+import { readUser, isClientUser } from '../lib/authSession.js';
 import Icon from '../lib/icons.jsx';
 import Logo from '../components/Logo.jsx';
 import NeuralNet from '../components/NeuralNet.jsx';
 import { fetchAdminProjects, saveProject, deleteProject, updateProject } from '../lib/projectData.jsx';
+import { PortalTable, StatusBadge, ProgressBar, ProjectTimeline, ChatPanel, Modal, NotificationsBell } from '../components/portal/PortalUI.jsx';
+import { fetchDashboard } from '../lib/serviceData.jsx';
+import { fetchNotifications, markNotificationRead, markAllNotificationsRead } from '../lib/portalData.jsx';
 import { DashboardView, LeadsManager, ServicesManager, TechManager, SeoManager, ConfigManager } from './AdminViews.jsx';
+import { UsersManager, ClientsManager, ClientDetailView, ClientProjectsAdmin, MessagesManager, ActivityView, PermissionsView, LanguagesView, AppearanceView, IntegrationsView, GeneralSettingsView } from './AdminPortalViews.jsx';
 
 const LANGS = ['es', 'en', 'pt', 'fr', 'de'];
 const LANG_LABELS = { es: 'ES', en: 'EN', pt: 'PT', fr: 'FR', de: 'DE' };
@@ -23,33 +30,48 @@ function Admin({ setRoute }) {
     set, setAll, reset, exportData, importData, editMode, setEditMode, authError,
   } = useAdmin();
   const { theme } = useTheme();
+  const { t } = useI18n();
   const [pwd, setPwd] = React.useState('');
+  const [email, setEmail] = React.useState('admin@desarpro.com');
   const [err, setErr] = React.useState('');
   const [activeSection, setActiveSection] = React.useState('dashboard');
   const [savedKey, setSavedKey] = React.useState(null);
   const [importText, setImportText] = React.useState('');
   const [importStatus, setImportStatus] = React.useState('');
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [collapsedGroups, setCollapsedGroups] = React.useState({});
+  const [selectedClientId, setSelectedClientId] = React.useState(null);
+  const [navBadges, setNavBadges] = React.useState({});
 
-  const sections = React.useMemo(() => ({
-    dashboard:   { label: 'Dashboard',        icon: 'Activity',   prefixes: [], always: true },
-    projects:    { label: 'Proyectos',        icon: 'Folder',     prefixes: [], always: true },
-    leads:       { label: 'Leads',            icon: 'Mail',       prefixes: [], always: true },
-    services:    { label: 'Servicios',        icon: 'Layers',     prefixes: [], always: true },
-    tech:        { label: 'Tecnologías',      icon: 'Cpu',        prefixes: [], always: true },
-    seo:         { label: 'SEO',              icon: 'Search',     prefixes: [], always: true },
-    config:      { label: 'Configuración',    icon: 'Settings',   prefixes: [], always: true },
-    hero:        { label: 'Inicio · Hero',     icon: 'Sparkle',    prefixes: ['hero.'] },
-    stats:       { label: 'Inicio · Stats',    icon: 'BarChart',   prefixes: ['stats.'] },
-    home_services:{ label: 'Inicio · Servicios', icon: 'Layers',   prefixes: ['services.'] },
-    home_tech:   { label: 'Inicio · Tecnología', icon: 'Cpu',      prefixes: ['tech.'] },
-    process:     { label: 'Inicio · Proceso',  icon: 'Compass',    prefixes: ['process.'] },
-    cta:         { label: 'Inicio · CTA',      icon: 'ArrowRight', prefixes: ['cta.'] },
-    contact:     { label: 'Contacto',          icon: 'Mail',       prefixes: ['contact.'] },
-    login:       { label: 'Login',             icon: 'Lock',       prefixes: ['login.'] },
-    about:       { label: 'Nosotros',          icon: 'Users',      prefixes: ['about.'] },
-    footer:      { label: 'Footer',            icon: 'Globe',      prefixes: ['footer.'] },
-    other:       { label: 'Otros',             icon: 'Settings',   prefixes: [] },
-  }), []);
+  React.useEffect(() => {
+    if (!isAdmin) return;
+    fetchDashboard().then((res) => {
+      if (res.ok && res.dashboard) {
+        const d = res.dashboard;
+        setNavBadges({
+          leads: d.leads || 0,
+          messages: d.unreadMessages || 0,
+          clients: d.clients || 0,
+          projects: d.clientProjects || 0,
+        });
+      }
+    });
+  }, [isAdmin, activeSection]);
+
+  const navFlat = React.useMemo(() => ADMIN_NAV.flatMap((g) => g.items), []);
+  const sections = React.useMemo(() => {
+    const map = {};
+    navFlat.forEach((item) => {
+      map[item.id] = {
+        label: t(item.labelKey) || item.id,
+        icon: item.icon,
+        prefixes: item.prefixes || [],
+        always: !!item.always,
+      };
+    });
+    return map;
+  }, [navFlat, t]);
 
   const allKeys = Object.keys(fullContent || {});
   const keyOrder = fullContent || {};
@@ -68,12 +90,26 @@ function Admin({ setRoute }) {
 
   const handleLogin = async () => {
     setErr('');
-    const res = await login(pwd);
+    const res = await login(email.trim().toLowerCase(), pwd);
     if (!res || !res.ok) {
-      setErr(res && res.error === 'server' ? 'Servidor no disponible. Verifica que la API esté activa.' : 'Contraseña incorrecta');
+      setErr(res && res.error === 'server' ? 'Servidor no disponible. Verifica que la API esté activa.' : res?.error === 'forbidden' ? t('portal.client.accessDenied') : 'Contraseña incorrecta');
       setTimeout(() => setErr(''), 3500);
     }
   };
+
+  const portalUser = readUser();
+  if (!isAdmin && portalUser && isClientUser(portalUser)) {
+    return (
+      <div className="page" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div className="glass-2" style={{ padding: 32, borderRadius: 20, maxWidth: 420, textAlign: 'center' }}>
+          <Icon.Shield size={40} stroke="#EF4444"/>
+          <h2 style={{ margin: '16px 0 8px' }}>{t('portal.client.accessDenied')}</h2>
+          <p style={{ color: 'var(--text-2)', fontSize: 14 }}>Tu cuenta de cliente no tiene acceso al panel administrador.</p>
+          <button onClick={() => setRoute('client')} className="btn btn-primary" style={{ marginTop: 16 }}>Ir al portal cliente</button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSave = async (key, translations) => {
     setSavedKey(key);
@@ -148,6 +184,10 @@ function Admin({ setRoute }) {
 
             <div style={{ display: 'grid', gap: 14, marginTop: 24 }} onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}>
               <label style={{ display: 'block' }}>
+                <span style={{ display: 'block', fontSize: 12, color: 'var(--text-2)', marginBottom: 6, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Email</span>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="input" autoFocus/>
+              </label>
+              <label style={{ display: 'block' }}>
                 <span style={{ display: 'block', fontSize: 12, color: 'var(--text-2)', marginBottom: 6, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Contraseña</span>
                 <input
                   type="password"
@@ -197,6 +237,7 @@ function Admin({ setRoute }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <button className="btn btn-ghost admin-menu-btn" style={{ padding: 8, display: 'none' }} onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu">☰</button>
           <a onClick={() => setRoute('home')} style={{ cursor: 'pointer' }}>
             <Logo size={32} withWordmark/>
           </a>
@@ -212,6 +253,12 @@ function Admin({ setRoute }) {
             <Icon.Edit size={13}/> {editMode ? 'Edición activa' : 'Activar edición en vivo'}
           </button>
           <ThemeToggle size={36}/>
+          <NotificationsBell t={t} fetchList={fetchNotifications} markRead={markNotificationRead} markAllRead={markAllNotificationsRead} onNavigate={(target) => {
+            if (target === 'clients') setActiveSection('clients');
+            else if (target === 'leads') setActiveSection('leads');
+            else if (target === 'client/messages' || target.includes('messages')) setActiveSection('messages');
+            else if (target.includes('projects')) setActiveSection('client_projects');
+          }}/>
           <button onClick={() => setRoute('home')} className="btn btn-ghost" style={{ padding: '8px 14px', fontSize: 13 }}>
             <Icon.Globe size={13}/> Ver sitio
           </button>
@@ -224,29 +271,58 @@ function Admin({ setRoute }) {
       {/* Body — sidebar + main */}
       <div className="admin-layout">
         {/* Sidebar */}
-        <aside className="admin-sidebar">
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, padding: '4px 12px', marginBottom: 8 }}>
-            Secciones
-          </div>
-          {Object.entries(sections).map(([id, s]) => {
-            const I = Icon[s.icon] || Icon.Settings;
-            const count = (keysByGroup[id] || []).length;
-            if (count === 0 && !s.always) return null;
-            const active = activeSection === id;
+        <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}>
+          <button
+            type="button"
+            className="admin-collapse-btn"
+            onClick={() => setSidebarCollapsed((c) => !c)}
+            aria-label="Colapsar sidebar"
+            style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', padding: '4px 8px 8px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-3)' }}
+          >
+            <Icon.ChevronDown size={14} style={{ transform: sidebarCollapsed ? 'rotate(90deg)' : 'rotate(-90deg)', transition: 'transform 160ms' }}/>
+          </button>
+          {ADMIN_NAV.map((group) => {
+            const collapsed = collapsedGroups[group.id];
             return (
-              <button key={id} onClick={() => setActiveSection(id)} style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 12px', borderRadius: 10,
-                background: active ? 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(6,182,212,0.12))' : 'transparent',
-                border: active ? '1px solid rgba(34,211,238,0.4)' : '1px solid transparent',
-                color: active ? 'var(--text-0)' : 'var(--text-1)',
-                fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left',
-                transition: 'all 160ms', marginBottom: 4,
-              }}>
-                <I size={15}/>
-                <span style={{ flex: 1 }}>{s.label}</span>
-                {count > 0 && <span style={{ fontSize: 11, opacity: 0.6 }}>{count}</span>}
-              </button>
+              <div key={group.id} style={{ marginBottom: 12 }}>
+                <button
+                  onClick={() => setCollapsedGroups((s) => ({ ...s, [group.id]: !s[group.id] }))}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '6px 12px', background: 'transparent', border: 'none', cursor: 'pointer',
+                    fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600,
+                  }}
+                >
+                  {t(group.labelKey)}
+                  <Icon.ChevronDown size={12} style={{ transform: collapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 160ms' }}/>
+                </button>
+                {!collapsed && group.items.map((item) => {
+                  const s = sections[item.id];
+                  if (!s) return null;
+                  const I = Icon[s.icon] || Icon.Settings;
+                  const count = (keysByGroup[item.id] || []).length;
+                  if (count === 0 && !s.always) return null;
+                  const active = activeSection === item.id;
+                  return (
+                    <button key={item.id} data-nav-id={item.id} onClick={() => { setActiveSection(item.id); setSidebarOpen(false); }} style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '10px 12px', borderRadius: 10,
+                      background: active ? 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(6,182,212,0.12))' : 'transparent',
+                      border: active ? '1px solid rgba(34,211,238,0.4)' : '1px solid transparent',
+                      color: active ? 'var(--text-0)' : 'var(--text-1)',
+                      fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left',
+                      transition: 'all 160ms', marginBottom: 4,
+                    }}>
+                      <I size={15}/>
+                      <span style={{ flex: 1 }}>{s.label}</span>
+                      {item.badgeKey && navBadges[item.badgeKey] > 0 && (
+                        <span style={{ fontSize: 10, fontWeight: 700, minWidth: 18, height: 18, borderRadius: 99, background: '#EF4444', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>{navBadges[item.badgeKey] > 99 ? '99+' : navBadges[item.badgeKey]}</span>
+                      )}
+                      {count > 0 && !item.badgeKey && <span style={{ fontSize: 11, opacity: 0.6 }}>{count}</span>}
+                    </button>
+                  );
+                })}
+              </div>
             );
           })}
 
@@ -275,7 +351,7 @@ function Admin({ setRoute }) {
             </div>
           )}
 
-          {activeSection === 'projects' ? (
+          {activeSection === 'portfolio' ? (
             <ProjectsManager/>
           ) : activeSection === 'dashboard' ? (
             <DashboardView goTo={setActiveSection}/>
@@ -289,6 +365,32 @@ function Admin({ setRoute }) {
             <SeoManager/>
           ) : activeSection === 'config' ? (
             <ConfigManager/>
+          ) : activeSection === 'general' ? (
+            <GeneralSettingsView/>
+          ) : activeSection === 'users' ? (
+            <UsersManager/>
+          ) : activeSection === 'admins' ? (
+            <UsersManager roleFilter="admin"/>
+          ) : activeSection === 'clients' ? (
+            selectedClientId ? (
+              <ClientDetailView clientId={selectedClientId} onBack={() => setSelectedClientId(null)}/>
+            ) : (
+              <ClientsManager onViewClient={setSelectedClientId}/>
+            )
+          ) : activeSection === 'permissions' ? (
+            <PermissionsView/>
+          ) : activeSection === 'client_projects' ? (
+            <ClientProjectsAdmin/>
+          ) : activeSection === 'messages' ? (
+            <MessagesManager/>
+          ) : activeSection === 'activity' ? (
+            <ActivityView/>
+          ) : activeSection === 'languages' ? (
+            <LanguagesView/>
+          ) : activeSection === 'appearance' ? (
+            <AppearanceView/>
+          ) : activeSection === 'integrations' ? (
+            <IntegrationsView/>
           ) : activeSection === '__import' ? (
             <>
               <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-0)', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -350,6 +452,8 @@ function Admin({ setRoute }) {
 
       <style>{`
         .admin-shell.page { padding-top: 0 !important; overflow-x: hidden; }
+        .admin-sidebar.collapsed { width: 56px; padding: 12px 8px; }
+        .admin-sidebar.collapsed span { display: none; }
         .admin-layout {
           display: grid;
           grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
@@ -377,20 +481,20 @@ function Admin({ setRoute }) {
         }
         @media (max-width: 880px) {
           .admin-layout { grid-template-columns: 1fr !important; }
+          .admin-menu-btn { display: inline-flex !important; }
           .admin-sidebar {
+            display: none;
+            position: fixed;
+            inset: 70px 0 auto 0;
+            z-index: 45;
+            max-height: calc(100vh - 70px);
+            overflow-y: auto;
             border-right: none !important;
             border-bottom: 1px solid var(--card-border) !important;
-            padding: 16px !important;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 6px;
-            max-height: none;
-            position: static;
+            background: var(--bg-0) !important;
           }
+          .admin-sidebar.open { display: block; }
           .admin-main { padding: 20px !important; }
-        }
-        @media (max-width: 480px) {
-          .admin-sidebar { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

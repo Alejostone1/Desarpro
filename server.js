@@ -7,6 +7,11 @@ const path = require('path');
 const vm = require('vm');
 const { PrismaClient } = require('@prisma/client');
 const seedData = require('./src/lib/contentSeedData.js');
+const { isAdminRole, userBlocked, logActivity, notifyAdmins } = require('./server/authUtils');
+const { registerPortalRoutes } = require('./server/portalRoutes');
+const { registerIntegrationsRoutes } = require('./server/integrationsRoutes');
+const { initEmail } = require('./server/emailService');
+const { dispatchWebhooks } = require('./server/webhookService');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -94,6 +99,10 @@ async function requireAuth(req, res, next) {
       return res.status(401).json({ ok: false, error: 'Sesión expirada', code: 'expired' });
     }
     req.user = session.user;
+    if (userBlocked(session.user)) {
+      await prisma.session.delete({ where: { id: session.id } }).catch(() => {});
+      return res.status(401).json({ ok: false, error: 'Cuenta no activa', code: 'blocked' });
+    }
     next();
   } catch (error) {
     console.error(error);
@@ -102,7 +111,7 @@ async function requireAuth(req, res, next) {
 }
 
 function requireAdminRole(req, res, next) {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || !isAdminRole(req.user.role)) {
     return res.status(403).json({ ok: false, error: 'No autorizado' });
   }
   next();
@@ -149,13 +158,38 @@ app.post('/api/login', loginRateLimit, async (req, res) => {
   try {
     // Single generic error for both "user not found" and "wrong password"
     // to avoid leaking which emails are registered.
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: String(email).trim().toLowerCase() } });
     const valid = user && (await bcrypt.compare(password, user.passwordHash));
     if (!valid) {
       return res.status(401).json({ ok: false, error: 'Credenciales inválidas' });
     }
+    if (user.role === 'client' && user.status === 'PENDING') {
+      return res.status(403).json({ ok: false, error: 'pending', message: 'Cuenta pendiente de aprobación por un administrador' });
+    }
+    if (user.role === 'client' && user.status === 'REJECTED') {
+      return res.status(403).json({ ok: false, error: 'rejected', message: 'Registro rechazado' });
+    }
+    if (user.role === 'client' && (user.status === 'SUSPENDED' || user.status === 'BLOCKED')) {
+      return res.status(403).json({ ok: false, error: 'suspended', message: 'Cuenta suspendida' });
+    }
+    if (userBlocked(user)) {
+      return res.status(403).json({ ok: false, error: 'Cuenta inactiva o bloqueada' });
+    }
+    await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    await logActivity(prisma, { userId: user.id, action: 'LOGIN', entity: 'user', entityId: user.id });
     const token = await createSession(user.id);
-    return res.json({ ok: true, token, user: { id: user.id, email: user.email, role: user.role } });
+    return res.json({
+      ok: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ ok: false, error: 'Error del servidor' });
@@ -536,6 +570,13 @@ app.post('/api/contact', contactRateLimit, async (req, res) => {
         status: 'new',
       },
     });
+    await notifyAdmins(prisma, {
+      type: 'new_lead',
+      title: 'Nuevo lead',
+      body: `${name} — ${String(body.company || '').trim() || email}`,
+      meta: { leadId: lead.id },
+    });
+    dispatchWebhooks(prisma, 'lead.created', { leadId: lead.id, email, name }).catch(() => {});
     res.json({ ok: true, id: lead.id });
   } catch (error) {
     console.error(error);
@@ -1048,7 +1089,8 @@ app.put('/api/admin/site-config', requireAuth, requireAdminRole, async (req, res
 // GET /api/admin/dashboard — aggregate counts for the admin overview.
 app.get('/api/admin/dashboard', requireAuth, requireAdminRole, async (_req, res) => {
   try {
-    const [projects, activeProjects, services, activeServices, techs, activeTechs, leads, leadStatuses, contentKeys, recentLeads, lastContentKey] = await Promise.all([
+    const dueSoonDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const [projects, activeProjects, services, activeServices, techs, activeTechs, leads, leadStatuses, contentKeys, recentLeads, lastContentKey, clients, users, clientProjects, activeClientProjects, completedClientProjects, unreadMessages, conversations, recentActivity, admins, clientsPending, clientsActive, clientsNoProject, newLeads, projectsDueSoon, deliverablesTotal, deliverablesRecent] = await Promise.all([
       prisma.project.count(),
       prisma.project.count({ where: { active: true } }),
       prisma.service.count(),
@@ -1060,21 +1102,47 @@ app.get('/api/admin/dashboard', requireAuth, requireAdminRole, async (_req, res)
       prisma.contentKey.count(),
       prisma.lead.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
       prisma.contentKey.findFirst({ orderBy: { updatedAt: 'desc' } }),
+      prisma.user.count({ where: { role: 'client' } }),
+      prisma.user.count(),
+      prisma.clientProject.count(),
+      prisma.clientProject.count({ where: { status: { notIn: ['COMPLETED', 'CANCELLED'] } } }),
+      prisma.clientProject.count({ where: { status: 'COMPLETED' } }),
+      prisma.message.count({ where: { readAt: null, sender: { role: 'client' } } }),
+      prisma.conversation.count(),
+      prisma.activityLog.findMany({ orderBy: { createdAt: 'desc' }, take: 10, include: { user: true } }),
+      prisma.user.count({ where: { role: { in: ['admin', 'super_admin'] } } }),
+      prisma.user.count({ where: { role: 'client', status: 'PENDING' } }),
+      prisma.user.count({ where: { role: 'client', status: 'ACTIVE' } }),
+      prisma.user.count({ where: { role: 'client', status: 'ACTIVE', clientProjects: { none: {} } } }),
+      prisma.lead.count({ where: { status: 'new' } }),
+      prisma.clientProject.count({
+        where: { dueDate: { lte: dueSoonDate, gte: new Date() }, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+      }),
+      prisma.projectDeliverable.count(),
+      prisma.projectDeliverable.count({ where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } }),
     ]);
     const leadCounts = { new: 0, contacted: 0, in_progress: 0, won: 0, lost: 0 };
     for (const l of leadStatuses) leadCounts[l.status] = (leadCounts[l.status] || 0) + 1;
+    const alerts = [];
+    if (clientsPending > 0) alerts.push({ type: 'pending_clients', count: clientsPending, severity: 'warning', message: `${clientsPending} cliente(s) pendiente(s) de aprobación` });
+    if (newLeads > 0) alerts.push({ type: 'new_leads', count: newLeads, severity: 'info', message: `${newLeads} lead(s) sin atender` });
+    if (unreadMessages > 0) alerts.push({ type: 'unread_messages', count: unreadMessages, severity: 'warning', message: `${unreadMessages} mensaje(s) sin responder` });
+    if (clientsNoProject > 0) alerts.push({ type: 'clients_no_project', count: clientsNoProject, severity: 'info', message: `${clientsNoProject} cliente(s) sin proyecto asignado` });
+    if (projectsDueSoon > 0) alerts.push({ type: 'projects_due_soon', count: projectsDueSoon, severity: 'warning', message: `${projectsDueSoon} proyecto(s) próximo(s) a vencer` });
     res.json({
       ok: true,
       dashboard: {
-        projects,
-        activeProjects,
-        services,
-        activeServices,
-        technologies: techs,
-        activeTechnologies: activeTechs,
-        leads,
-        leadCounts,
-        contentKeys,
+        projects, activeProjects, services, activeServices,
+        technologies: techs, activeTechnologies: activeTechs,
+        leads, leadCounts, contentKeys, clients, users, admins,
+        clientsPending, clientsActive, clientsNoProject, newLeads, projectsDueSoon,
+        clientProjects, activeClientProjects, completedClientProjects,
+        unreadMessages, conversations, alerts,
+        deliverablesTotal, deliverablesRecent,
+        recentActivity: recentActivity.map((l) => ({
+          id: l.id, action: l.action, entity: l.entity, entityId: l.entityId,
+          createdAt: l.createdAt.toISOString(), userEmail: l.user ? l.user.email : null,
+        })),
         lastContentUpdate: lastContentKey ? lastContentKey.updatedAt.toISOString() : null,
         recentLeads: recentLeads.map(serializeLead),
       },
@@ -1403,6 +1471,11 @@ app.post('/api/admin/content/reset', requireAuth, requireAdminRole, async (_req,
     res.status(500).json({ ok: false, error: 'No se pudo restablecer el contenido' });
   }
 });
+
+registerPortalRoutes(app, { prisma, requireAuth, createSession, getToken });
+registerIntegrationsRoutes(app, { prisma, requireAuth });
+
+initEmail();
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor de auth listo en http://localhost:${PORT}`);

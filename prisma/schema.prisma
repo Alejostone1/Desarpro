@@ -7,16 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
-  passwordHash String
-  role         String    @default("admin")
-  createdAt    DateTime  @default(now())
-  sessions     Session[]
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
-// API session tokens for the admin panel (validated server-side).
+model User {
+  id                 Int              @id @default(autoincrement())
+  email              String           @unique
+  passwordHash       String
+  role               String           @default("client") // super_admin | admin | client
+  status             String           @default("ACTIVE") // ACTIVE | PENDING | REJECTED | SUSPENDED | INACTIVE | BLOCKED
+  firstName          String           @default("")
+  lastName           String           @default("")
+  phone              String           @default("")
+  company            String           @default("")
+  jobTitle           String           @default("")
+  permissions        String           @default("[]")
+  mustChangePassword Boolean          @default(false)
+  lastLoginAt        DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now()) @updatedAt
+  sessions           Session[]
+  clientProjects     ClientProject[]  @relation("ClientProjects")
+  assignedProjects   ClientProject[]  @relation("AssignedProjects")
+  conversations      Conversation[]   @relation("ClientConversations")
+  sentMessages       Message[]        @relation("SentMessages")
+  convertedLeads     Lead[]           @relation("ConvertedLeads")
+  activityLogs       ActivityLog[]
+  notifications      Notification[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([role])
+  @@index([status])
+}
+
 model Session {
   id        Int      @id @default(autoincrement())
   token     String   @unique
@@ -26,6 +59,120 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model ClientProject {
+  id           Int            @id @default(autoincrement())
+  clientId     Int
+  client       User           @relation("ClientProjects", fields: [clientId], references: [id], onDelete: Cascade)
+  assigneeId   Int?
+  assignee     User?          @relation("AssignedProjects", fields: [assigneeId], references: [id], onDelete: SetNull)
+  title        String
+  description  String         @default("")
+  status       String         @default("PLANNING")
+  priority     String         @default("MEDIUM")
+  progress     Int            @default(0)
+  technologies String         @default("[]")
+  deliverables String         @default("[]")
+  milestones   String         @default("[]")
+  startDate    DateTime?
+  dueDate      DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  conversations Conversation[]
+  files         ProjectDeliverable[]
+
+  @@index([clientId])
+  @@index([assigneeId])
+  @@index([status])
+}
+
+model ProjectDeliverable {
+  id          Int           @id @default(autoincrement())
+  projectId   Int
+  project     ClientProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String        @default("")
+  url         String        @default("")
+  visible     Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([projectId])
+  @@index([visible])
+}
+
+model Webhook {
+  id        Int      @id @default(autoincrement())
+  name      String
+  url       String
+  event     String
+  active    Boolean  @default(true)
+  secret    String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([event])
+  @@index([active])
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String    @default("")
+  readAt    DateTime?
+  meta      String    @default("{}")
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([readAt])
+  @@index([createdAt])
+}
+
+model Conversation {
+  id            Int            @id @default(autoincrement())
+  clientId      Int
+  client        User           @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+  projectId     Int?
+  project       ClientProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  subject       String         @default("")
+  lastMessageAt DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  messages      Message[]
+
+  @@index([clientId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       Int
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String   @default("")
+  entityId  String   @default("")
+  meta      String   @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // Content keys that the CMS can edit (hero, stats, services, tech, process,
@@ -40,7 +187,6 @@ model ContentKey {
   translations ContentTranslation[]
 }
 
-// One row per (key, language). The five languages are es, en, pt, fr, de.
 model ContentTranslation {
   id           Int        @id @default(autoincrement())
   contentKeyId Int
@@ -75,8 +221,6 @@ model Project {
   @@index([featured])
 }
 
-// Per-language text for each project (title, tagline, desc). Missing
-// languages fall back to the canonical values stored on Project.
 model ProjectTranslation {
   id        Int     @id @default(autoincrement())
   projectId Int
@@ -89,34 +233,32 @@ model ProjectTranslation {
   @@unique([projectId, lang])
 }
 
-// Contact form submissions / sales leads. status flow:
-// new -> contacted -> in_progress -> won | lost
 model Lead {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  phone     String   @default("")
-  company   String   @default("")
-  service   String   @default("")
-  budget    String   @default("")
-  message   String   @default("")
-  status    String   @default("new") // new | contacted | in_progress | won | lost
-  notes     String   @default("")
-  source    String   @default("contact") // contact | manual
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String
+  phone           String   @default("")
+  company         String   @default("")
+  service         String   @default("")
+  budget          String   @default("")
+  message         String   @default("")
+  status          String   @default("new")
+  notes           String   @default("")
+  source          String   @default("contact")
+  convertedUserId Int?
+  convertedUser   User?    @relation("ConvertedLeads", fields: [convertedUserId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([status])
   @@index([createdAt])
+  @@index([email])
 }
 
-// Services catalog (12 services). `featured` marks the 6 core services shown
-// on the home preview; the rest are "specialized". Text lives per-language in
-// ServiceTranslation (bullets/deliverables/process are JSON arrays).
 model Service {
   id           Int                  @id @default(autoincrement())
-  slug         String               @unique // svc-web
-  kind         String               @unique // web
+  slug         String               @unique
+  kind         String               @unique
   icon         String               @default("Layers")
   color        String               @default("#22D3EE")
   featured     Boolean              @default(false)
@@ -135,21 +277,19 @@ model ServiceTranslation {
   name         String  @default("")
   tagline      String  @default("")
   overview     String  @default("")
-  bullets      String  @default("[]")     // JSON array
-  deliverables String  @default("[]")     // JSON array
-  process      String  @default("[]")     // JSON array
+  bullets      String  @default("[]")
+  deliverables String  @default("[]")
+  process      String  @default("[]")
   service      Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@unique([serviceId, lang])
 }
 
-// Technologies marquee (TechLoop). Icons are rendered client-side from the
-// bundled TECH_LOGOS map; the DB stores which are active/ordered/categorized.
 model Technology {
   id       Int     @id @default(autoincrement())
   name     String  @unique
   color    String  @default("#22D3EE")
-  category String  @default("Otros") // Frontend | Backend | Cloud | Data | DevOps | Mobile | Diseño | IA
+  category String  @default("Otros")
   featured Boolean @default(true)
   active   Boolean @default(true)
   order    Int     @default(0)
@@ -157,10 +297,9 @@ model Technology {
   @@index([active])
 }
 
-// Per-route, per-language SEO metadata (title, description, keywords, OG).
 model SeoEntry {
   id            Int      @id @default(autoincrement())
-  route         String   // home | servicios | svc-web | proyectos | nosotros | contacto | 404
+  route         String
   lang          String
   title         String   @default("")
   description   String   @default("")
@@ -173,18 +312,15 @@ model SeoEntry {
   @@unique([route, lang])
 }
 
-// Site-wide settings (section visibility, hero image, announcement, contact
-// details). `value` is a JSON object keyed by setting name.
 model SiteConfig {
   id    Int    @id @default(autoincrement())
-  key   String @unique // sections | heroImage | announcement | contact
+  key   String @unique
   value String @default("{}")
 }
 
-// Automatic backups taken before destructive operations (e.g. reset).
 model ContentSnapshot {
   id        Int      @id @default(autoincrement())
-  kind      String   @default("backup") // backup | reset-before | import-before
-  data      String   // JSON: { content, projects, services, technologies }
+  kind      String   @default("backup")
+  data      String
   createdAt DateTime @default(now())
 }

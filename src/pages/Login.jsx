@@ -2,7 +2,9 @@
 
 import React from 'react';
 import { useAdmin, Editable } from '../lib/admin.jsx';
-import { useTranslations } from '../i18n/index.jsx';
+import { useTranslations, useI18n } from '../i18n/index.jsx';
+import { registerAccount, loginAccount, requestPasswordReset } from '../lib/portalData.jsx';
+import { writeToken, writeUser, isAdminUser, isClientUser } from '../lib/authSession.js';
 import { Reveal } from '../lib/anim.jsx';
 import Icon from '../lib/icons.jsx';
 import Logo from '../components/Logo.jsx';
@@ -20,30 +22,97 @@ function FormField({ label, children }) {
 function Login({ setRoute }) {
   const { login: adminLogin, isAdmin } = useAdmin();
   const t = useTranslations();
-  const [mode, setMode] = React.useState('login'); // login | register | admin
-  const [data, setData] = React.useState({ email: '', password: '', name: '', remember: true });
+  const { t: tp } = useI18n();
+  const [mode, setMode] = React.useState('login'); // login | register | admin | forgot
+  const [pendingMsg, setPendingMsg] = React.useState('');
+  const [data, setData] = React.useState({ email: '', password: '', passwordConfirm: '', name: '', company: '', phone: '', remember: true });
   const [adminPwd, setAdminPwd] = React.useState('');
   const [adminError, setAdminError] = React.useState('');
   const [adminSuccess, setAdminSuccess] = React.useState(false);
+  const [formError, setFormError] = React.useState('');
+  const [formSuccess, setFormSuccess] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
 
   // Redirect away from login if already admin (and user picks admin route)
   React.useEffect(() => {
     if (adminSuccess && isAdmin) {
-      const t = setTimeout(() => setRoute('admin'), 600);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setRoute('admin'), 600);
+      return () => clearTimeout(timer);
     }
   }, [adminSuccess, isAdmin, setRoute]);
 
   const handleAdminSubmit = async (e) => {
     e.preventDefault();
     setAdminError('');
-    const res = await adminLogin(adminPwd);
+    const email = data.email.trim().toLowerCase() || 'admin@desarpro.com';
+    const res = await adminLogin(email, adminPwd);
     if (res && res.ok) {
       setAdminSuccess(true);
     } else {
-      setAdminError(res && res.error === 'server' ? t('common.serverError') : t('login.form.passwordWrong'));
+      setAdminError(res && res.error === 'server' ? t('common.serverError') : res?.error === 'forbidden' ? tp('portal.client.accessDenied') : t('login.form.passwordWrong'));
       setTimeout(() => setAdminError(''), 2500);
     }
+  };
+
+  const handleClientSubmit = async () => {
+    setFormError('');
+    setSubmitting(true);
+    const email = data.email.trim().toLowerCase();
+    if (!email || !data.password) {
+      setFormError(t('login.form.emailPlaceholder'));
+      setSubmitting(false);
+      return;
+    }
+    if (mode === 'register') {
+      if (data.password.length < 6) {
+        setFormError(tp('portal.register.passwordMin'));
+        setSubmitting(false);
+        return;
+      }
+      if (data.password !== data.passwordConfirm) {
+        setFormError(tp('portal.register.passwordMismatch'));
+        setSubmitting(false);
+        return;
+      }
+      const parts = (data.name || '').trim().split(/\s+/);
+      const res = await registerAccount({
+        email,
+        password: data.password,
+        passwordConfirm: data.passwordConfirm,
+        firstName: parts[0] || '',
+        lastName: parts.slice(1).join(' ') || '',
+        company: data.company,
+        phone: data.phone,
+      });
+      if (res.ok && res.data?.pending) {
+        setPendingMsg(res.data.message || tp('portal.auth.registerPending'));
+        setMode('login');
+      } else if (res.ok && res.data?.token) {
+        writeToken(res.data.token);
+        writeUser(res.data.user);
+        setFormSuccess(true);
+        setTimeout(() => setRoute('client'), 600);
+      } else {
+        setFormError(res.error === 'email_exists' ? tp('portal.auth.emailExists') : (res.error || t('common.serverError')));
+      }
+    } else {
+      const res = await loginAccount(email, data.password);
+      if (res.ok && res.data?.token) {
+        writeToken(res.data.token);
+        writeUser(res.data.user);
+        if (isAdminUser(res.data.user)) {
+          setRoute('admin');
+        } else if (isClientUser(res.data.user)) {
+          setRoute('client');
+        } else {
+          setFormError(tp('portal.client.accessDenied'));
+        }
+      } else {
+        const errCode = res.data?.error || res.error;
+        setFormError(errCode === 'pending' ? tp('portal.auth.pendingApproval') : errCode === 'rejected' ? tp('portal.auth.accountRejected') : errCode === 'suspended' ? tp('portal.auth.accountSuspended') : errCode === 'blocked' ? tp('portal.auth.accountBlocked') : t('login.form.passwordWrong'));
+      }
+    }
+    setSubmitting(false);
   };
 
   return (
@@ -124,6 +193,16 @@ function Login({ setRoute }) {
                     </div>
                   ) : (
                     <div onKeyDown={(e) => { if (e.key === 'Enter') handleAdminSubmit(e); }} style={{ display: 'grid', gap: 14 }}>
+                      <FormField label={t('login.form.email')}>
+                        <input
+                          type="email"
+                          value={data.email}
+                          onChange={e => setData(d => ({ ...d, email: e.target.value }))}
+                          placeholder={t('login.form.emailPlaceholder')}
+                          className="input"
+                          style={{ minHeight: 44 }}
+                        />
+                      </FormField>
                       <FormField label={t('login.form.adminPassword')}>
                         <input
                           type="password"
@@ -152,6 +231,26 @@ function Login({ setRoute }) {
                     </div>
                   )}
                 </>
+              ) : mode === 'forgot' ? (
+                <>
+                  <h2 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>{tp('portal.auth.forgotTitle')}</h2>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 24px' }}>{tp('portal.auth.forgotDesc')}</p>
+                  <div style={{ display: 'grid', gap: 14 }}>
+                    <FormField label={t('login.form.email')}>
+                      <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} className="input" style={{ minHeight: 44 }}/>
+                    </FormField>
+                    {formError && <div style={{ padding: 10, borderRadius: 10, background: 'rgba(239,68,68,0.12)', color: '#fca5a5', fontSize: 13 }}>{formError}</div>}
+                    {formSuccess && <div style={{ padding: 10, borderRadius: 10, background: 'rgba(34,197,94,0.12)', color: '#86efac', fontSize: 13 }}>{tp('portal.auth.forgotSent')}</div>}
+                    <button type="button" className="btn btn-primary" disabled={submitting} style={{ minHeight: 48 }} onClick={async () => {
+                      setSubmitting(true); setFormError(''); setFormSuccess(false);
+                      const res = await requestPasswordReset(data.email.trim().toLowerCase());
+                      setSubmitting(false);
+                      if (res.ok) setFormSuccess(true);
+                      else setFormError(res.error || t('common.serverError'));
+                    }}>{tp('portal.auth.forgotSubmit')}</button>
+                    <button type="button" className="btn btn-ghost" onClick={() => { setMode('login'); setFormError(''); setFormSuccess(false); }}>{tp('portal.auth.backLogin')}</button>
+                  </div>
+                </>
               ) : (
                 <>
                   <h2 style={{ fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>
@@ -160,12 +259,25 @@ function Login({ setRoute }) {
                   <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 24px' }}>
                     {mode === 'login' ? t('login.loginSubtitle') : t('login.registerSubtitle')}
                   </p>
+                  {pendingMsg && mode === 'login' && (
+                    <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', color: '#FBBF24', fontSize: 13, marginBottom: 14 }}>
+                      {pendingMsg}
+                    </div>
+                  )}
 
                   <div style={{ display: 'grid', gap: 14 }}>
                     {mode === 'register' && (
-                      <FormField label={t('login.form.name')}>
-                        <input type="text" value={data.name} onChange={e => setData(d => ({ ...d, name: e.target.value }))} placeholder={t('login.form.namePlaceholder')} className="input" style={{ minHeight: 44 }}/>
-                      </FormField>
+                      <>
+                        <FormField label={t('login.form.name')}>
+                          <input type="text" value={data.name} onChange={e => setData(d => ({ ...d, name: e.target.value }))} placeholder={t('login.form.namePlaceholder')} className="input" style={{ minHeight: 44 }}/>
+                        </FormField>
+                        <FormField label={tp('portal.register.company')}>
+                          <input type="text" value={data.company} onChange={e => setData(d => ({ ...d, company: e.target.value }))} className="input" style={{ minHeight: 44 }}/>
+                        </FormField>
+                        <FormField label={tp('portal.register.phone')}>
+                          <input type="tel" value={data.phone} onChange={e => setData(d => ({ ...d, phone: e.target.value }))} className="input" style={{ minHeight: 44 }}/>
+                        </FormField>
+                      </>
                     )}
                     <FormField label={t('login.form.email')}>
                       <input type="email" value={data.email} onChange={e => setData(d => ({ ...d, email: e.target.value }))} placeholder={t('login.form.emailPlaceholder')} className="input" style={{ minHeight: 44 }}/>
@@ -173,6 +285,23 @@ function Login({ setRoute }) {
                     <FormField label={t('login.form.password')}>
                       <input type="password" value={data.password} onChange={e => setData(d => ({ ...d, password: e.target.value }))} placeholder="••••••••" className="input" style={{ minHeight: 44 }}/>
                     </FormField>
+                    {mode === 'register' && (
+                      <FormField label={tp('portal.register.confirmPassword')}>
+                        <input type="password" value={data.passwordConfirm} onChange={e => setData(d => ({ ...d, passwordConfirm: e.target.value }))} placeholder="••••••••" className="input" style={{ minHeight: 44 }}/>
+                      </FormField>
+                    )}
+
+                    {formError && (
+                      <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Icon.X size={14}/> {formError}
+                      </div>
+                    )}
+
+                    {formSuccess && (
+                      <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', color: '#86efac', fontSize: 13 }}>
+                        {t('login.form.sessionStarted')}
+                      </div>
+                    )}
 
                     {mode === 'login' && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
@@ -180,12 +309,12 @@ function Login({ setRoute }) {
                           <input type="checkbox" checked={data.remember} onChange={e => setData(d => ({ ...d, remember: e.target.checked }))} style={{ accentColor: '#22D3EE', width: 18, height: 18 }}/>
                           {t('login.form.remember')}
                         </label>
-                        <a href="#" style={{ color: '#22D3EE', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>{t('login.form.forgotPassword')}</a>
+                        <button type="button" onClick={() => { setMode('forgot'); setFormError(''); setFormSuccess(false); }} style={{ background: 'none', border: 'none', color: '#22D3EE', fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0 }}>{t('login.form.forgotPassword')}</button>
                       </div>
                     )}
 
-                    <button type="button" className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center', minHeight: 48 }}>
-                      {mode === 'login' ? t('login.form.loginBtn') : t('login.form.registerBtn')} <Icon.ArrowRight size={14}/>
+                    <button type="button" onClick={handleClientSubmit} disabled={submitting} className="btn btn-primary" style={{ marginTop: 6, padding: '14px 20px', justifyContent: 'center', minHeight: 48 }}>
+                      {submitting ? t('common.loading') : (mode === 'login' ? t('login.form.loginBtn') : t('login.form.registerBtn'))} <Icon.ArrowRight size={14}/>
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0' }}>
