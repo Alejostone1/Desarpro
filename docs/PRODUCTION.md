@@ -11,12 +11,12 @@ Prisma
   ↓
 SQLite → /data/prod.db
   ↓
-Railway Volume (mount: /data) ← VERIFICAR MANUALMENTE
+Railway Volume (mount: /data) — volumen `desarpro-volume`
 ```
 
 ## 1. Volume Railway (PRIORIDAD #1)
 
-**NO PUEDO VERIFICAR EL VOLUME DESDE EL CÓDIGO; DEBE CONFIRMARSE EN RAILWAY.**
+Confirmado en Railway: volumen **`desarpro-volume`** montado en `/data` (~50 MB en uso).
 
 ### Configuración esperada
 
@@ -118,7 +118,7 @@ Respuesta esperada (sin secretos):
   "ok": true,
   "message": "API lista",
   "environment": "production",
-  "database": { "provider": "sqlite", "status": "ok", "path": "/data/prod.db" }
+  "database": { "connected": true, "provider": "sqlite" }
 }
 ```
 
@@ -130,8 +130,8 @@ Respuesta esperada (sin secretos):
 
 ## 8. Checklist manual post-deploy
 
-- [ ] Volume `/data` confirmado en Railway
-- [ ] Health OK con `database.status: ok`
+- [x] Volume `/data` confirmado en Railway (`desarpro-volume`)
+- [ ] Health OK con `database.connected: true`
 - [ ] Login admin en producción
 - [ ] Login cliente en producción
 - [ ] Redeploy → datos persisten

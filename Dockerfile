@@ -12,6 +12,7 @@ COPY prisma ./prisma
 RUN npm ci --ignore-scripts && npx prisma generate
 
 COPY server.js seed.js ./
+COPY server ./server
 COPY scripts ./scripts
 COPY src/lib ./src/lib
 COPY src/i18n ./src/i18n
