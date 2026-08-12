@@ -92,19 +92,76 @@
 
 ## 📸 Capturas de pantalla
 
-> Capturas reales de [desarpro.vercel.app](https://desarpro.vercel.app) — producción.
+> Capturas reales de producción — [desarpro.vercel.app](https://desarpro.vercel.app) · agosto 2026.
+
+<table>
+<tr>
+<td width="50%">
 
 ### Home — Hero corporativo
 
 <img src="docs/readme/home-hero.png" alt="DesarPro — Home hero" width="100%" />
 
-### Portal de login (cliente + admin)
+</td>
+<td width="50%">
 
-<img src="docs/readme/login-portal.png" alt="DesarPro — Login portal" width="100%" />
+### Hub de servicios
+
+<img src="docs/readme/services-hub.png" alt="DesarPro — Servicios" width="100%" />
+
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### Portafolio de proyectos
 
 <img src="docs/readme/projects-portfolio.png" alt="DesarPro — Proyectos" width="100%" />
+
+</td>
+<td width="50%">
+
+### Formulario de contacto
+
+<img src="docs/readme/contact-form.png" alt="DesarPro — Contacto" width="100%" />
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### Portal de login
+
+<img src="docs/readme/login-portal.png" alt="DesarPro — Login portal" width="100%" />
+
+</td>
+<td width="50%">
+
+### Dashboard cliente
+
+<img src="docs/readme/client-portal.png" alt="DesarPro — Portal cliente" width="100%" />
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+
+### Panel administrativo
+
+<img src="docs/readme/admin-dashboard.png" alt="DesarPro — Admin dashboard" width="100%" />
+
+</td>
+</tr>
+</table>
+
+| Vista | URL directa |
+|-------|-------------|
+| Sitio público | [desarpro.vercel.app](https://desarpro.vercel.app) |
+| Login portal | [desarpro.vercel.app/#/login](https://desarpro.vercel.app/#/login) |
+| Portal cliente | [desarpro.vercel.app/#/client](https://desarpro.vercel.app/#/client) |
+| Panel admin | [desarpro.vercel.app/#/admin](https://desarpro.vercel.app/#/admin) |
+| Servicios | [desarpro.vercel.app/#/servicios](https://desarpro.vercel.app/#/servicios) |
+| Contacto | [desarpro.vercel.app/#/contacto](https://desarpro.vercel.app/#/contacto) |
 
 ---
 
@@ -150,45 +207,76 @@
 
 ```mermaid
 graph TB
-    subgraph VER["🌐 Vercel — desarpro.vercel.app"]
-        FE["React 18 + Vite build"]
-        PROXY["Rewrite /api/* → Railway"]
+    subgraph VER ["Vercel desarpro.vercel.app"]
+        FE["React 18 y Vite build"]
+        PROXY["Rewrite api hacia Railway"]
     end
 
-    subgraph MOB["📱 Browser / Móvil"]
-        USER["Usuario visitante · cliente · admin"]
+    subgraph MOB ["Browser y movil"]
+        USER["Visitante, cliente o admin"]
     end
 
-    subgraph RW["🚂 Railway — desarpro-production"]
+    subgraph RW ["Railway desarpro-production"]
         EX["Express 5 API"]
         SA["start-api.js"]
-        VOL[("Volume /data")]
+        VOL[("Volume data")]
         DB[("prod.db SQLite")]
     end
 
     USER --> FE
-    FE -->|"Same-origin /api/login"| PROXY
+    FE -->|"Same-origin api login"| PROXY
     PROXY --> EX
-    FE -.->|"Dev/LAN :3001"| EX
+    FE -.->|"Dev LAN puerto 3001"| EX
     SA --> EX
     EX --> PRISMA["Prisma 5"]
     PRISMA --> DB
     DB --- VOL
 ```
 
+<details>
+<summary>Diagrama ASCII (fallback si Mermaid no carga)</summary>
+
+```
+Usuario (browser/movil)
+        |
+        v
+  Vercel - React static
+        |
+        +-- prod --> /api/* proxy same-origin --> Railway Express
+        |
+        +-- dev/LAN --> hostname:3001 directo --> Express local
+                              |
+                              v
+                    Prisma 5 --> SQLite (dev.db o /data/prod.db)
+```
+
+</details>
+
 ### Resolución de API (frontend)
 
 ```mermaid
 flowchart TD
-    A[resolveApiBase] --> B{¿Dev/LAN?}
-    B -->|localhost · 192.168.x.x :3000/5173| C["http://hostname:3001"]
-    B -->|Producción Vercel| D["'' → /api proxy same-origin"]
+    A[resolveApiBase] --> B{Dev o LAN}
+    B -->|localhost o red local| C["http hostname puerto 3001"]
+    B -->|Produccion Vercel| D["base vacia usa proxy api"]
     D --> E[vercel.json rewrite]
     E --> F[Railway Express]
     C --> F
 ```
 
-> **Importante móvil:** en producción las peticiones van a `desarpro.vercel.app/api/*`, **no** cross-origin a Railway. Esto evita bloqueos CORS en Safari iOS.
+<details>
+<summary>Tabla resolveApiBase</summary>
+
+| Entorno | Host detectado | API base | Resultado |
+|---------|----------------|----------|-----------|
+| Dev Vite | `localhost:5173` | `http://localhost:3001` | Directo al Express local |
+| Dev LAN | `192.168.x.x:5173` | `http://192.168.x.x:3001` | API en la misma máquina/red |
+| Producción | `desarpro.vercel.app` | `""` (vacío) | Same-origin `/api/*` vía proxy Vercel |
+| Preview Vercel | `*.vercel.app` | `""` (vacío) | Mismo proxy, evita CORS móvil |
+
+</details>
+
+> **Importante móvil:** en producción las peticiones van a `desarpro.vercel.app/api/...`, **no** cross-origin a Railway. Esto evita bloqueos CORS en Safari iOS.
 
 ### Flujo de autenticación
 
@@ -196,32 +284,60 @@ flowchart TD
 sequenceDiagram
     actor U as Usuario
     participant F as Frontend React
-    participant V as Vercel /api proxy
+    participant V as Vercel proxy api
     participant E as Express Railway
-    participant P as Prisma + SQLite
+    participant P as Prisma SQLite
 
-    U->>F: Email + contraseña
-    F->>V: POST /api/login
+    U->>F: Email y contrasena
+    F->>V: POST api login
     V->>E: Forward request
-    E->>P: findUnique + bcrypt.compare
-    P-->>E: Usuario válido
+    E->>P: findUnique y bcrypt compare
+    P-->>E: Usuario valido
     E->>P: create Session token
-    E-->>F: { ok, token, user }
+    E-->>F: ok token user
     F->>F: sessionStorage token
-    F-->>U: Redirect #/admin o #/client
+    F-->>U: Redirect admin o client
 ```
 
 ### RBAC — Roles y destinos
 
 ```mermaid
 graph LR
-    SA((super_admin)) --> AD["#/admin — permisos totales"]
-    ADM((admin)) --> AD2["#/admin — permisos según rol"]
-    CL((client)) --> CLP["#/client — solo sus proyectos"]
+    SA((super_admin)) --> AD["Panel admin permisos totales"]
+    ADM((admin)) --> AD2["Panel admin permisos por rol"]
+    CL((client)) --> CLP["Portal client solo sus datos"]
+```
 
-    style SA fill:#F59E0B,color:#000
-    style ADM fill:#3B82F6,color:#fff
-    style CL fill:#22C55E,color:#000
+### Flujo CMS y portales
+
+```mermaid
+flowchart LR
+    subgraph PUBLICO ["Sitio publico"]
+        H[Home]
+        S[Servicios]
+        P[Proyectos]
+        C[Contacto leads]
+    end
+
+    subgraph API ["Express API"]
+        CMS[CMS content keys]
+        AUTH[Auth y sesiones]
+        PORT[Portal routes]
+    end
+
+    subgraph PANELES ["Portales autenticados"]
+        ADM[Admin dashboard]
+        CLI[Client dashboard]
+    end
+
+    H --> CMS
+    S --> CMS
+    P --> CMS
+    C --> PORT
+    AUTH --> ADM
+    AUTH --> CLI
+    PORT --> ADM
+    PORT --> CLI
 ```
 
 ### Seed idempotente (producción)
@@ -230,17 +346,14 @@ graph LR
 stateDiagram-v2
     [*] --> Arranque
     Arranque --> UsuarioExiste: seed.js
-    UsuarioExiste --> SinCambios: NO tocar password/rol/status
+    UsuarioExiste --> SinCambios: no tocar password rol status
     Arranque --> UsuarioNuevo: email no existe
     UsuarioNuevo --> Crear: bcrypt hash demo
     SinCambios --> [*]
     Crear --> [*]
-
-    note right of SinCambios
-      SEED_RESET_PASSWORDS=1
-      solo manual con autorización
-    end note
 ```
+
+> `SEED_RESET_PASSWORDS=1` solo debe usarse manualmente y con autorización explícita.
 
 ---
 
@@ -422,34 +535,33 @@ erDiagram
     User ||--o{ Notification : recibe
     User ||--o{ Conversation : participa
     ClientProject ||--o{ ProjectDeliverable : contiene
-    ClientProject ||--o{ Message : via_conversation
     Conversation ||--o{ Message : contiene
     ContentKey ||--o{ ContentTranslation : traduce
     Project ||--o{ ProjectTranslation : traduce
     Service ||--o{ ServiceTranslation : traduce
     User {
-        int id PK
-        string email UK
+        int id
+        string email
         string passwordHash
         string role
         string status
     }
     Session {
-        int id PK
-        string token UK
-        int userId FK
-        datetime expiresAt
+        int id
+        string token
+        int userId
+        string expiresAt
     }
     ClientProject {
-        int id PK
-        int clientId FK
+        int id
+        int clientId
         string title
         string status
         int progress
     }
     ContentKey {
-        int id PK
-        string key UK
+        int id
+        string key
         string section
     }
 ```
@@ -672,6 +784,16 @@ Usar **https://desarpro.vercel.app** directamente. Las peticiones API van por pr
 
 ## ✅ Tests y calidad
 
+### Cobertura por suite
+
+```mermaid
+pie title Distribucion de pruebas automatizadas
+    "Smoke API" : 56
+    "Browser E2E" : 280
+    "i18n keys por idioma" : 226
+    "Admin E2E" : 8
+```
+
 | Suite | Resultado | Comando |
 |-------|-----------|---------|
 | Build | ✅ PASS | `npm run build` |
@@ -681,9 +803,35 @@ Usar **https://desarpro.vercel.app** directamente. Las peticiones API van por pr
 | Admin E2E | ✅ **8/8** | `npm run build:local` + `npm run test:e2e:admin` |
 | Prod verify | ✅ 9/10 | `npm run verify:prod` |
 
+### Pipeline local recomendado
+
+```mermaid
+flowchart LR
+    A[npm install] --> B[db push y seed]
+    B --> C[npm run build]
+    C --> D[test smoke]
+    D --> E[i18n check]
+    E --> F[build local E2E]
+    F --> G[test e2e browser]
+    G --> H[verify prod opcional]
+```
+
 ---
 
 ## 🚢 Despliegue
+
+### Pipeline CI/CD
+
+```mermaid
+flowchart TD
+    DEV[Push a main] --> VER[Vercel build frontend]
+    DEV --> RW[Railway build Docker]
+    VER --> CDN[dist estatico CDN]
+    RW --> VOL[Volume data prod.db]
+    CDN --> PROXY[vercel.json rewrite api]
+    PROXY --> API[Express Railway]
+    API --> VOL
+```
 
 ### Arquitectura producción
 
