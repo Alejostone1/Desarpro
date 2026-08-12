@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/readme/banner.svg" alt="DesarPro — banner" width="100%" />
+<img src="docs/readme/banner.png" alt="DesarPro — banner" width="100%" />
 
 # DesarPro
 
