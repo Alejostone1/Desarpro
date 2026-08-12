@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05060A"/>
+      <stop offset="50%" stop-color="#0B1220"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22D3EE"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="280" fill="url(#g)"/>
+  <circle cx="980" cy="80" r="120" fill="#22D3EE" opacity="0.08"/>
+  <circle cx="150" cy="220" r="90" fill="#3B82F6" opacity="0.1"/>
+  <text x="60" y="110" fill="url(#a)" font-family="Segoe UI, Arial, sans-serif" font-size="56" font-weight="800">DESARPRO</text>
+  <text x="60" y="150" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600">Desarrollo de software profesional · Pereira, Colombia</text>
+  <text x="60" y="200" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="18">Sitio corporativo · CMS multilingüe · Portal admin/cliente · RBAC · SQLite en producción</text>
+  <rect x="60" y="225" width="180" height="34" rx="8" fill="#22D3EE" opacity="0.15" stroke="#22D3EE" stroke-width="1"/>
+  <text x="78" y="247" fill="#67E8F9" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">desarpro.vercel.app</text>
+  <rect x="260" y="225" width="260" height="34" rx="8" fill="#3B82F6" opacity="0.12" stroke="#3B82F6" stroke-width="1"/>
+  <text x="278" y="247" fill="#93C5FD" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Railway · Express · Prisma · SQLite</text>
+</svg>

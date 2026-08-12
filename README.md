@@ -1,322 +1,769 @@
+<div align="center">
+
+<img src="docs/readme/banner.svg" alt="DesarPro — banner" width="100%" />
+
 # DesarPro
 
-> Plataforma web corporativa, portafolio y CMS de **DesarPro**, creada para que **Daniel Colorado** y **Alejandro Piedrahita** presenten sus servicios, publiquen proyectos, reciban contactos y administren el contenido de la empresa.
+**Plataforma corporativa, CMS multilingüe y portales admin/cliente para desarrollo de software profesional**
 
-DesarPro es la presencia digital principal de la empresa: una experiencia visual de alto impacto para explicar capacidades de desarrollo de software, convertir visitas en oportunidades comerciales y mantener el portafolio actualizado sin editar código. Incluye un sitio público multilingüe y un panel administrativo protegido que persiste contenido, proyectos, servicios, leads, SEO y configuración global.
+*Sitio público · Panel administrativo · Portal cliente · Chat · Entregables · Notificaciones*
 
-## Tabla de contenido
+<br/>
 
-- [Propósito y alcance](#propósito-y-alcance)
-- [Funciones principales](#funciones-principales)
-- [Manual de usuario](#manual-de-usuario)
-- [Arquitectura técnica](#arquitectura-técnica)
-- [Modelo de datos](#modelo-de-datos)
-- [API](#api)
-- [Instalación y desarrollo](#instalación-y-desarrollo)
-- [Variables de entorno](#variables-de-entorno)
-- [Despliegue](#despliegue)
-- [Operación y seguridad](#operación-y-seguridad)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite)](https://vitejs.dev/)
+[![Express](https://img.shields.io/badge/Express-5-000000?style=flat-square&logo=express)](https://expressjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![SQLite](https://img.shields.io/badge/SQLite-Producción-003B57?style=flat-square&logo=sqlite)](https://www.sqlite.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-Frontend-000000?style=flat-square&logo=vercel)](https://vercel.com/)
+[![Railway](https://img.shields.io/badge/Railway-Backend-0B0D0E?style=flat-square&logo=railway)](https://railway.app/)
 
-## Propósito y alcance
+<br/>
 
-La plataforma cumple dos objetivos complementarios:
+[![Estado](https://img.shields.io/badge/Estado-Producción-22c55e?style=flat-square)](https://desarpro.vercel.app)
+[![Frontend](https://img.shields.io/badge/Frontend-desarpro.vercel.app-22D3EE?style=flat-square)](https://desarpro.vercel.app)
+[![API](https://img.shields.io/badge/API-Railway-3B82F6?style=flat-square)](https://desarpro-production.up.railway.app/api/health)
+[![i18n](https://img.shields.io/badge/i18n-5_idiomas-F59E0B?style=flat-square)](#-internacionalización)
+[![Tests](https://img.shields.io/badge/Smoke-56%2F56_PASS-22c55e?style=flat-square)](#-tests-y-calidad)
 
-1. **Sitio público de DesarPro.** Comunica la propuesta de valor de la empresa, sus servicios, tecnologías, proyectos, equipo y canales de contacto.
-2. **Herramienta editorial interna.** Permite a Daniel y Alejandro administrar el contenido comercial y técnico desde un CMS, con versiones en español, inglés, portugués, francés y alemán.
+<br/>
 
-La navegación utiliza rutas por hash, por lo que funciona correctamente en hospedajes estáticos sin reglas especiales de redirección: `#/`, `#/servicios`, `#/proyectos`, `#/nosotros`, `#/contacto`, `#/login` y `#/admin`.
+[🌐 Demo en vivo](https://desarpro.vercel.app) · [📖 Documentación producción](docs/PRODUCTION.md) · [🔐 Login portal](https://desarpro.vercel.app/#/login) · [🛡️ Admin](https://desarpro.vercel.app/#/admin)
 
-## Funciones principales
+---
 
-### Experiencia pública
+</div>
 
-- Página principal con hero audiovisual, servicios destacados, tecnologías, proceso de trabajo y llamadas a la acción.
-- Catálogo de servicios y vistas de detalle para desarrollo web, móvil, software a medida, IA, APIs, datos, cloud, seguridad, SEO, mantenimiento, consultoría y BI.
-- Portafolio de proyectos con filtros, detalle, carrusel y contenido localizado.
-- Página institucional, formulario de contacto y captura de leads.
-- Internacionalización en **ES, EN, PT, FR y DE**.
-- Tema claro/oscuro persistente, diseño responsive, SEO por ruta e integración de metadatos Open Graph.
-- Componentes visuales y animaciones: video del hero, globo terráqueo, redes neuronales, asistentes holográficos, carruseles y fondos interactivos.
+## 📋 Índice
 
-### CMS administrativo
+- [Resumen ejecutivo](#-resumen-ejecutivo)
+- [Capturas de pantalla](#-capturas-de-pantalla)
+- [Stack tecnológico](#-stack-tecnológico)
+- [Arquitectura del sistema](#-arquitectura-del-sistema)
+- [Estructura del proyecto](#-estructura-del-proyecto)
+- [Instalación y configuración](#-instalación-y-configuración)
+- [Variables de entorno](#-variables-de-entorno)
+- [Base de datos SQLite](#-base-de-datos-sqlite)
+- [Autenticación y RBAC](#-autenticación-y-rbac)
+- [Módulos del sistema](#-módulos-del-sistema)
+- [API Reference](#-api-reference)
+- [Internacionalización](#-internacionalización)
+- [Manual de usuario](#-manual-de-usuario)
+- [Sistema de diseño y UX](#-sistema-de-diseño-y-ux)
+- [Tests y calidad](#-tests-y-calidad)
+- [Despliegue](#-despliegue)
+- [Roadmap](#-roadmap)
+- [Créditos](#-créditos)
 
-- Inicio de sesión con sesiones almacenadas del lado del servidor.
-- Edición de textos en vivo y por secciones, en los cinco idiomas.
-- CRUD de proyectos con orden, publicación, destacados y traducciones.
-- CRUD de servicios, tecnologías, SEO y configuración global del sitio.
-- Bandeja de leads con búsqueda, estado comercial y notas.
-- Exportación, importación y restablecimiento de contenido; antes de operaciones destructivas se guarda una instantánea de respaldo.
-- Panel de métricas operativas para contenido, leads y catálogo.
+---
 
-## Manual de usuario
+## 🎯 Resumen ejecutivo
 
-### Para visitantes
+**DesarPro** es la plataforma digital de **Daniel Colorado** y **Alejandro Piedrahita**: un sitio corporativo de alto impacto visual, un **CMS administrativo** completo y **portales admin/cliente** con autenticación RBAC, chat, entregables, notificaciones, webhooks e integraciones.
 
-| Necesidad | Cómo hacerlo |
-|---|---|
-| Cambiar de idioma | Usar el selector de idioma de la barra superior. La preferencia queda guardada en el navegador. |
-| Cambiar el tema | Usar el control claro/oscuro de la barra superior. |
-| Explorar servicios | Abrir **Servicios**, seleccionar una categoría y consultar el detalle o CTA correspondiente. |
-| Ver trabajos realizados | Abrir **Proyectos**, usar los filtros y navegar el carrusel o detalle del proyecto. |
-| Solicitar contacto | Ir a **Contacto**, completar nombre, correo y mensaje; los campos adicionales ayudan a calificar la oportunidad. |
-
-### Para administradores
-
-1. Iniciar el frontend y la API (ver [Instalación y desarrollo](#instalación-y-desarrollo)).
-2. Abrir `http://localhost:3000/#/login` y entrar al área administrativa, o navegar directamente a `#/admin`.
-3. Iniciar sesión con el usuario creado por `npm run db:seed`.
-4. Elegir una sección en el menú del CMS:
-   - **Contenido:** textos por sección e idioma.
-   - **Proyectos:** alta, edición, publicación, destacado, orden y traducciones.
-   - **Leads:** consulta, búsqueda, notas y avance de estado (`new`, `contacted`, `in_progress`, `won`, `lost`).
-   - **Servicios, tecnologías, SEO y configuración:** gestión del catálogo y de la presencia editorial.
-5. Guardar cada cambio y comprobar el sitio público en el idioma correspondiente.
-
-> **Credenciales de desarrollo:** si no se definen `ADMIN_EMAIL` y `ADMIN_PASSWORD`, el seed crea `admin@desarpro.com` / `Administrador01`. Nunca use esa contraseña predeterminada en producción.
-
-### Exportar, importar o restablecer
-
-- **Exportar:** descarga una representación JSON del contenido administrable.
-- **Importar:** carga un JSON previamente exportado. Revise el archivo antes de confirmar.
-- **Restablecer:** vuelve a los valores semilla. El sistema registra una instantánea previa para recuperación operativa.
-
-## Arquitectura técnica
-
-```mermaid
-flowchart LR
-  U[Visitante o administrador] --> F[React 18 + Vite]
-  F -->|Contenido público / formularios| A[Express 5 API]
-  F -->|Token de administración| A
-  A --> P[Prisma]
-  P --> D[(SQLite)]
-  S[contentSeedData.js] --> A
-  S --> F
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                       │
+│   "Tecnología que transforma tu negocio — software a medida,         │
+│    apps móviles, SaaS, IA e infraestructura para LATAM."             │
+│                                                                       │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-| Capa | Implementación | Responsabilidad |
-|---|---|---|
-| Interfaz | React 18 + Vite 5 + ESM | Rutas por hash, componentes, i18n, tema, CMS y UX. |
-| Estilos | CSS nativo y `tokens.css` | Tokens de diseño, temas, responsive y animaciones. |
-| API | Express 5 | Autenticación, contenido, proyectos, servicios, leads, SEO y configuración. |
-| Persistencia | Prisma 5 + SQLite | Datos del CMS, sesiones, catálogos, leads y respaldos. |
-| Seguridad | bcryptjs, tokens aleatorios y límites por IP | Contraseñas con hash, sesiones con expiración y mitigación básica de fuerza bruta/spam. |
-| Build | Vite + `copy-build-assets.js` | Bundle ESM y copia de `media/`, `tokens.css` y `robots.txt` a `dist/`. |
+### ✨ Capacidades principales
+
+| Capacidad | Descripción |
+|-----------|-------------|
+| 🌐 **Sitio corporativo** | Hero audiovisual, servicios, tecnologías, procesos, proyectos, contacto |
+| 🌍 **5 idiomas** | ES · EN · PT · FR · DE con paridad verificada (226 claves) |
+| 🎨 **CMS en vivo** | Edición de contenido, proyectos, servicios, SEO y configuración global |
+| 🛡️ **Portal admin** | Dashboard, clientes, usuarios, proyectos, entregables, leads, permisos |
+| 👤 **Portal cliente** | Dashboard, proyectos, chat, notificaciones, perfil y entregables |
+| 🔐 **RBAC completo** | `super_admin` · `admin` · `client` con permisos granulares |
+| 💬 **Mensajería** | Conversaciones admin↔cliente con historial persistente |
+| 📦 **Entregables** | Subida/gestión de archivos por proyecto con notificaciones |
+| 🔔 **Notificaciones** | In-app con contador, lectura individual y masiva |
+| 🔗 **Webhooks** | Eventos configurables con deduplicación |
+| 📧 **Email opcional** | SMTP para reset, aprobación, suspensión y alertas |
+| 📱 **Mobile-first** | Login vía proxy `/api` same-origin — compatible Safari móvil |
+| 🗄️ **SQLite persistente** | Railway Volume `/data/prod.db` en producción |
+
+---
+
+## 📸 Capturas de pantalla
+
+> Capturas reales de [desarpro.vercel.app](https://desarpro.vercel.app) — producción.
+
+### Home — Hero corporativo
+
+<img src="docs/readme/home-hero.png" alt="DesarPro — Home hero" width="100%" />
+
+### Portal de login (cliente + admin)
+
+<img src="docs/readme/login-portal.png" alt="DesarPro — Login portal" width="100%" />
+
+### Portafolio de proyectos
+
+<img src="docs/readme/projects-portfolio.png" alt="DesarPro — Proyectos" width="100%" />
+
+---
+
+## 🔧 Stack tecnológico
 
 ### Frontend
 
-- `src/main.jsx`: único punto de entrada; monta React en `#root`.
-- `src/App.jsx`: composición de proveedores, SEO de ruta y router por hash.
-- `src/pages/`: vistas públicas, login, CMS y gestores administrativos.
-- `src/components/`: navegación, carruseles, escenas visuales, estados, notificaciones y componentes reutilizables.
-- `src/lib/`: acceso a la API, administración, datos de servicios/proyectos, iconos, tema y animación.
-- `src/i18n/`: traducciones y contexto de idioma.
-- `src/lib/contentSeedData.js`: fuente semilla compartida por el backend y el navegador; evita divergencias entre los valores iniciales y el CMS.
+| Tecnología | Versión | Rol |
+|------------|---------|-----|
+| ![React](https://img.shields.io/badge/-React-61DAFB?logo=react&style=flat-square&logoColor=black) | 18.3 | UI con hooks, contextos y rutas hash |
+| ![Vite](https://img.shields.io/badge/-Vite-646CFF?logo=vite&style=flat-square&logoColor=white) | 5.4 | Build ESM, HMR en desarrollo |
+| CSS nativo + `tokens.css` | — | Design tokens, temas claro/oscuro, responsive |
+| Hash routing | — | `#/`, `#/admin`, `#/client` — compatible hosting estático |
 
-### Rutas del frontend
+### Backend & Infraestructura
 
-| Ruta | Vista |
-|---|---|
-| `#/` | Inicio |
-| `#/servicios` | Hub de servicios |
-| `#/svc-*` | Detalle del servicio |
-| `#/proyectos` | Portafolio |
-| `#/nosotros` | Página institucional |
-| `#/contacto` | Contacto y captura de leads |
-| `#/login` | Acceso administrativo |
-| `#/admin` | CMS |
+| Tecnología | Versión | Rol |
+|------------|---------|-----|
+| ![Node.js](https://img.shields.io/badge/-Node.js-339933?logo=node.js&style=flat-square&logoColor=white) | 20+ | Runtime Express |
+| ![Express](https://img.shields.io/badge/-Express-000000?logo=express&style=flat-square&logoColor=white) | 5.2 | API REST, CORS, rate limit, sesiones |
+| ![Prisma](https://img.shields.io/badge/-Prisma-2D3748?logo=prisma&style=flat-square&logoColor=white) | 5.22 | ORM type-safe |
+| ![SQLite](https://img.shields.io/badge/-SQLite-003B57?logo=sqlite&style=flat-square&logoColor=white) | 3.x | BD en dev (`./dev.db`) y prod (`/data/prod.db`) |
+| ![Vercel](https://img.shields.io/badge/-Vercel-000000?logo=vercel&style=flat-square&logoColor=white) | — | Frontend estático + proxy `/api/*` |
+| ![Railway](https://img.shields.io/badge/-Railway-0B0D0E?logo=railway&style=flat-square&logoColor=white) | — | Backend Docker + Volume persistente |
+| bcryptjs | 3.0 | Hash de contraseñas |
+| nodemailer | 6.9 | SMTP opcional |
 
-## Modelo de datos
+### DevTools & QA
 
-| Modelo | Finalidad |
-|---|---|
-| `User` | Administradores del sistema. |
-| `Session` | Tokens de sesión, usuario asociado y fecha de expiración. |
-| `ContentKey` / `ContentTranslation` | Claves editables y su valor por idioma. |
-| `Project` / `ProjectTranslation` | Portafolio, publicación, métricas, etiquetas y traducciones. |
-| `Lead` | Solicitudes recibidas desde el formulario y su seguimiento comercial. |
-| `Service` / `ServiceTranslation` | Catálogo de servicios, textos, entregables y proceso por idioma. |
-| `Technology` | Tecnologías visibles, orden y categoría. |
-| `SeoEntry` | Metadatos SEO por ruta e idioma. |
-| `SiteConfig` | Visibilidad de secciones, hero, anuncio y ajustes globales. |
-| `ContentSnapshot` | Respaldos previos a importaciones o restablecimientos. |
+| Herramienta | Uso |
+|-------------|-----|
+| `smoke-test.js` | 56 pruebas API (auth, RBAC, ownership, CMS) |
+| `scripts/i18n-parity-check.js` | Paridad 226×5 idiomas |
+| `scripts/browser-test.js` | 280 pruebas E2E con Puppeteer + Chrome |
+| `scripts/admin-verify.js` | E2E del CMS admin |
+| `scripts/verify-production.js` | Checklist post-deploy producción |
 
-El esquema completo está en [`prisma/schema.prisma`](prisma/schema.prisma). Las relaciones dependientes usan borrado en cascada cuando corresponde; por ejemplo, una sesión no sobrevive a la eliminación del usuario y las traducciones no sobreviven al recurso padre.
+---
 
-## API
+## 🏛️ Arquitectura del sistema
 
-Base local: `http://localhost:3001`. El cliente usa `VITE_API_URL` en despliegues remotos y detecta la API local durante desarrollo.
+### Vista general — Producción
 
-### Pública
+```mermaid
+graph TB
+    subgraph VER["🌐 Vercel — desarpro.vercel.app"]
+        FE["React 18 + Vite build"]
+        PROXY["Rewrite /api/* → Railway"]
+    end
 
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `GET` | `/api/health` | Estado de la API. |
-| `GET` | `/api/content?lang=es` | Contenido público localizado. |
-| `GET` | `/api/projects?lang=es` | Proyectos activos localizados. |
-| `GET` | `/api/projects/:slug` | Detalle de un proyecto. |
-| `GET` | `/api/services?lang=es` | Servicios activos localizados. |
-| `GET` | `/api/technologies` | Tecnologías activas. |
-| `GET` | `/api/seo?lang=es` | Metadatos de las rutas. |
-| `GET` | `/api/site-config` | Configuración pública del sitio. |
-| `POST` | `/api/contact` | Crea un lead; exige nombre, email y mensaje válidos. |
-| `POST` | `/api/login` | Autentica y entrega un token de sesión. |
+    subgraph MOB["📱 Browser / Móvil"]
+        USER["Usuario visitante · cliente · admin"]
+    end
 
-### Administración
+    subgraph RW["🚂 Railway — desarpro-production"]
+        EX["Express 5 API"]
+        SA["start-api.js"]
+        VOL[("Volume /data")]
+        DB[("prod.db SQLite")]
+    end
 
-Las rutas siguientes requieren `x-admin-token: <token>` o `Authorization: Bearer <token>`, además del rol `admin`.
+    USER --> FE
+    FE -->|"Same-origin /api/login"| PROXY
+    PROXY --> EX
+    FE -.->|"Dev/LAN :3001"| EX
+    SA --> EX
+    EX --> PRISMA["Prisma 5"]
+    PRISMA --> DB
+    DB --- VOL
+```
 
-| Recurso | Endpoints |
-|---|---|
-| Sesión | `POST /api/auth/logout` |
-| Contenido | `GET /api/admin/content`, `PUT /api/admin/content`, `PUT /api/admin/content/:key` |
-| Proyectos | `GET /api/admin/projects`, `POST /api/projects`, `PUT /api/projects/:slug`, `DELETE /api/projects/:slug` |
-| Leads | `GET /api/admin/leads`, `PUT /api/admin/leads/:id`, `DELETE /api/admin/leads/:id` |
-| Servicios | `GET /api/admin/services`, `POST /api/services`, `PUT /api/services/:slug`, `DELETE /api/services/:slug` |
-| Tecnologías | `GET /api/admin/technologies`, `POST /api/technologies`, `DELETE /api/technologies/:id` |
-| SEO | `GET /api/admin/seo`, `POST /api/admin/seo`, `DELETE /api/admin/seo/:route` |
-| Configuración | `GET /api/admin/site-config`, `PUT /api/admin/site-config` |
-| Operación CMS | `GET /api/admin/dashboard`, `GET /api/admin/content/export`, `POST /api/admin/content/import`, `POST /api/admin/content/reset` |
+### Resolución de API (frontend)
 
-La API limita intentos de inicio de sesión y envíos de contacto en memoria. Para múltiples instancias se recomienda sustituir ese límite por una solución compartida (por ejemplo Redis o un gateway).
+```mermaid
+flowchart TD
+    A[resolveApiBase] --> B{¿Dev/LAN?}
+    B -->|localhost · 192.168.x.x :3000/5173| C["http://hostname:3001"]
+    B -->|Producción Vercel| D["'' → /api proxy same-origin"]
+    D --> E[vercel.json rewrite]
+    E --> F[Railway Express]
+    C --> F
+```
 
-## Instalación y desarrollo
+> **Importante móvil:** en producción las peticiones van a `desarpro.vercel.app/api/*`, **no** cross-origin a Railway. Esto evita bloqueos CORS en Safari iOS.
 
-### Requisitos
+### Flujo de autenticación
 
-- Node.js **18 o superior**.
-- npm.
-- Una base SQLite local (se crea mediante Prisma) para usar CMS y API.
+```mermaid
+sequenceDiagram
+    actor U as Usuario
+    participant F as Frontend React
+    participant V as Vercel /api proxy
+    participant E as Express Railway
+    participant P as Prisma + SQLite
 
-### Puesta en marcha
+    U->>F: Email + contraseña
+    F->>V: POST /api/login
+    V->>E: Forward request
+    E->>P: findUnique + bcrypt.compare
+    P-->>E: Usuario válido
+    E->>P: create Session token
+    E-->>F: { ok, token, user }
+    F->>F: sessionStorage token
+    F-->>U: Redirect #/admin o #/client
+```
+
+### RBAC — Roles y destinos
+
+```mermaid
+graph LR
+    SA((super_admin)) --> AD["#/admin — permisos totales"]
+    ADM((admin)) --> AD2["#/admin — permisos según rol"]
+    CL((client)) --> CLP["#/client — solo sus proyectos"]
+
+    style SA fill:#F59E0B,color:#000
+    style ADM fill:#3B82F6,color:#fff
+    style CL fill:#22C55E,color:#000
+```
+
+### Seed idempotente (producción)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Arranque
+    Arranque --> UsuarioExiste: seed.js
+    UsuarioExiste --> SinCambios: NO tocar password/rol/status
+    Arranque --> UsuarioNuevo: email no existe
+    UsuarioNuevo --> Crear: bcrypt hash demo
+    SinCambios --> [*]
+    Crear --> [*]
+
+    note right of SinCambios
+      SEED_RESET_PASSWORDS=1
+      solo manual con autorización
+    end note
+```
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+desarpro-full/
+│
+├── 📄 server.js                 # Express principal + CMS routes
+├── 📄 seed.js                   # Seed idempotente (prod-safe)
+├── 📄 smoke-test.js             # 56 pruebas de integración API
+├── 📄 Dockerfile                # Imagen Railway (API + Prisma + SQLite)
+├── 📄 railway.toml              # Deploy Railway: start:api + healthcheck
+├── 📄 vercel.json               # Rewrite /api + security headers
+├── 📄 index.html                # Meta desarpro:api + bootstrap API base
+├── 📄 tokens.css                # Design tokens globales
+│
+├── 📁 prisma/
+│   └── schema.prisma            # 20+ modelos SQLite
+│
+├── 📁 server/
+│   ├── authUtils.js             # Sesiones, serialización, activity log
+│   ├── permissions.js           # RBAC — PERMISSIONS + requirePermission
+│   ├── portalRoutes.js          # Admin/cliente: users, projects, chat…
+│   ├── integrationsRoutes.js    # SMTP status, webhooks
+│   ├── emailService.js          # Nodemailer + templates
+│   └── webhookService.js        # Dispatch eventos
+│
+├── 📁 scripts/
+│   ├── start-api.js             # Arranque prod: /data, prisma, seed, express
+│   ├── inject-api-url.js        # Inyecta VITE_API_URL en dist/
+│   ├── build-local.js           # Build E2E con API localhost
+│   ├── verify-production.js     # Checklist post-deploy
+│   ├── browser-test.js          # 280 E2E browser
+│   └── admin-verify.js          # E2E CMS admin
+│
+├── 📁 src/
+│   ├── main.jsx                 # Entry React
+│   ├── App.jsx                  # Router hash + providers
+│   ├── pages/                   # Home, Admin, ClientApp, Login…
+│   ├── components/              # Navbar, carruseles, globo 3D, portal UI
+│   ├── lib/                     # apiBase, admin, portalData, serviceData
+│   └── i18n/                    # translations.jsx + 5 idiomas
+│
+├── 📁 docs/
+│   ├── PRODUCTION.md            # Guía Railway + Volume + variables
+│   └── readme/                  # Screenshots + banner para README
+│
+└── 📁 dist/                     # Build Vite (generado)
+```
+
+---
+
+## 🚀 Instalación y configuración
+
+### Prerrequisitos
+
+```bash
+Node.js  >= 18.x
+npm      >= 10.x
+Git      >= 2.x
+```
+
+### 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/desarpro-prog/Desarpro.git
 cd Desarpro
-npm install
 ```
 
-Crear el archivo de entorno:
+### 2. Instalar dependencias
 
 ```bash
-# Linux/macOS
-cp .env.example .env
-
-# Windows PowerShell
-Copy-Item .env.example .env
+npm install
+# Ejecuta postinstall → prisma generate
 ```
 
-Preparar la base de datos y el usuario administrador:
+### 3. Configurar entorno local
+
+```bash
+# Windows PowerShell
+Copy-Item .env.example .env
+
+# Linux/macOS
+cp .env.example .env
+```
+
+### 4. Base de datos local
 
 ```bash
 npm run db:push
 npm run db:seed
 ```
 
-Iniciar frontend y backend conjuntamente:
+### 5. Desarrollo
 
 ```bash
 npm run dev
 ```
 
-- Frontend: `http://localhost:3000`
-- API: `http://localhost:3001`
-- Salud de API: `http://localhost:3001/api/health`
+| Servicio | URL |
+|----------|-----|
+| Frontend Vite | http://localhost:5173 |
+| API Express | http://localhost:3001 |
+| Health | http://localhost:3001/api/health |
+| Admin CMS | http://localhost:5173/#/admin |
+| Login | http://localhost:5173/#/login |
 
 ### Scripts disponibles
 
-| Comando | Uso |
-|---|---|
-| `npm run dev` | Inicia Vite y Express en paralelo. |
-| `npm run build` | Genera el build ESM de producción en `dist/` y copia assets estáticos. |
-| `npm run preview` | Sirve localmente el build de Vite. |
-| `npm run db:push` | Sincroniza el esquema Prisma con SQLite. |
-| `npm run db:migrate` | Crea y aplica una migración Prisma llamada `cms`. |
-| `npm run db:seed` | Crea/actualiza el contenido semilla y usuario administrador. |
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Vite + Express en paralelo |
+| `npm run build` | Build producción → `dist/` |
+| `npm run build:local` | Build E2E con API en `:3001` |
+| `npm run preview` | Preview del build Vite |
+| `npm run start` | Solo Express (sin setup) |
+| `npm run start:api` | Prod: prisma + seed + Express |
+| `npm run db:push` | Sincronizar schema SQLite |
+| `npm run db:seed` | Seed idempotente |
+| `npm run test:smoke` | 56 pruebas API |
+| `npm run i18n:check` | Paridad i18n 226×5 |
+| `npm run test:e2e:browser` | 280 E2E browser |
+| `npm run test:e2e:admin` | E2E CMS admin |
+| `npm run verify:prod` | Verificar producción live |
 
-## Variables de entorno
+---
 
-Tomar como referencia [`.env.example`](.env.example). No versionar `.env`.
+## 🔐 Variables de entorno
 
-| Variable | Uso | Ejemplo |
-|---|---|---|
-| `DATABASE_URL` | Ubicación de SQLite para Prisma. | `file:./dev.db` |
-| `PORT` | Puerto de Express. | `3001` |
-| `SESSION_TTL_MS` | Duración de las sesiones administrativas. | `604800000` |
-| `CORS_ORIGIN` | Orígenes permitidos, separados por coma. | `https://desarpro.com` |
-| `ADMIN_EMAIL` | Usuario creado o actualizado por el seed. | `admin@dominio.com` |
-| `ADMIN_PASSWORD` | Contraseña inicial/actualizada por el seed. | Use un secreto robusto. |
-| `VITE_API_URL` | URL pública de la API remota durante el build. No es secreto. | `https://api.ejemplo.com` |
+Ver [`.env.example`](.env.example) y [`docs/PRODUCTION.md`](docs/PRODUCTION.md).
 
-## Despliegue
+### Railway (backend)
 
-### Frontend estático en Vercel
+| Variable | Producción | Secreta |
+|----------|------------|---------|
+| `DATABASE_URL` | `file:/data/prod.db` | No* |
+| `NODE_ENV` | `production` | No |
+| `CORS_ORIGIN` | `https://desarpro.vercel.app` | No |
+| `APP_URL` | `https://desarpro.vercel.app` | No |
+| `FRONTEND_URL` | `https://desarpro.vercel.app` | No |
+| `SESSION_TTL_MS` | `604800000` | No |
+| `ADMIN_EMAIL` | `admin@desarpro.com` | No |
+| `ADMIN_PASSWORD` | *(mantener actual)* | **Sí** |
+| `RUN_DB_SETUP` | `0` tras estabilizar | No |
+| `SEED_ON_START` | `0` tras estabilizar | No |
+| `SMTP_*` | según proveedor | **Sí** |
 
-El frontend está preparado para Vite y debe publicar **`dist/`**, no `src/`.
-
-1. Conectar el repositorio a Vercel.
-2. Usar el preset **Vite** (o configurar manualmente):
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-   - **Node.js:** 18 o superior
-3. Después de desplegar el backend (ver abajo), crear **`BACKEND_URL`** en Vercel con la URL HTTPS pública de la API, **sin barra final** (p. ej. `https://desarpro-api.up.railway.app`).
-4. Redesplegar el frontend. El sitio usará el proxy `/api/*` del mismo dominio (`desarpro.vercel.app/api/...`), así login y CMS funcionan desde cualquier red sin CORS.
-5. *(Opcional)* Si prefieres llamar al backend directamente, define `VITE_API_URL` en el build y configura `CORS_ORIGIN` en el backend.
-
-`vercel.json` define cabeceras de seguridad y caché prolongada para `media/`. La carpeta `api/` incluye un proxy serverless hacia `BACKEND_URL`.
-
-### API y base de datos en producción (Railway recomendado)
-
-El CMS requiere una API Express disponible públicamente y una base de datos persistente. **Vercel solo sirve el frontend**; el backend va en un servicio Node con disco persistente.
-
-#### Railway (Express + SQLite)
-
-1. Crear proyecto en [Railway](https://railway.app) conectado a este repositorio.
-2. Añadir un **volumen** montado en `/data`.
-3. Variables de entorno en Railway:
+### Vercel (frontend)
 
 | Variable | Valor |
-|---|---|
-| `DATABASE_URL` | `file:/data/prod.db` |
-| `CORS_ORIGIN` | `https://desarpro.vercel.app` (y tu dominio custom si aplica) |
-| `ADMIN_EMAIL` | tu correo admin |
-| `ADMIN_PASSWORD` | contraseña segura |
-| `PORT` | `3001` (Railway inyecta su propio puerto; opcional) |
+|----------|-------|
+| `VITE_API_URL` | `https://desarpro-production.up.railway.app` *(opcional — proxy `/api` funciona sin ella en browser)* |
 
-4. Railway usará `railway.toml` → `npm run start:api` (Prisma push + seed + Express).
-5. Generar dominio público en Railway (Settings → Networking → Generate Domain).
-6. Copiar esa URL a **`BACKEND_URL`** en Vercel y redesplegar el frontend.
+### Local (`.env`)
 
-#### Verificar acceso remoto
-
-- Salud API: `https://TU-BACKEND/api/health`
-- Login: `https://desarpro.vercel.app/#/login`
-- Admin: `https://desarpro.vercel.app/#/admin`
-
-Desde móvil o cualquier red, las peticiones van a `desarpro.vercel.app/api/*` → proxy → tu backend.
-
-> SQLite en un sistema de archivos efímero de serverless no garantiza persistencia. Para crecer, planifique una base de datos gestionada y la migración correspondiente de Prisma.
-
-### Verificación antes de publicar
-
-```bash
-npm run build
-npm run dev
+```env
+DATABASE_URL="file:./dev.db"
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
+PORT=3001
 ```
 
-Comprobar manualmente el home, los cinco idiomas, tema claro/oscuro, contacto, proyectos, servicios, login y CMS. Confirme además que la API responde en `/api/health` y que los assets bajo `dist/media/` se sirven correctamente.
+---
 
-## Operación y seguridad
+## 🗄️ Base de datos SQLite
 
-- Cambie las credenciales predeterminadas antes de exponer la API.
-- Mantenga `ADMIN_PASSWORD` únicamente en el gestor de secretos del entorno; nunca en Git ni en el frontend.
-- `VITE_API_URL` sí puede ser pública: Vite la incorpora al build.
-- Las sesiones usan tokens aleatorios de 32 bytes, se validan en servidor y expiran.
-- Las contraseñas se procesan con bcrypt.
-- Limite los orígenes CORS y opere la API exclusivamente sobre HTTPS en producción.
-- Antes de importar o restablecer contenido, exporte una copia y valide que las instantáneas se estén creando.
+| Entorno | Ruta | Persistencia |
+|---------|------|--------------|
+| Desarrollo | `file:./dev.db` | Archivo local |
+| Producción | `file:/data/prod.db` | **Railway Volume** `desarpro-volume` |
 
-## Créditos
+### Diagrama ER (simplificado)
 
-**DesarPro** es la plataforma corporativa de **Daniel Colorado** y **Alejandro Piedrahita** para presentar, publicar y administrar el trabajo de la empresa.
+```mermaid
+erDiagram
+    User ||--o{ Session : tiene
+    User ||--o{ ClientProject : posee
+    User ||--o{ Notification : recibe
+    User ||--o{ Conversation : participa
+    ClientProject ||--o{ ProjectDeliverable : contiene
+    ClientProject ||--o{ Message : via_conversation
+    Conversation ||--o{ Message : contiene
+    ContentKey ||--o{ ContentTranslation : traduce
+    Project ||--o{ ProjectTranslation : traduce
+    Service ||--o{ ServiceTranslation : traduce
+    User {
+        int id PK
+        string email UK
+        string passwordHash
+        string role
+        string status
+    }
+    Session {
+        int id PK
+        string token UK
+        int userId FK
+        datetime expiresAt
+    }
+    ClientProject {
+        int id PK
+        int clientId FK
+        string title
+        string status
+        int progress
+    }
+    ContentKey {
+        int id PK
+        string key UK
+        string section
+    }
+```
 
-© 2026 DesarPro · Desarrollo de software profesional · Pereira, Colombia.
+### Modelos Prisma (20)
+
+`User` · `Session` · `PasswordResetToken` · `ClientProject` · `ProjectDeliverable` · `Conversation` · `Message` · `Notification` · `Webhook` · `ActivityLog` · `ContentKey` · `ContentTranslation` · `Project` · `ProjectTranslation` · `Lead` · `Service` · `ServiceTranslation` · `Technology` · `SeoEntry` · `SiteConfig` · `ContentSnapshot`
+
+> **No migrar a PostgreSQL** sin plan explícito. La arquitectura actual está optimizada para SQLite + Volume Railway.
+
+---
+
+## 🔑 Autenticación y RBAC
+
+### Roles
+
+| Rol | Destino | Capacidades |
+|-----|---------|-------------|
+| `super_admin` | `#/admin` | Todos los permisos + gestión de roles |
+| `admin` | `#/admin` | Según matriz de permisos asignada |
+| `client` | `#/client` | Solo proyectos/datos propios (ownership) |
+
+### Usuarios demo (desarrollo / staging)
+
+| Email | Rol | Password | Destino |
+|-------|-----|----------|---------|
+| `super@desarpro.com` | super_admin | `Android.13` | `#/admin` |
+| `admin@desarpro.com` | admin | `Android.13` | `#/admin` |
+| `cliente@demo.com` | client | `Android.13` | `#/client` |
+| `maria@demo.com` | client | `Android.13` | `#/client` |
+
+> ⚠️ **No resetear contraseñas en producción** sin autorización. El seed es idempotente: usuarios existentes no se modifican.
+
+### Seguridad implementada
+
+- ✅ bcrypt para contraseñas
+- ✅ Tokens de sesión aleatorios (32 bytes) con TTL configurable
+- ✅ Rate limiting en login y contacto
+- ✅ RBAC backend con `requirePermission`
+- ✅ Ownership: cliente A **no** accede a datos de cliente B (403/404)
+- ✅ CORS restringido en producción
+- ✅ Secretos solo en Railway — nunca en Vercel build
+- ✅ Reset tokens hasheados (no plaintext)
+- ✅ Headers de seguridad en `vercel.json`
+
+---
+
+## 📦 Módulos del sistema
+
+### 🏠 Sitio público
+
+| Ruta hash | Módulo |
+|-----------|--------|
+| `#/` | Home — hero, servicios, tech loop, proceso, CTA |
+| `#/servicios` | Hub de 12 servicios tecnológicos |
+| `#/svc-*` | Detalle de servicio con entregables y proceso |
+| `#/proyectos` | Portafolio, carrusel, paquetes estratégicos |
+| `#/nosotros` | Misión, visión, valores, fundadores |
+| `#/contacto` | Formulario → Lead en BD |
+| `#/login` | Portal cliente + pestaña Admin |
+
+### 🛡️ Portal administrativo (`#/admin`)
+
+| Sección | Funcionalidad |
+|---------|--------------|
+| Dashboard | KPIs, alertas, métricas operativas |
+| CMS Contenido | 84+ claves editables × 5 idiomas |
+| Proyectos catálogo | CRUD portafolio público |
+| Clientes | CRUD, estados, conversión leads |
+| Proyectos cliente | CRUD con progreso, prioridad, entregables |
+| Usuarios | CRUD + RBAC + reset password |
+| Leads | Bandeja comercial con estados |
+| Servicios / Tech / SEO | Catálogos editables |
+| Mensajes | Chat con clientes |
+| Notificaciones | Centro de alertas |
+| Integraciones | SMTP, webhooks, email test |
+| Configuración | Site config, settings generales |
+
+### 👤 Portal cliente (`#/client`)
+
+| Sección | Funcionalidad |
+|---------|--------------|
+| Dashboard | Resumen de proyectos activos |
+| Proyectos | Lista y detalle con timeline |
+| Mensajes | Chat con equipo DesarPro |
+| Entregables | Descarga de archivos por proyecto |
+| Notificaciones | Alertas de estado y entregas |
+| Perfil / Settings | Datos personales |
+
+---
+
+## 🌐 API Reference
+
+**Base producción:** `https://desarpro-production.up.railway.app`  
+**Proxy Vercel:** `https://desarpro.vercel.app/api/*`
+
+### Salud
+
+```http
+GET /api/health
+```
+
+```json
+{
+  "ok": true,
+  "message": "API lista",
+  "environment": "production",
+  "database": { "connected": true, "provider": "sqlite" }
+}
+```
+
+### Pública
+
+| Método | Endpoint | Auth |
+|--------|----------|------|
+| `GET` | `/api/health` | ❌ |
+| `GET` | `/api/content?lang=es` | ❌ |
+| `GET` | `/api/projects?lang=es` | ❌ |
+| `GET` | `/api/services?lang=es` | ❌ |
+| `GET` | `/api/technologies` | ❌ |
+| `GET` | `/api/seo?lang=es` | ❌ |
+| `GET` | `/api/site-config` | ❌ |
+| `POST` | `/api/contact` | ❌ |
+| `POST` | `/api/login` | ❌ |
+| `POST` | `/api/auth/register` | ❌ |
+| `POST` | `/api/auth/forgot-password` | ❌ |
+
+### Autenticada (`x-admin-token`)
+
+| Grupo | Endpoints destacados |
+|-------|---------------------|
+| CMS | `/api/admin/content`, `PUT /api/admin/content/:key` |
+| Catálogo | `/api/projects`, `/api/services`, `/api/technologies` |
+| Portal admin | `/api/admin/users`, `/api/admin/clients`, `/api/admin/client-projects` |
+| Portal cliente | `/api/client/dashboard`, `/api/client/projects` |
+| Chat | `/api/conversations`, `/api/conversations/:id/messages` |
+| Notificaciones | `/api/notifications`, `PATCH /api/notifications/read-all` |
+| Entregables | `/api/admin/deliverables`, `/api/client/deliverables` |
+| Integraciones | `/api/admin/integrations/status`, `/api/admin/webhooks` |
+
+> Lista completa en [`server.js`](server.js) + [`server/portalRoutes.js`](server/portalRoutes.js).
+
+---
+
+## 🌍 Internacionalización
+
+| Idioma | Código | Estado |
+|--------|--------|--------|
+| 🇪🇸 Español | `es` | Default + CMS source |
+| 🇺🇸 English | `en` | ✅ Paridad |
+| 🇧🇷 Português | `pt` | ✅ Paridad |
+| 🇫🇷 Français | `fr` | ✅ Paridad |
+| 🇩🇪 Deutsch | `de` | ✅ Paridad |
+
+```bash
+npm run i18n:check
+# → i18n parity OK (226 keys × 5 langs)
+```
+
+---
+
+## 📖 Manual de usuario
+
+### Visitante
+
+1. Explorar servicios en `#/servicios`
+2. Ver casos en `#/proyectos`
+3. Contactar en `#/contacto`
+4. Cambiar idioma/tema desde el header
+
+### Cliente
+
+1. Ir a [#/login](https://desarpro.vercel.app/#/login)
+2. Pestaña **Iniciar sesión** → credenciales
+3. Redirección automática a `#/client`
+4. Consultar proyectos, chat y entregables
+
+### Administrador
+
+1. `#/login` → pestaña **Admin**
+2. Email + contraseña admin
+3. Panel completo en `#/admin`
+4. Editar CMS, gestionar clientes y proyectos
+
+### Desde móvil
+
+Usar **https://desarpro.vercel.app** directamente. Las peticiones API van por proxy same-origin — no requiere configuración extra.
+
+---
+
+## 🎨 Sistema de diseño y UX
+
+### Paleta DesarPro
+
+| Token | Color | Uso |
+|-------|-------|-----|
+| `--bg-0` | `#05060A` | Fondo principal dark |
+| `--accent-cyan` | `#22D3EE` | Highlights, gradientes hero |
+| `--accent-blue` | `#3B82F6` | CTAs, links activos |
+| `--accent-orange` | `#F59E0B` | Admin, badges premium |
+| `--text-primary` | `#F8FAFC` | Texto principal |
+
+### Componentes visuales destacados
+
+- 🌍 **EarthGlobeScene** — globo 3D en login
+- 🎬 **Hero video** — background cinematográfico
+- 🔄 **TechLoop** — carrusel infinito de tecnologías
+- 📊 **ProjectCarousel** — casos por industria
+- 🌓 **Tema claro/oscuro** persistente en `localStorage`
+
+### Responsive
+
+| Breakpoint | Comportamiento |
+|------------|----------------|
+| `< 640px` | Menú hamburguesa, grids 1 col |
+| `< 980px` | Login en columna única |
+| `≥ 1024px` | Nav completa, layout 2 columnas |
+
+---
+
+## ✅ Tests y calidad
+
+| Suite | Resultado | Comando |
+|-------|-----------|---------|
+| Build | ✅ PASS | `npm run build` |
+| Smoke API | ✅ **56/56** | `npm run test:smoke` |
+| i18n parity | ✅ **226×5** | `npm run i18n:check` |
+| Browser E2E | ✅ **280/280** | `npm run build:local` + `npm run test:e2e:browser` |
+| Admin E2E | ✅ **8/8** | `npm run build:local` + `npm run test:e2e:admin` |
+| Prod verify | ✅ 9/10 | `npm run verify:prod` |
+
+---
+
+## 🚢 Despliegue
+
+### Arquitectura producción
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                      PRODUCCIÓN DESARPRO                      │
+│                                                               │
+│  ┌─────────────────┐         ┌──────────────────────────┐   │
+│  │     Vercel      │  /api   │        Railway            │   │
+│  │  React static   │ ──────► │  Express + Prisma         │   │
+│  │  vercel.json    │  proxy  │  Docker + start-api.js    │   │
+│  └─────────────────┘         │  Volume → /data/prod.db   │   │
+│                               └──────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+| Servicio | URL |
+|----------|-----|
+| 🌐 Frontend | https://desarpro.vercel.app |
+| ⚙️ API | https://desarpro-production.up.railway.app |
+| ❤️ Health | https://desarpro-production.up.railway.app/api/health |
+
+### Checklist Railway
+
+- [x] Volume `desarpro-volume` montado en `/data`
+- [x] `DATABASE_URL=file:/data/prod.db`
+- [ ] `CORS_ORIGIN=https://desarpro.vercel.app` *(sin `*.vercel.app`)*
+- [x] Dockerfile incluye carpeta `server/`
+- [x] Health reporta `database.connected: true`
+
+Guía completa: [`docs/PRODUCTION.md`](docs/PRODUCTION.md)
+
+---
+
+## 🗺️ Roadmap
+
+```
+✅ COMPLETADO
+├── Sitio corporativo multilingüe (5 idiomas)
+├── CMS admin completo
+├── Portal cliente + admin con RBAC
+├── Chat, notificaciones, entregables
+├── Webhooks + integraciones SMTP
+├── Despliegue Vercel + Railway + SQLite persistente
+├── Login móvil vía proxy same-origin
+├── Seed idempotente producción
+└── 56 smoke + 280 browser E2E
+
+🔄 EN CURSO
+├── Restringir CORS a solo desarpro.vercel.app
+├── RUN_DB_SETUP=0 / SEED_ON_START=0 en prod estable
+└── SMTP producción (cuando haya proveedor)
+
+🔜 PRÓXIMO
+├── Dominio custom desarpro.com
+├── PWA + push notifications
+├── Panel analytics avanzado
+└── Escalar BD si crece tráfico (evaluación futura)
+```
+
+---
+
+## 👥 Créditos
+
+<div align="center">
+
+### Desarrollado por
+
+| | |
+|---|---|
+| **Daniel Colorado** | Frontend · UI/UX · CMS · Animaciones |
+| **Alejandro Piedrahita** | Backend · DevOps · RBAC · Arquitectura |
+
+<br/>
+
+**DesarPro** · Pereira, Colombia · 2026
+
+[![GitHub](https://img.shields.io/badge/GitHub-desarpro--prog-181717?style=flat-square&logo=github)](https://github.com/desarpro-prog/Desarpro)
+[![Live Demo](https://img.shields.io/badge/Demo-desarpro.vercel.app-22D3EE?style=flat-square&logo=vercel)](https://desarpro.vercel.app)
+
+*"Tecnología que transforma tu negocio"*
+
+</div>
