@@ -16,8 +16,6 @@ import {
 } from '../lib/portalData.jsx';
 import { resolveApiBase } from '../lib/apiBase.js';
 
-const API_BASE = resolveApiBase();
-
 function parseClientRoute(route) {
   if (!route || route === 'client') return { page: 'dashboard', projectId: null };
   const parts = route.replace(/^client\/?/, '').split('/');
@@ -43,7 +41,7 @@ function ClientLayout({ setRoute, page, navigate, children, unread = 0 }) {
 
   const logout = async () => {
     const token = readToken();
-    if (token) fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: { 'x-admin-token': token } }).catch(() => {});
+    if (token) fetch(`${resolveApiBase()}/api/auth/logout`, { method: 'POST', headers: { 'x-admin-token': token } }).catch(() => {});
     clearSession();
     setRoute('login');
   };
@@ -242,7 +240,7 @@ function ClientMessages() {
   }, [activeId]);
 
   const startChat = async () => {
-    const res = await fetch(`${API_BASE}/api/conversations`, {
+    const res = await fetch(`${resolveApiBase()}/api/conversations`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': readToken() },
       body: JSON.stringify({ subject: t('portal.client.newConversation'), content: t('portal.client.firstMessage') }),
     });

@@ -18,7 +18,6 @@ const SESSION_KEY = 'desarpro:admin:session';
 function getApiBase() {
   return resolveApiBase();
 }
-const API_BASE = getApiBase();
 function readAdminFlag() {
   try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) { return false; }
 }
@@ -32,11 +31,12 @@ const DEFAULT_CONTENT = (typeof window !== 'undefined' && window.__CONTENT_SEED 
 };
 
 async function api(path, opts = {}) {
+  const base = resolveApiBase();
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   const token = readToken();
   if (token) headers['x-admin-token'] = token;
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(`${base}${path}`, {
       method: opts.method || 'GET',
       headers,
       body: opts.body ? JSON.stringify(opts.body) : undefined,
@@ -230,7 +230,8 @@ function AdminProvider({ children }) {
       password = emailOrPassword;
     }
     try {
-      const res = await fetch(`${API_BASE}/api/login`, {
+      const base = resolveApiBase();
+      const res = await fetch(`${base}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -257,7 +258,7 @@ function AdminProvider({ children }) {
   const logout = React.useCallback(() => {
     const token = readToken();
     if (token) {
-      fetch(`${API_BASE}/api/auth/logout`, {
+      fetch(`${resolveApiBase()}/api/auth/logout`, {
         method: 'POST',
         headers: { 'x-admin-token': token },
       }).catch(() => {});
@@ -478,4 +479,4 @@ function AdminFab({ setRoute }) {
   );
 }
 
-export { AdminProvider, useAdmin, Editable, AdminFab, API_BASE, DEFAULT_CONTENT };
+export { AdminProvider, useAdmin, Editable, AdminFab, getApiBase as API_BASE, DEFAULT_CONTENT };

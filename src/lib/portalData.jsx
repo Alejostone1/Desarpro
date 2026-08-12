@@ -3,14 +3,13 @@
 import { resolveApiBase } from './apiBase.js';
 import { readToken } from './authSession.js';
 
-const API_BASE = resolveApiBase();
-
 async function apiReq(path, opts = {}) {
+  const base = resolveApiBase();
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   const token = readToken();
   if (token) headers['x-admin-token'] = token;
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(`${base}${path}`, {
       method: opts.method || 'GET',
       headers,
       body: opts.body ? JSON.stringify(opts.body) : undefined,

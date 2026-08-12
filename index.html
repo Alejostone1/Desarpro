@@ -47,21 +47,15 @@
     // Resolve the backend API base (used by admin.jsx and projectData.jsx).
     (function() {
       try {
-        var meta = document.querySelector('meta[name="desarpro:api"]');
-        var base = meta && meta.getAttribute('content');
-        // "%VITE_API_URL%" = placeholder sin reemplazar en el build → auto-detectar.
-        if (base && base.indexOf('%VITE_') === 0) base = '';
-        if (!base) {
-          var h = window.location.hostname;
-          var port = window.location.port;
-          if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || port === '3000' || port === '5173') {
-            base = window.location.protocol + '//' + h + ':3001';
-          } else {
-            // Vercel / producción: /api/* proxy en el mismo dominio
-            base = '';
-          }
-        }
-        window.__DESARPRO_API_BASE = (base || '').replace(/\/+$/, '');
+        var h = window.location.hostname;
+        var port = window.location.port;
+        var isDev = h === 'localhost' || h === '127.0.0.1' || h === '::1'
+          || port === '3000' || port === '5173'
+          || /^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h);
+        // Dev/LAN → API en :3001. Producción → proxy /api mismo origen (móvil sin CORS).
+        window.__DESARPRO_API_BASE = isDev
+          ? (window.location.protocol + '//' + h + ':3001')
+          : '';
       } catch (e) {}
     })();
   </script>

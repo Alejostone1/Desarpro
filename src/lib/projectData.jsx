@@ -17,7 +17,7 @@ function readToken() {
   try { return sessionStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
 }
 
-const API_BASE = resolveApiBase();
+const API_BASE = resolveApiBase;
 
 function readLang() {
   if (typeof window === 'undefined') return 'es';
@@ -27,11 +27,12 @@ function readLang() {
 }
 
 async function apiReq(path, opts = {}) {
+  const base = API_BASE();
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
   const token = readToken();
   if (token) headers['x-admin-token'] = token;
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(`${base}${path}`, {
       method: opts.method || 'GET',
       headers,
       body: opts.body ? JSON.stringify(opts.body) : undefined,
@@ -218,7 +219,7 @@ async function fetchProjects(lang) {
   try {
     const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = ctrl ? setTimeout(() => ctrl.abort(), 2500) : null;
-    const res = await fetch(`${API_BASE}/api/projects?lang=${encodeURIComponent(l)}`, {
+    const res = await fetch(`${API_BASE()}/api/projects?lang=${encodeURIComponent(l)}`, {
       signal: ctrl ? ctrl.signal : undefined,
     });
     if (timer) clearTimeout(timer);
