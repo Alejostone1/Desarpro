@@ -207,30 +207,15 @@
 
 ```mermaid
 graph TB
-    subgraph VER ["Vercel desarpro.vercel.app"]
-        FE["React 18 y Vite build"]
-        PROXY["Rewrite api hacia Railway"]
-    end
-
-    subgraph MOB ["Browser y movil"]
-        USER["Visitante, cliente o admin"]
-    end
-
-    subgraph RW ["Railway desarpro-production"]
-        EX["Express 5 API"]
-        SA["start-api.js"]
-        VOL[("Volume data")]
-        DB[("prod.db SQLite")]
-    end
-
-    USER --> FE
-    FE -->|"Same-origin api login"| PROXY
-    PROXY --> EX
-    FE -.->|"Dev LAN puerto 3001"| EX
-    SA --> EX
-    EX --> PRISMA["Prisma 5"]
-    PRISMA --> DB
-    DB --- VOL
+    USER[Usuario browser] --> FE[Frontend React Vercel]
+    FE --> PROXY[Proxy api same origin]
+    PROXY --> EX[Express Railway]
+    FE --> EXLAN[Express dev LAN 3001]
+    EXLAN --> EX
+    START[Start api script] --> EX
+    EX --> PRISMA[Prisma ORM]
+    PRISMA --> DB[SQLite prod db]
+    DB --> VOL[Railway Volume data]
 ```
 
 <details>
@@ -298,23 +283,31 @@ resolveApiBase()
 ### Flujo de autenticación
 
 ```mermaid
-sequenceDiagram
-    actor U as Usuario
-    participant F as Frontend React
-    participant V as Vercel proxy api
-    participant E as Express Railway
-    participant P as Prisma SQLite
-
-    U->>F: Email y contrasena
-    F->>V: POST api login
-    V->>E: Forward request
-    E->>P: findUnique y bcrypt compare
-    P-->>E: Usuario valido
-    E->>P: create Session token
-    E-->>F: ok token user
-    F->>F: sessionStorage token
-    F-->>U: Redirect admin o client
+graph TD
+    A[Usuario ingresa credenciales] --> B[Frontend POST login]
+    B --> C[Vercel proxy api]
+    C --> D[Express valida bcrypt]
+    D --> E[Prisma crea sesion]
+    E --> F[Frontend guarda token]
+    F --> G[Redirect admin o client]
 ```
+
+<details>
+<summary>Diagrama ASCII flujo login</summary>
+
+```
+Usuario --> Frontend : email + password
+Frontend --> Vercel proxy : POST /api/login
+Vercel proxy --> Express : forward
+Express --> Prisma : findUnique + bcrypt
+Prisma --> Express : usuario valido
+Express --> Prisma : create Session
+Express --> Frontend : { ok, token, user }
+Frontend --> Frontend : sessionStorage
+Frontend --> Usuario : redirect #/admin o #/client
+```
+
+</details>
 
 ### RBAC — Roles y destinos
 
